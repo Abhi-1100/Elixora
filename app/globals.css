@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #F7F8F6;
+    --surface: #FFFFFF;
+    --surface-muted: #EEF2EF;
+    --ink: #16211D;
+    --ink-muted: #5B6B64;
+    --accent: #2F6F62;
+    --accent-soft: #DCEAE4;
+    --warn: #B65C39;
+    --warn-soft: #F6E9E3;
+    --glow-a: #C9B8F0;
+    --glow-b: #FFD8B8;
+    --border: #DFE6E1;
+    
+    --font-serif: var(--font-fraunces), Georgia, serif;
+    --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+    --font-mono: var(--font-ibm-plex-mono), monospace;
+  }
+
+  .dark {
+    --bg: #101713;
+    --surface: #17221D;
+    --surface-muted: #1F2E27;
+    --ink: #EAF2ED;
+    --ink-muted: #8AA096;
+    --accent: #3F8C7C;
+    --accent-soft: #1B362F;
+    --warn: #D9754E;
+    --warn-soft: #382117;
+    --glow-a: #A08ED1;
+    --glow-b: #E5B493;
+    --border: #25382F;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+.font-display {
+  font-family: var(--font-serif);
+}
+
+.font-data {
+  font-family: var(--font-mono);
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-muted);
+}
+
+/* Breath Orb keyframe animation for fallback / reduced motion */
+@keyframes orb-pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
+
+@keyframes orb-pulse-fast {
+  0%, 100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+.animate-orb-slow {
+  animation: orb-pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-orb-fast {
+  animation: orb-pulse-fast 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-orb-slow,
+  .animate-orb-fast {
+    animation: none !important;
+    transform: scale(1) !important;
+  }
+}
