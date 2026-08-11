@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  Sun,
-  Moon,
   Mic,
   Share2,
   User,
@@ -11,11 +9,10 @@ import {
   Globe,
 } from "lucide-react";
 import { BreathOrb } from "@/components/ui/breath-orb";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface TopBarProps {
   title: string;
-  isDarkMode: boolean;
-  onToggleTheme: () => void;
   onOpenVoiceMode: () => void;
   onToggleSidebarMobile?: () => void;
   onGoToLanding?: () => void;
@@ -23,8 +20,6 @@ interface TopBarProps {
 
 export function TopBar({
   title,
-  isDarkMode,
-  onToggleTheme,
   onOpenVoiceMode,
   onGoToLanding,
 }: TopBarProps) {
@@ -42,7 +37,7 @@ export function TopBar({
         >
           <BreathOrb size="sm" mode="idle" />
           <span className="font-semibold text-sm tracking-tight text-[var(--ink)] group-hover:text-[var(--accent)] transition-colors">
-            Aether
+            Elixora
           </span>
         </button>
 
@@ -82,19 +77,8 @@ export function TopBar({
           <span className="hidden sm:inline">Voice Mode</span>
         </button>
 
-        {/* Theme Toggle */}
-        <button
-          onClick={onToggleTheme}
-          className="p-2 rounded-lg text-[var(--ink-muted)] hover:text-[var(--ink)] hover:bg-[var(--surface-muted)] transition-colors"
-          title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          aria-label="Toggle theme mode"
-        >
-          {isDarkMode ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Moon className="w-4 h-4 text-slate-700" />
-          )}
-        </button>
+        {/* Theme Toggle — uses global context */}
+        <ThemeToggle />
 
         {/* Profile Avatar Menu */}
         <div className="relative">

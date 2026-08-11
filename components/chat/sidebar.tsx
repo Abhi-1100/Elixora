@@ -96,7 +96,7 @@ export function Sidebar({
                 <Activity className="w-4 h-4 text-[var(--accent)]" />
               </div>
               <span className="font-semibold text-sm tracking-tight text-[var(--ink)]">
-                Aether
+                Elixora
               </span>
               <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-[var(--surface-muted)] text-[var(--ink-muted)]">
                 AI Health

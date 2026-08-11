@@ -63,7 +63,7 @@ export function EmptyState({ onSelectPrompt }: EmptyStateProps) {
       </h2>
 
       <p className="text-xs sm:text-sm text-[var(--ink-muted)] max-w-md mb-8 leading-relaxed">
-        Speak naturally or upload documents. Aether answers your questions about medications, lab values, and symptoms in plain language.
+        Speak naturally or upload documents. Elixora answers your questions about medications, lab values, and symptoms in plain language.
       </p>
 
       {/* Starter Suggestion Chips Grid */}

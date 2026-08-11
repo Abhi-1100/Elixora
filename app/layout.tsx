@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -22,7 +23,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Aether — AI Healthcare Assistant",
+  title: "Elixora — AI Healthcare Assistant",
   description: "Talk with your AI healthcare assistant about symptoms, medicines, prescriptions, and lab reports.",
 };
 
@@ -35,10 +36,34 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${fraunces.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Anti-FOUC: apply dark class before React hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('elixora-theme');
+                  if (stored === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else if (!stored) {
+                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) document.documentElement.classList.add('dark');
+                  }
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans bg-[var(--bg)] text-[var(--ink)] transition-colors duration-200">
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+

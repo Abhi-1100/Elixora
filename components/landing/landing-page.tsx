@@ -2,6 +2,7 @@
 
 import React from "react";
 import { BreathOrb } from "@/components/ui/breath-orb";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   MessageSquare,
   Mic,
@@ -28,7 +29,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
         <div className="flex items-center gap-2">
           <BreathOrb size="sm" mode="idle" />
           <span className="font-semibold text-lg tracking-tight text-[var(--ink)]">
-            Aether
+            Elixora
           </span>
           <span className="text-[10px] font-mono uppercase bg-[var(--accent-soft)] text-[var(--accent)] px-2 py-0.5 rounded-full font-bold">
             AI Healthcare
@@ -51,6 +52,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <button
             onClick={onStartChat}
             className="px-4 py-2 rounded-xl bg-[var(--accent)] text-white hover:opacity-90 transition-all font-medium text-xs shadow-sm flex items-center gap-1.5"
@@ -84,7 +86,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
         </h1>
 
         <p className="text-sm sm:text-base text-[var(--ink-muted)] max-w-xl mb-8 leading-relaxed">
-          Aether explains prescriptions, analyzes lab reports, and answers medical questions through natural conversation. No clinical jargon, no complex dashboards.
+          Elixora explains prescriptions, analyzes lab reports, and answers medical questions through natural conversation. No clinical jargon, no complex dashboards.
         </p>
 
         {/* Primary Call to Action Buttons */}
@@ -165,7 +167,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
                 Multilingual Voice Input
               </h4>
               <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
-                Speak in over 40 languages. Aether automatically translates medical terminology into your native tongue in clear, plain language.
+                Speak in over 40 languages. Elixora automatically translates medical terminology into your native tongue in clear, plain language.
               </p>
             </div>
 
@@ -265,7 +267,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
                 Most Popular
               </span>
               <div className="space-y-3">
-                <h4 className="font-semibold text-sm text-[var(--ink)]">Aether Plus</h4>
+                <h4 className="font-semibold text-sm text-[var(--ink)]">Elixora Plus</h4>
                 <div className="text-3xl font-bold font-mono text-[var(--accent)]">$12<span className="text-xs font-normal text-[var(--ink-muted)]">/mo</span></div>
                 <p className="text-xs text-[var(--ink-muted)]">Includes live voice mode and OCR analysis.</p>
                 <ul className="space-y-2 text-xs text-[var(--ink)] pt-4 border-t border-[var(--border)]">
@@ -326,7 +328,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BreathOrb size="sm" mode="idle" />
-            <span className="font-semibold text-[var(--ink)]">Aether Assistant</span>
+            <span className="font-semibold text-[var(--ink)]">Elixora Assistant</span>
           </div>
 
           <p className="text-[11px] font-mono text-center">

@@ -15,7 +15,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
   const [isMuted, setIsMuted] = useState(false);
   const [isListening, setIsListening] = useState(true);
   const [transcript, setTranscript] = useState<string[]>([
-    "Aether Voice initialized. How can I assist your health query today?",
+    "Elixora Voice initialized. How can I assist your health query today?",
   ]);
   const [currentSpeech, setCurrentSpeech] = useState<string>("");
 
@@ -29,7 +29,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
 
     const timer2 = setTimeout(() => {
       const userText = "User: What is the recommended timing for taking Amoxicillin 500mg?";
-      const aiText = "Aether: Take 500mg every 8 hours with or without food. Finish the full course as prescribed.";
+      const aiText = "Elixora: Take 500mg every 8 hours with or without food. Finish the full course as prescribed.";
       setTranscript((prev) => [...prev, userText, aiText]);
       onSendTranscript?.(userText);
       setCurrentSpeech("");
@@ -54,7 +54,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
             </div>
             <div>
               <h3 className="font-semibold text-base tracking-tight text-emerald-50">
-                Aether Live Voice
+                Elixora Live Voice
               </h3>
               <p className="text-xs text-emerald-400 font-mono flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />

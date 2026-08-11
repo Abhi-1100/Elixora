@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Sidebar, Conversation } from "@/components/chat/sidebar";
 import { TopBar } from "@/components/chat/top-bar";
 import { EmptyState } from "@/components/chat/empty-state";
@@ -182,18 +182,10 @@ export default function ChatPage() {
   const [activeId, setActiveId] = useState<string>("conv-1");
   const [threadMap, setThreadMap] = useState<Record<string, Message[]>>(MOCK_THREAD_DATA);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Sync dark class on document element
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
+  // Theme is now globally managed by ThemeProvider in layout.tsx
 
   const activeConversation = conversations.find((c) => c.id === activeId);
   const activeMessages = threadMap[activeId] || [];
@@ -328,9 +320,7 @@ export default function ChatPage() {
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
         {/* Top Header */}
         <TopBar
-          title={activeConversation?.title || "Aether Health Assistant"}
-          isDarkMode={isDarkMode}
-          onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+          title={activeConversation?.title || "Elixora Health Assistant"}
           onOpenVoiceMode={() => setIsVoiceOpen(true)}
           onGoToLanding={() => router.push("/")}
         />

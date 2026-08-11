@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { BreathOrb } from "@/components/ui/breath-orb";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   Mic,
   FileSpreadsheet,
@@ -33,7 +34,7 @@ export default function Home() {
           <BreathOrb size="sm" mode="idle" />
           <div className="flex items-center gap-2">
             <span className="font-semibold text-lg tracking-tight text-[var(--ink)]">
-              Aether
+              Elixora
             </span>
             <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] font-semibold">
               AI Healthcare Assistant
@@ -59,6 +60,7 @@ export default function Home() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           <Link
             href="/chat"
             className="text-xs font-medium px-3.5 py-2 rounded-xl text-[var(--ink)] hover:bg-[var(--surface-muted)] transition-colors"
@@ -129,7 +131,7 @@ export default function Home() {
               type="submit"
               className="px-5 py-3 rounded-2xl bg-[var(--accent)] text-white text-xs sm:text-sm font-semibold hover:opacity-90 transition-all flex items-center gap-2 shrink-0 shadow-md"
             >
-              <span>Ask Aether</span>
+              <span>Ask Elixora</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -247,7 +249,7 @@ export default function Home() {
               <span className="font-mono text-2xl font-bold text-[var(--accent)]">02</span>
               <h3 className="font-semibold text-sm text-[var(--ink)]">AI Synthesis</h3>
               <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
-                Aether references validated medical datasets to structure biomarker ranges and dosage guides.
+                Elixora references validated medical datasets to structure biomarker ranges and dosage guides.
               </p>
             </div>
 
@@ -396,7 +398,7 @@ export default function Home() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <BreathOrb size="sm" mode="idle" />
-              <span className="font-semibold text-sm text-[var(--ink)]">Aether Health</span>
+              <span className="font-semibold text-sm text-[var(--ink)]">Elixora Health</span>
             </div>
             <p className="text-[11px] leading-relaxed">
               Empowering individuals with AI clinical assistant tools and structured medical intelligence.
@@ -426,13 +428,13 @@ export default function Home() {
           <div>
             <h4 className="font-semibold text-[var(--ink)] mb-3">Medical Disclaimer</h4>
             <p className="text-[10px] leading-relaxed opacity-80">
-              Aether is an artificial intelligence application designed for informational and educational purposes only. Aether does not provide medical diagnoses or replace professional healthcare consultations.
+              Elixora is an artificial intelligence application designed for informational and educational purposes only. Elixora does not provide medical diagnoses or replace professional healthcare consultations.
             </p>
           </div>
         </div>
 
         <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
-          <p>© 2026 Aether Health Assistant Inc. All rights reserved.</p>
+          <p>© 2026 Elixora Health Assistant Inc. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/chat">Launch App</Link>
             <span>•</span>
