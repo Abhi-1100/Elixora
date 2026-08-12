@@ -10,6 +10,9 @@ import {
 } from "lucide-react";
 import { BreathOrb } from "@/components/ui/breath-orb";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface TopBarProps {
   title: string;
@@ -25,6 +28,14 @@ export function TopBar({
 }: TopBarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English (US)");
+  const { user, logout } = useAuth() as { user: any; logout: () => void };
+  const router = useRouter();
+
+  function handleLogout() {
+    logout();
+    setShowProfileMenu(false);
+    router.push("/");
+  }
 
   return (
     <header className="h-14 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-20">
@@ -80,50 +91,67 @@ export function TopBar({
         {/* Theme Toggle — uses global context */}
         <ThemeToggle />
 
-        {/* Profile Avatar Menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--glow-a)] text-white font-medium text-xs flex items-center justify-center border border-[var(--border)] shadow-xs hover:scale-105 transition-transform"
-            aria-label="User profile menu"
-          >
-            <User className="w-4 h-4" />
-          </button>
+        {/* Profile / Auth Section */}
+        {user ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--accent)] to-[var(--glow-a)] text-white font-medium text-xs flex items-center justify-center border border-[var(--border)] shadow-xs hover:scale-105 transition-transform uppercase"
+              aria-label="User profile menu"
+            >
+              {user.name ? user.name.charAt(0) : <User className="w-4 h-4" />}
+            </button>
 
-          {/* Profile Dropdown */}
-          {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl p-2 z-50 text-xs">
-              <div className="p-2.5 border-b border-[var(--border)]">
-                <p className="font-semibold text-[var(--ink)]">Dr. Alex Morgan</p>
-                <p className="text-[var(--ink-muted)] text-[11px]">alex.morgan@health.org</p>
+            {/* Profile Dropdown */}
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl p-2 z-50 text-xs">
+                <div className="p-2.5 border-b border-[var(--border)]">
+                  <p className="font-semibold text-[var(--ink)]">{user.name}</p>
+                  <p className="text-[var(--ink-muted)] text-[11px] truncate">{user.email}</p>
+                </div>
+                <div className="py-1">
+                  <button
+                    onClick={() => setShowProfileMenu(false)}
+                    className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>HIPAA & Privacy Settings</span>
+                  </button>
+                  <button
+                    onClick={() => setShowProfileMenu(false)}
+                    className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <span>Export Medical History</span>
+                  </button>
+                </div>
+                <div className="pt-1 border-t border-[var(--border)]">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-2.5 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 rounded-lg"
+                  >
+                    Sign Out
+                  </button>
+                </div>
               </div>
-              <div className="py-1">
-                <button
-                  onClick={() => setShowProfileMenu(false)}
-                  className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>HIPAA & Privacy Settings</span>
-                </button>
-                <button
-                  onClick={() => setShowProfileMenu(false)}
-                  className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
-                >
-                  <Share2 className="w-3.5 h-3.5 text-[var(--accent)]" />
-                  <span>Export Medical History</span>
-                </button>
-              </div>
-              <div className="pt-1 border-t border-[var(--border)]">
-                <button
-                  onClick={() => setShowProfileMenu(false)}
-                  className="w-full text-left px-2.5 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 rounded-lg"
-                >
-                  Sign Out
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="px-3 py-1.5 text-xs font-medium text-[var(--ink)] hover:text-[var(--accent)] transition-colors"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              className="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+            >
+              Sign up
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

@@ -15,12 +15,14 @@ interface InputBarProps {
   onSendMessage: (text: string, attachment?: File | null) => void;
   onOpenVoiceMode: () => void;
   isLoading?: boolean;
+  className?: string;
 }
 
 export function InputBar({
   onSendMessage,
   onOpenVoiceMode,
   isLoading = false,
+  className = "sticky bottom-0 z-20 pb-4",
 }: InputBarProps) {
   const [text, setText] = useState("");
   const [attachedFile, setAttachedFile] = useState<{
@@ -28,6 +30,8 @@ export function InputBar({
     size: string;
     type: string;
   } | null>(null);
+  // Keep reference to the real File object so it can be sent to the backend
+  const attachedFileRef = useRef<File | null>(null);
   const [isListeningLocal, setIsListeningLocal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -35,9 +39,11 @@ export function InputBar({
     if (e) e.preventDefault();
     if ((!text.trim() && !attachedFile) || isLoading) return;
 
-    onSendMessage(text.trim(), null);
+    // Pass the real File object so the parent can send it to the backend
+    onSendMessage(text.trim(), attachedFileRef.current);
     setText("");
     setAttachedFile(null);
+    attachedFileRef.current = null;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -50,6 +56,8 @@ export function InputBar({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Store the real File object for sending to backend
+      attachedFileRef.current = file;
       setAttachedFile({
         name: file.name,
         size: (file.size / 1024).toFixed(1) + " KB",
@@ -72,9 +80,9 @@ export function InputBar({
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 pb-4 sticky bottom-0 z-20">
+    <div className={`w-full max-w-3xl mx-auto px-4 flex flex-col items-center justify-center pointer-events-none gap-2 ${className}`}>
       {/* Container Card */}
-      <div className="relative rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-xl p-2.5 transition-all focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent-soft)]">
+      <div className="w-full pointer-events-auto flex flex-col gap-2 relative rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-xl p-2.5 transition-all focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent-soft)]">
         {/* Attached File Preview Tag */}
         {attachedFile && (
           <div className="mb-2 px-3 py-1.5 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)] inline-flex items-center gap-2 text-xs">
@@ -147,11 +155,10 @@ export function InputBar({
             type="button"
             onClick={toggleLocalMic}
             onDoubleClick={onOpenVoiceMode}
-            className={`p-2.5 rounded-full transition-all ${
-              isListeningLocal
+            className={`p-2.5 rounded-full transition-all ${isListeningLocal
                 ? "bg-red-500 text-white animate-pulse"
                 : "text-[var(--ink-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-muted)]"
-            }`}
+              }`}
             title="Click to dictate, Double-click for Fullscreen Voice Mode"
             aria-label="Voice input"
           >
@@ -162,11 +169,10 @@ export function InputBar({
           <button
             type="submit"
             disabled={(!text.trim() && !attachedFile) || isLoading}
-            className={`p-2.5 rounded-full transition-all ${
-              text.trim() || attachedFile
+            className={`p-2.5 rounded-full transition-all ${text.trim() || attachedFile
                 ? "bg-[var(--accent)] text-white hover:opacity-90 shadow-md scale-100"
                 : "bg-[var(--surface-muted)] text-[var(--ink-muted)] cursor-not-allowed opacity-50"
-            }`}
+              }`}
             title="Send message"
             aria-label="Send message"
           >

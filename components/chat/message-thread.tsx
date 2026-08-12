@@ -6,7 +6,8 @@ import { MedicineCard, MedicineDetails } from "./cards/medicine-card";
 import { LabCard, LabReportData } from "./cards/lab-card";
 import { PrescriptionCard, PrescriptionData } from "./cards/prescription-card";
 import { EmergencyCard } from "./cards/emergency-card";
-import { User, Copy, Check, Sparkles } from "lucide-react";
+import { User, Copy, Check, Sparkles, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 export interface Message {
   id: string;
@@ -15,6 +16,8 @@ export interface Message {
   timestamp: string;
   cardType?: "medicine" | "lab" | "prescription" | "emergency";
   cardData?: MedicineDetails | LabReportData | PrescriptionData | { message?: string; redFlagSymptoms?: string[] };
+  /** When set, a 'View full report' button linking to this URL is shown in the AI bubble */
+  reportLink?: string;
 }
 
 interface MessageThreadProps {
@@ -39,9 +42,8 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
         return (
           <div
             key={msg.id}
-            className={`flex items-start gap-3 text-xs sm:text-sm ${
-              isUser ? "flex-row-reverse" : "flex-row"
-            }`}
+            className={`flex items-start gap-3 text-xs sm:text-sm ${isUser ? "flex-row-reverse" : "flex-row"
+              }`}
           >
             {/* Avatar */}
             {isUser ? (
@@ -81,11 +83,22 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
                   {msg.cardType === "emergency" && (
                     <EmergencyCard
                       message={
-                        msg.cardData?.message ||
+                        (msg.cardData as any)?.message ||
                         "Severe chest pain requires immediate emergency evaluation. Please dial emergency services right now."
                       }
-                      redFlagSymptoms={msg.cardData?.redFlagSymptoms}
+                      redFlagSymptoms={(msg.cardData as any)?.redFlagSymptoms}
                     />
+                  )}
+
+                  {/* Report link button — shown when a file was analyzed */}
+                  {msg.reportLink && (
+                    <Link
+                      href={msg.reportLink}
+                      className="inline-flex items-center gap-2 mt-1 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-md"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      View full report
+                    </Link>
                   )}
 
                   {/* Actions Footer */}

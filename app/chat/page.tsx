@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Sidebar, Conversation } from "@/components/chat/sidebar";
 import { TopBar } from "@/components/chat/top-bar";
 import { EmptyState } from "@/components/chat/empty-state";
@@ -8,6 +8,8 @@ import { MessageThread, Message } from "@/components/chat/message-thread";
 import { InputBar } from "@/components/chat/input-bar";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { uploadReport } from "@/lib/api";
 
 // Initial Demo Conversations
 const INITIAL_CONVERSATIONS: Conversation[] = [
@@ -181,9 +183,22 @@ export default function ChatPage() {
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [activeId, setActiveId] = useState<string>("conv-1");
   const [threadMap, setThreadMap] = useState<Record<string, Message[]>>(MOCK_THREAD_DATA);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const { user, token, loading } = useAuth() as { user: any; token: string | null; loading: boolean };
+
+  // Keep token in a ref so async handlers can access current value without stale closures
+  const tokenRef = useRef<string | null>(token);
+  useEffect(() => { tokenRef.current = token; }, [token]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   // Theme is now globally managed by ThemeProvider in layout.tsx
 
@@ -217,13 +232,13 @@ export default function ChatPage() {
     );
   };
 
-  const handleSendMessage = (text: string, attachment?: File | null) => {
+  const handleSendMessage = async (text: string, attachment?: File | null) => {
     if (!text && !attachment) return;
 
     const userMsg: Message = {
       id: "m-" + Date.now(),
       sender: "user",
-      text: text || "Uploaded document analysis",
+      text: text || (attachment ? `📎 ${attachment.name}` : "Uploaded document"),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
@@ -233,13 +248,58 @@ export default function ChatPage() {
     // Update conversation title if it was "New Health Query"
     if (activeConversation && activeConversation.title === "New Health Query") {
       const summaryTitle = text.slice(0, 28) + (text.length > 28 ? "..." : "");
-      handleRenameConversation(activeId, summaryTitle || "Lab Analysis Query");
+      handleRenameConversation(activeId, summaryTitle || (attachment ? "Lab Report Analysis" : "Health Query"));
     }
 
     setThreadMap({ ...threadMap, [activeId]: updatedMsgs });
     setIsGenerating(true);
 
-    // Simulate AI clinical response after 1.5 seconds
+    // ── REAL BACKEND PATH: file attached ──────────────────────────────────
+    if (attachment) {
+      const formData = new FormData();
+      formData.append("file", attachment);
+
+      try {
+        const currentToken = tokenRef.current;
+        const data = await uploadReport(formData, currentToken);
+        const reportId = data.report_id;
+
+        // Stub message in chat with a link to the full split-view
+        const stubMsg: Message = {
+          id: "m-" + (Date.now() + 1),
+          sender: "ai",
+          text: `✅ Report analyzed successfully — overall status: **${data.overall_status}**. ${data.results?.length ?? 0} biomarker(s) extracted.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          cardType: undefined,
+          // Custom field to store the report link
+          reportLink: `/reports/${reportId}`,
+        };
+
+        setThreadMap((prev) => ({
+          ...prev,
+          [activeId]: [...(prev[activeId] || []), stubMsg],
+        }));
+
+        setIsGenerating(false);
+        // Navigate to full split-view report page
+        router.push(`/reports/${reportId}`);
+      } catch (err: unknown) {
+        const errMsg: Message = {
+          id: "m-" + (Date.now() + 1),
+          sender: "ai",
+          text: `❌ Failed to analyze report: ${err instanceof Error ? err.message : "Unknown error"}. Please try uploading again or visit the Upload page directly.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
+        setThreadMap((prev) => ({
+          ...prev,
+          [activeId]: [...(prev[activeId] || []), errMsg],
+        }));
+        setIsGenerating(false);
+      }
+      return;
+    }
+
+    // ── KEYWORD-MATCHED FALLBACK for text-only messages ───────────────────
     setTimeout(() => {
       let replyCardType: "medicine" | "lab" | "prescription" | "emergency" | undefined;
       let replyCardData: Message["cardData"];
@@ -271,17 +331,7 @@ export default function ChatPage() {
       } else if (lower.includes("cough") || lower.includes("fever") || lower.includes("symptom")) {
         replyText = "Based on your described symptoms (cough/fever):\n• Stay well hydrated with fluids & rest.\n• Monitor body temperature twice daily.\n• If high fever (>102°F) persists past 3 days or shortness of breath develops, consult your physician immediately.";
       } else {
-        replyCardType = "medicine";
-        replyText = "Here is the summary guide for your query:";
-        replyCardData = {
-          name: text.slice(0, 30),
-          genericName: "Active Bio-Compound",
-          dosage: "Standard Regimen",
-          frequency: "As prescribed",
-          timing: "Take with food",
-          purpose: "Symptom management and targeted therapy.",
-          sideEffects: ["Mild drowsiness", "Dry mouth"],
-        };
+        replyText = "I'm here to help with your health queries. You can ask me about symptoms, medications, lab results, or upload a lab report PDF/image for detailed analysis.";
       }
 
       const aiMsg: Message = {
@@ -301,20 +351,30 @@ export default function ChatPage() {
     }, 1500);
   };
 
+  if (loading || !user) {
+    return <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center text-[var(--ink)]">Loading...</div>;
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
       {/* Icon-Rail & Collapsible Sidebar */}
-      <Sidebar
-        isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        conversations={conversations}
-        activeConversationId={activeId}
-        onSelectConversation={setActiveId}
-        onNewConversation={handleNewConversation}
-        onDeleteConversation={handleDeleteConversation}
-        onRenameConversation={handleRenameConversation}
-        onOpenVoiceMode={() => setIsVoiceOpen(true)}
-      />
+      <div 
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
+        className="z-50 h-screen"
+      >
+        <Sidebar
+          isCollapsed={isSidebarCollapsed && !isSidebarHovered}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          conversations={conversations}
+          activeConversationId={activeId}
+          onSelectConversation={setActiveId}
+          onNewConversation={handleNewConversation}
+          onDeleteConversation={handleDeleteConversation}
+          onRenameConversation={handleRenameConversation}
+          onOpenVoiceMode={() => setIsVoiceOpen(true)}
+        />
+      </div>
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col h-full min-w-0 relative">
@@ -328,18 +388,31 @@ export default function ChatPage() {
         {/* Dynamic Center Stage: Empty State OR Message Thread */}
         <main className="flex-1 overflow-y-auto flex flex-col relative">
           {activeMessages.length === 0 ? (
-            <EmptyState onSelectPrompt={(pText) => handleSendMessage(pText)} />
+            <EmptyState 
+              onSelectPrompt={(pText) => handleSendMessage(pText)} 
+              InputBarComponent={
+                <InputBar
+                  onSendMessage={handleSendMessage}
+                  onOpenVoiceMode={() => setIsVoiceOpen(true)}
+                  isLoading={isGenerating}
+                  className=""
+                />
+              }
+            />
           ) : (
             <MessageThread messages={activeMessages} isGenerating={isGenerating} />
           )}
         </main>
 
         {/* Floating Pill Input Bar */}
-        <InputBar
-          onSendMessage={handleSendMessage}
-          onOpenVoiceMode={() => setIsVoiceOpen(true)}
-          isLoading={isGenerating}
-        />
+        {activeMessages.length > 0 && (
+          <InputBar
+            onSendMessage={handleSendMessage}
+            onOpenVoiceMode={() => setIsVoiceOpen(true)}
+            isLoading={isGenerating}
+            className="sticky bottom-0 z-20 pb-4"
+          />
+        )}
       </div>
 
       {/* Full-Screen Immersive Voice Mode Overlay */}

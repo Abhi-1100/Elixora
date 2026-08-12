@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { BreathOrb } from "@/components/ui/breath-orb";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Navbar } from "@/components/ui/navbar";
 import {
   Mic,
   FileSpreadsheet,
@@ -28,54 +28,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] flex flex-col font-sans transition-colors duration-200 selection:bg-[var(--accent-soft)]">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BreathOrb size="sm" mode="idle" />
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-lg tracking-tight text-[var(--ink)]">
-              Elixora
-            </span>
-            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] font-semibold">
-              AI Healthcare Assistant
-            </span>
-          </div>
-        </div>
-
-        {/* Center Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-[var(--ink-muted)]">
-          <a href="#features" className="hover:text-[var(--accent)] transition-colors">
-            Features
-          </a>
-          <a href="#how-it-works" className="hover:text-[var(--accent)] transition-colors">
-            How it Works
-          </a>
-          <a href="#security" className="hover:text-[var(--accent)] transition-colors">
-            HIPAA Security
-          </a>
-          <a href="#pricing" className="hover:text-[var(--accent)] transition-colors">
-            Pricing
-          </a>
-        </nav>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Link
-            href="/chat"
-            className="text-xs font-medium px-3.5 py-2 rounded-xl text-[var(--ink)] hover:bg-[var(--surface-muted)] transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/chat"
-            className="text-xs font-medium px-4 py-2 rounded-full bg-[var(--accent)] text-white hover:opacity-90 transition-all shadow-sm flex items-center gap-1.5"
-          >
-            <span>Launch Assistant</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-      </header>
+      {/* Shared auth-aware Navbar */}
+      <Navbar showNavLinks={true} />
 
       {/* Hero Section */}
       <section className="relative pt-16 pb-20 px-6 max-w-6xl mx-auto flex flex-col items-center text-center">
