@@ -83,7 +83,7 @@ def create_app():
     jwt.init_app(app)
 
     # Allow requests from your Next.js frontend (update origin for production)
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000"]}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # --- Register blueprints (routes) ---
     from app.routes.auth_routes import auth_bp
@@ -97,7 +97,9 @@ def create_app():
 
     @app.route("/uploads/reports/<path:filename>")
     def serve_report_file(filename):
-        return _send(app.config["UPLOAD_FOLDER"], filename)
+        res = _send(app.config["UPLOAD_FOLDER"], filename)
+        res.headers["Access-Control-Allow-Origin"] = "*"
+        return res
 
     # --- Simple health check route ---
     @app.route("/api/health")

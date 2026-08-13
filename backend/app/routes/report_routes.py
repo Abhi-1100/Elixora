@@ -3,11 +3,12 @@ import re
 import uuid
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
+
 try:
-    import pymupdf as fitz  # PyMuPDF >= 1.24 — preferred import
+    import pymupdf as fitz  # PyMuPDF >= 1.24
 except ImportError:
     try:
-        import fitz  # older PyMuPDF fallback
+        import fitz
     except ImportError:
         fitz = None
 
@@ -19,9 +20,14 @@ except ImportError:
     np = None
 
 try:
+    from rapidocr_onnxruntime import RapidOCR
+    rapid_ocr = RapidOCR()
+except Exception:
+    rapid_ocr = None
+
+try:
     import pytesseract
-    # Default Windows Tesseract path fallback
-    if os.name == "nt" and not pytesseract.pytesseract.tesseract_cmd or pytesseract.pytesseract.tesseract_cmd == "tesseract":
+    if os.name == "nt" and (not pytesseract.pytesseract.tesseract_cmd or pytesseract.pytesseract.tesseract_cmd == "tesseract"):
         default_tess = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
         if os.path.exists(default_tess):
             pytesseract.pytesseract.tesseract_cmd = default_tess
@@ -45,6 +51,50 @@ report_bp = Blueprint("report_bp", __name__)
 
 ALLOWED_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 
+# Alias mapping to handle common lab report test names / abbreviations
+TEST_ALIASES = {
+    "hemoglobin": "Hemoglobin (Hb)",
+    "hb": "Hemoglobin (Hb)",
+    "wbc count": "White Blood Cell Count (WBC)",
+    "wbccount": "White Blood Cell Count (WBC)",
+    "wbc": "White Blood Cell Count (WBC)",
+    "white blood cells": "White Blood Cell Count (WBC)",
+    "rbc count": "Red Blood Cell Count (RBC)",
+    "rbccount": "Red Blood Cell Count (RBC)",
+    "rbc": "Red Blood Cell Count (RBC)",
+    "red blood cells": "Red Blood Cell Count (RBC)",
+    "platelet count": "Platelet Count",
+    "plateletcount": "Platelet Count",
+    "platelets": "Platelet Count",
+    "hematocrit": "Hematocrit (Hct)",
+    "hematocrit (hct)": "Hematocrit (Hct)",
+    "hct": "Hematocrit (Hct)",
+    "fastingbloodsugar": "Fasting Blood Sugar (FBS)",
+    "fasting blood sugar": "Fasting Blood Sugar (FBS)",
+    "fbs": "Fasting Blood Sugar (FBS)",
+    "hba1c": "HbA1c",
+    "total cholesterol": "Total Cholesterol",
+    "totalcholesterol": "Total Cholesterol",
+    "hdlcholesterol": "HDL Cholesterol (Good)",
+    "hdl cholesterol": "HDL Cholesterol (Good)",
+    "hdl": "HDL Cholesterol (Good)",
+    "ldlcholesterol": "LDL Cholesterol (Bad)",
+    "ldl cholesterol": "LDL Cholesterol (Bad)",
+    "ldl": "LDL Cholesterol (Bad)",
+    "triglycerides": "Triglycerides",
+    "alt (sgpt)": "ALT (SGPT)",
+    "alt": "ALT (SGPT)",
+    "sgpt": "ALT (SGPT)",
+    "ast (sgot)": "AST (SGOT)",
+    "ast": "AST (SGOT)",
+    "sgot": "AST (SGOT)",
+    "total bilirubin": "Total Bilirubin",
+    "direct bilirubin": "Direct Bilirubin",
+    "creatinine": "Creatinine",
+    "bun": "Blood Urea Nitrogen (BUN)",
+    "tsh": "TSH (Thyroid Stimulating Hormone)",
+}
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -67,52 +117,70 @@ def extract_text_from_pdf(filepath):
 
 
 def ocr_image(image_input):
-    """Run OpenCV preprocessing & pytesseract on image (path or numpy array)."""
-    if not pytesseract:
-        print("[OCR] pytesseract not installed/available")
-        return ""
-    try:
-        if isinstance(image_input, str):
-            if cv2:
-                img = cv2.imread(image_input)
-            else:
-                from PIL import Image
-                img = Image.open(image_input)
-        else:
-            img = image_input
+    """Run RapidOCR (or fallback pytesseract) on image path or numpy array."""
+    lines = []
+    # 1. Primary engine: RapidOCR
+    if rapid_ocr:
+        try:
+            res, _ = rapid_ocr(image_input)
+            if res:
+                lines = [item[1].strip() for item in res if item[1].strip()]
+                return "\n".join(lines)
+        except Exception as e:
+            print(f"[OCR] RapidOCR error: {e}")
 
-        if cv2 and isinstance(img, np.ndarray):
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            # Thresholding / Denoise
-            processed = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
-            text = pytesseract.image_to_string(processed)
-        else:
-            text = pytesseract.image_to_string(img)
-        return text
-    except Exception as e:
-        print(f"[OCR] Image OCR error: {e}")
-        return ""
+    # 2. Fallback engine: Pytesseract
+    if pytesseract:
+        try:
+            if isinstance(image_input, str):
+                if cv2:
+                    img = cv2.imread(image_input)
+                else:
+                    from PIL import Image
+                    img = Image.open(image_input)
+            else:
+                img = image_input
+
+            if cv2 and isinstance(img, np.ndarray):
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                processed = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+                text = pytesseract.image_to_string(processed)
+            else:
+                text = pytesseract.image_to_string(img)
+            return text
+        except Exception as e:
+            print(f"[OCR] Image OCR error: {e}")
+
+    return ""
 
 
 def process_report_file(filepath, ext):
-    """Pipeline: PyMuPDF -> fallback OCR if needed."""
+    """Pipeline: PyMuPDF / RapidOCR -> fallback OCR if needed."""
     raw_text = ""
     if ext == "pdf":
         raw_text = extract_text_from_pdf(filepath)
-        if len(raw_text) < 100:
-            print("[OCR] PDF yielded < 100 chars text. Trying image conversion + OCR...")
-            if convert_from_path:
+        if len(raw_text) < 50:
+            print("[OCR] PDF yielded < 50 chars text. Trying page rendering + RapidOCR...")
+            if fitz:
                 try:
-                    # Fallback to Poppler conversion
-                    poppler_fallback = r"C:\poppler\Library\bin"
-                    kwargs = {}
-                    if os.path.exists(poppler_fallback):
-                        kwargs["poppler_path"] = poppler_fallback
-                    images = convert_from_path(filepath, **kwargs)
-                    ocr_text_list = [ocr_image(np.array(img) if cv2 else img) for img in images]
-                    raw_text = "\n".join(ocr_text_list)
+                    doc = fitz.open(filepath)
+                    ocr_pages = []
+                    for page in doc:
+                        pix = page.get_pixmap(dpi=150)
+                        img_bytes = pix.tobytes("png")
+                        if cv2:
+                            nparr = np.frombuffer(img_bytes, np.uint8)
+                            img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                            ocr_pages.append(ocr_image(img_np))
+                        else:
+                            import io
+                            from PIL import Image
+                            img_pil = Image.open(io.BytesIO(img_bytes))
+                            ocr_pages.append(ocr_image(img_pil))
+                    doc.close()
+                    raw_text = "\n".join(ocr_pages)
                 except Exception as e:
-                    print(f"[OCR] pdf2image conversion error: {e}")
+                    print(f"[OCR] PyMuPDF page rendering error: {e}")
     else:
         raw_text = ocr_image(filepath)
 
@@ -120,13 +188,11 @@ def process_report_file(filepath, ext):
 
 
 def parse_line_for_test(line):
-    """Parse line for test pattern: name ... numeric_value unit."""
+    """Parse single line for test pattern: name ... numeric_value unit."""
     line = line.strip()
     if not line:
         return None
 
-    # Pattern matches: Test Name (letters/spaces/parens) followed by number and unit
-    # e.g., "Hemoglobin 13.5 g/dL" or "WBC: 6.5 x10^9/L" or "FBS ... 95 mg/dL"
     pattern = r"^([A-Za-z0-9\s\(\)\/\-\.\:]+?)[\s\:\.\_]+(\d+(?:\.\d+)?)\s*([a-zA-Z0-9\%\^\/]+)?$"
     match = re.search(pattern, line)
     if match:
@@ -136,7 +202,6 @@ def parse_line_for_test(line):
         if len(name_part) >= 2:
             return name_part, val_part, unit_part
 
-    # Secondary regex attempt
     pattern2 = r"([A-Za-z\s\(\)]+)\s+(\d+(?:\.\d+)?)"
     match2 = re.search(pattern2, line)
     if match2:
@@ -155,13 +220,11 @@ def classify_result(ref_row, val):
     crit_low = ref_row.get("critical_low")
     crit_high = ref_row.get("critical_high")
 
-    # Critical checks
     if crit_low is not None and val < crit_low:
         return "Critical"
     if crit_high is not None and val > crit_high:
         return "Critical"
 
-    # Normal checks
     is_normal = True
     if norm_min is not None and val < norm_min:
         is_normal = False
@@ -175,44 +238,99 @@ def classify_result(ref_row, val):
 
 
 def match_and_analyze_text(raw_text, user_gender="Both"):
-    """Parse text lines, fuzzy match against CSV reference names, classify."""
+    """Parse text lines (single-line & multi-line OCR layouts), fuzzy match & classify."""
     lines = [l.strip() for l in raw_text.splitlines() if l.strip()]
     results = []
+    seen_tests = set()
     unmatched_lines = []
 
+    def get_reference_row(test_name):
+        matching_rows = [r for r in REFERENCE_ROWS if r["test_name"] == test_name]
+        g_row = next((r for r in matching_rows if r["gender"].lower() == (user_gender or "").lower()), None)
+        if not g_row:
+            g_row = next((r for r in matching_rows if r["gender"].lower() == "both"), matching_rows[0] if matching_rows else None)
+        return g_row
+
+    def clean_candidate_name(name):
+        cleaned = re.sub(r"[^a-zA-Z0-9\s\(\)]", "", name).strip()
+        return cleaned
+
+    def resolve_test_name(cand):
+        c_lower = cand.lower()
+        if c_lower in TEST_ALIASES:
+            return TEST_ALIASES[c_lower]
+
+        if process and REFERENCE_NAMES:
+            best_match = process.extractOne(cand, REFERENCE_NAMES)
+            if best_match and best_match[1] >= 65:
+                return best_match[0]
+        return None
+
+    # Pass 1: Multi-line OCR Table Layout Matching
+    for i, line in enumerate(lines):
+        # Look for isolated numbers (e.g., "10.2", "142")
+        m = re.search(r"^\s*(\d+(?:\.\d+)?)\s*$", line)
+        if m:
+            val = float(m.group(1))
+            possible_name = None
+            for j in range(max(0, i - 3), i):
+                cand = clean_candidate_name(lines[j])
+                if (
+                    cand
+                    and not re.match(r"^\d", cand)
+                    and cand.lower() not in [
+                        "result", "unit", "reference range", "referencerange",
+                        "test name", "testname", "referring doctor", "patient name",
+                        "patient id", "samplecollected", "report date", "age gender"
+                    ]
+                ):
+                    possible_name = cand
+
+            if possible_name:
+                matched_name = resolve_test_name(possible_name)
+                if matched_name and matched_name not in seen_tests:
+                    seen_tests.add(matched_name)
+                    unit = ""
+                    if i + 1 < len(lines):
+                        next_line = lines[i + 1]
+                        if re.match(r"^[a-zA-Z0-9\%\^\/]+", next_line) and not re.match(r"^\d", next_line):
+                            unit = next_line.rstrip(".")
+
+                    ref_row = get_reference_row(matched_name)
+                    status = classify_result(ref_row, val) if ref_row else "Normal"
+                    n_min = ref_row["normal_min"] if ref_row and ref_row["normal_min"] is not None else ""
+                    n_max = ref_row["normal_max"] if ref_row and ref_row["normal_max"] is not None else ""
+                    norm_range_str = f"{n_min}-{n_max}" if (n_min or n_max) else "N/A"
+                    final_unit = unit or (ref_row["unit"] if ref_row else "")
+
+                    results.append({
+                        "test_name": matched_name,
+                        "value": val,
+                        "unit": final_unit,
+                        "status": status,
+                        "normal_range": norm_range_str
+                    })
+                    continue
+
+    # Pass 2: Single-line regex matching for lines not yet matched
     for line in lines:
         parsed = parse_line_for_test(line)
         if not parsed:
-            if len(line) > 3:
+            if len(line) > 3 and not any(k in line.lower() for k in ["patient", "doctor", "report date"]):
                 unmatched_lines.append(line)
             continue
 
         raw_name, val, raw_unit = parsed
+        matched_name = resolve_test_name(raw_name)
 
-        # Fuzzy match against CSV reference test names
-        matched_name = None
-        score = 0
-        if process and REFERENCE_NAMES:
-            best_match = process.extractOne(raw_name, REFERENCE_NAMES)
-            if best_match:
-                matched_name, score = best_match[0], best_match[1]
-
-        if score >= 80 and matched_name:
-            # Find best matching reference row by gender
-            matching_rows = [r for r in REFERENCE_ROWS if r["test_name"] == matched_name]
-            gender_row = next((r for r in matching_rows if r["gender"].lower() == (user_gender or "").lower()), None)
-            if not gender_row:
-                gender_row = next((r for r in matching_rows if r["gender"].lower() == "both"), matching_rows[0] if matching_rows else None)
-
-            status = "Normal"
-            norm_range_str = "N/A"
-            unit = raw_unit or (gender_row["unit"] if gender_row else "")
-
-            if gender_row:
-                status = classify_result(gender_row, val)
-                n_min = gender_row["normal_min"] if gender_row["normal_min"] is not None else ""
-                n_max = gender_row["normal_max"] if gender_row["normal_max"] is not None else ""
-                norm_range_str = f"{n_min}-{n_max}" if (n_min or n_max) else "N/A"
+        if matched_name and matched_name not in seen_tests:
+            seen_tests.add(matched_name)
+            ref_row = get_reference_row(matched_name)
+            status = classify_result(ref_row, val) if ref_row else "Normal"
+            n_min = ref_row["normal_min"] if ref_row and ref_row["normal_min"] is not None else ""
+            n_max = ref_row["normal_max"] if ref_row and ref_row["normal_max"] is not None else ""
+            norm_range_str = f"{n_min}-{n_max}" if (n_min or n_max) else "N/A"
+            unit = raw_unit or (ref_row["unit"] if ref_row else "")
 
             results.append({
                 "test_name": matched_name,
@@ -221,10 +339,8 @@ def match_and_analyze_text(raw_text, user_gender="Both"):
                 "status": status,
                 "normal_range": norm_range_str
             })
-        else:
-            unmatched_lines.append(line)
 
-    return results, unmatched_lines
+    return results, unmatched_lines[:20]
 
 
 @report_bp.route("/upload", methods=["POST"])
@@ -295,6 +411,7 @@ def upload_report():
         return jsonify({
             "report_id": report.id,
             "overall_status": overall_status,
+            "file_url": report.file_url,
             "results": results_data,
             "unmatched_lines": unmatched
         }), 201
@@ -320,7 +437,6 @@ def get_report(report_id):
 
     results = []
     for r in report.test_results:
-        # Match back against reference range for normal_range string
         matching_rows = [row for row in REFERENCE_ROWS if row["test_name"] == r.test_name]
         g_row = next((row for row in matching_rows if row["gender"].lower() == (user.gender or "").lower()), None) if user else None
         if not g_row:

@@ -7,6 +7,9 @@ import {
   User,
   ShieldCheck,
   Globe,
+  LayoutDashboard,
+  LogOut,
+  ArrowRight,
 } from "lucide-react";
 import { BreathOrb } from "@/components/ui/breath-orb";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -34,7 +37,7 @@ export function TopBar({
   function handleLogout() {
     logout();
     setShowProfileMenu(false);
-    router.push("/");
+    router.push("/login");
   }
 
   return (
@@ -88,7 +91,7 @@ export function TopBar({
           <span className="hidden sm:inline">Voice Mode</span>
         </button>
 
-        {/* Theme Toggle — uses global context */}
+        {/* Theme Toggle */}
         <ThemeToggle />
 
         {/* Profile / Auth Section */}
@@ -104,51 +107,67 @@ export function TopBar({
 
             {/* Profile Dropdown */}
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl p-2 z-50 text-xs">
-                <div className="p-2.5 border-b border-[var(--border)]">
-                  <p className="font-semibold text-[var(--ink)]">{user.name}</p>
-                  <p className="text-[var(--ink-muted)] text-[11px] truncate">{user.email}</p>
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowProfileMenu(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl p-2 z-50 text-xs animate-fade-in">
+                  <div className="p-2.5 border-b border-[var(--border)] bg-[var(--surface-muted)]/50 rounded-xl mb-1">
+                    <p className="font-semibold text-[var(--ink)] truncate">{user.name}</p>
+                    <p className="text-[var(--ink-muted)] text-[11px] truncate">{user.email}</p>
+                  </div>
+                  <div className="py-1 space-y-0.5">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)] font-medium"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5 text-[var(--accent)]" />
+                      <span>Dashboard</span>
+                    </Link>
+                    <button
+                      onClick={() => setShowProfileMenu(false)}
+                      className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>HIPAA & Privacy Settings</span>
+                    </button>
+                    <button
+                      onClick={() => setShowProfileMenu(false)}
+                      className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-[var(--accent)]" />
+                      <span>Export Medical History</span>
+                    </button>
+                  </div>
+                  <div className="pt-1 border-t border-[var(--border)]">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-2.5 py-1.5 hover:bg-rose-500/10 text-rose-600 rounded-lg flex items-center gap-2 font-semibold"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Log Out / Switch Account</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="py-1">
-                  <button
-                    onClick={() => setShowProfileMenu(false)}
-                    className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>HIPAA & Privacy Settings</span>
-                  </button>
-                  <button
-                    onClick={() => setShowProfileMenu(false)}
-                    className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"
-                  >
-                    <Share2 className="w-3.5 h-3.5 text-[var(--accent)]" />
-                    <span>Export Medical History</span>
-                  </button>
-                </div>
-                <div className="pt-1 border-t border-[var(--border)]">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-2.5 py-1.5 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 rounded-lg"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              </div>
+              </>
             )}
           </div>
         ) : (
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className="px-3 py-1.5 text-xs font-medium text-[var(--ink)] hover:text-[var(--accent)] transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold text-[var(--ink)] hover:text-[var(--accent)] transition-colors"
             >
               Log in
             </Link>
             <Link
               href="/signup"
-              className="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-medium hover:opacity-90 transition-opacity"
+              className="px-3 py-1.5 rounded-full bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1"
             >
-              Sign up
+              <span>Sign up</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
         )}

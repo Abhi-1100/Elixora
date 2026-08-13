@@ -7,9 +7,10 @@ import { EmptyState } from "@/components/chat/empty-state";
 import { MessageThread, Message } from "@/components/chat/message-thread";
 import { InputBar } from "@/components/chat/input-bar";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
+import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { uploadReport } from "@/lib/api";
+import { uploadReport, getReport } from "@/lib/api";
 
 // Initial Demo Conversations
 const INITIAL_CONVERSATIONS: Conversation[] = [
@@ -52,22 +53,8 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
     {
       id: "m-2",
       sender: "ai",
-      text: "Here is your verified medication guide for Amoxicillin 500mg. Always take antibiotics exactly as prescribed by your physician.",
+      text: "Here is your guidance for Amoxicillin 500mg:\n\n• **Dosage:** 500 mg every 8 hours as directed by your physician.\n• **Food Instructions:** Can be taken with or without food. Taking with meals helps reduce stomach discomfort.\n• **Side Effects:** Mild nausea, diarrhea, abdominal discomfort, or headache. Contact your doctor if severe rash occurs.\n• **Warning:** Complete the full prescribed course even if you feel better early.",
       timestamp: "10:30 AM",
-      cardType: "medicine",
-      cardData: {
-        name: "Amoxicillin 500mg Capsule",
-        genericName: "Amoxicillin Trihydrate",
-        dosage: "500 mg",
-        frequency: "3 times daily",
-        timing: "Every 8 hours with water",
-        purpose: "Treatment of susceptible bacterial infections (ENT, respiratory tract, urinary tract).",
-        sideEffects: ["Mild nausea", "Diarrhea", "Abdominal discomfort", "Headache", "Skin rash (rare)"],
-        warnings: [
-          "Do not take if you have a known penicillin allergy.",
-          "Complete the entire 7 to 10 day course even if symptoms resolve early.",
-        ],
-      },
     },
   ],
   "conv-2": [
@@ -80,47 +67,8 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
     {
       id: "m-4",
       sender: "ai",
-      text: "I analyzed your uploaded Lipid Panel report. Here is the biomarker breakdown along with clinical insights:",
+      text: "I analyzed your uploaded Lipid Panel report.\n\n• **Total Cholesterol:** 240 mg/dL (High — target is < 200 mg/dL)\n• **HDL (Good Cholesterol):** 45 mg/dL (Normal — target is > 40 mg/dL)\n\n**Clinical Summary:** Total cholesterol is moderately elevated. Adopting a balanced Mediterranean diet and routine cardiovascular check-up with your primary care provider is recommended.",
       timestamp: "08:16 AM",
-      cardType: "lab",
-      cardData: {
-        reportTitle: "Comprehensive Lipid Profile",
-        patientName: "Dr. Alex Morgan",
-        date: "2026-07-25",
-        labName: "Quest Diagnostics Central Lab",
-        items: [
-          {
-            biomarker: "Total Cholesterol",
-            result: "240",
-            unit: "mg/dL",
-            referenceRange: "< 200 mg/dL",
-            status: "High",
-          },
-          {
-            biomarker: "LDL (Bad Cholesterol)",
-            result: "155",
-            unit: "mg/dL",
-            referenceRange: "< 100 mg/dL",
-            status: "High",
-          },
-          {
-            biomarker: "HDL (Good Cholesterol)",
-            result: "45",
-            unit: "mg/dL",
-            referenceRange: "> 40 mg/dL",
-            status: "Normal",
-          },
-          {
-            biomarker: "Triglycerides",
-            result: "140",
-            unit: "mg/dL",
-            referenceRange: "< 150 mg/dL",
-            status: "Normal",
-          },
-        ],
-        overallSummary:
-          "Your total cholesterol and LDL levels are moderately elevated. While HDL and Triglycerides are within target limits, adoption of a Mediterranean diet and routine cardiovascular evaluation with your PCP is advised.",
-      },
     },
   ],
   "conv-3": [
@@ -133,23 +81,8 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
     {
       id: "m-6",
       sender: "ai",
-      text: "Here is your prescription summary for Lisinopril from Metro Health Clinic:",
+      text: "Prescription Summary for Lisinopril 10mg Tablets:\n\n• **Instructions:** Take 1 tablet orally every morning with water.\n• **Refills Remaining:** 3 refills available.\n• **Monitoring:** Check your blood pressure weekly as recommended by your physician.",
       timestamp: "Yesterday, 4:21 PM",
-      cardType: "prescription",
-      cardData: {
-        rxNumber: "RX-8849201",
-        doctorName: "Dr. Sarah Jenkins, MD",
-        clinic: "Metro Cardiovascular Clinic",
-        issueDate: "2026-06-15",
-        refillsRemaining: 3,
-        medications: [
-          {
-            name: "Lisinopril 10mg Tablets",
-            instructions: "Take 1 tablet orally every morning with water. Monitor blood pressure weekly.",
-            quantity: "90 Tablets (90-Day Supply)",
-          },
-        ],
-      },
     },
   ],
   "conv-4": [
@@ -162,7 +95,7 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
     {
       id: "m-8",
       sender: "ai",
-      text: "CRITICAL HEALTH ALERT: Chest pressure radiating to the arm is a major red-flag symptom of an acute cardiovascular event.",
+      text: "CRITICAL HEALTH ALERT: Chest pressure radiating to your arm or jaw is a major red-flag symptom of an acute medical emergency.\n\nDo not delay — please seek emergency medical evaluation immediately (call 911 or visit the nearest emergency room).",
       timestamp: "3 days ago",
       cardType: "emergency",
       cardData: {
@@ -188,19 +121,21 @@ export default function ChatPage() {
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Active Report state for side-by-side partition view
+  const [activeReport, setActiveReport] = useState<ReportData | null>(null);
+
   const { user, token, loading } = useAuth() as { user: any; token: string | null; loading: boolean };
 
-  // Keep token in a ref so async handlers can access current value without stale closures
   const tokenRef = useRef<string | null>(token);
-  useEffect(() => { tokenRef.current = token; }, [token]);
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
-
-  // Theme is now globally managed by ThemeProvider in layout.tsx
 
   const activeConversation = conversations.find((c) => c.id === activeId);
   const activeMessages = threadMap[activeId] || [];
@@ -216,6 +151,7 @@ export default function ChatPage() {
     setConversations([newConv, ...conversations]);
     setThreadMap({ ...threadMap, [newId]: [] });
     setActiveId(newId);
+    setActiveReport(null);
   };
 
   const handleDeleteConversation = (id: string) => {
@@ -245,7 +181,6 @@ export default function ChatPage() {
     const currentMsgs = threadMap[activeId] || [];
     const updatedMsgs = [...currentMsgs, userMsg];
 
-    // Update conversation title if it was "New Health Query"
     if (activeConversation && activeConversation.title === "New Health Query") {
       const summaryTitle = text.slice(0, 28) + (text.length > 28 ? "..." : "");
       handleRenameConversation(activeId, summaryTitle || (attachment ? "Lab Report Analysis" : "Health Query"));
@@ -254,7 +189,7 @@ export default function ChatPage() {
     setThreadMap({ ...threadMap, [activeId]: updatedMsgs });
     setIsGenerating(true);
 
-    // ── REAL BACKEND PATH: file attached ──────────────────────────────────
+    // ── REAL REPORT ATTACHMENT PATH: Upload to backend & Open Side Panel in Chat ───────
     if (attachment) {
       const formData = new FormData();
       formData.append("file", attachment);
@@ -262,32 +197,27 @@ export default function ChatPage() {
       try {
         const currentToken = tokenRef.current;
         const data = await uploadReport(formData, currentToken);
-        const reportId = data.report_id;
 
-        // Stub message in chat with a link to the full split-view
-        const stubMsg: Message = {
+        // Set active report to display in partition side panel right inside chat!
+        setActiveReport(data);
+
+        const aiMsg: Message = {
           id: "m-" + (Date.now() + 1),
           sender: "ai",
-          text: `✅ Report analyzed successfully — overall status: **${data.overall_status}**. ${data.results?.length ?? 0} biomarker(s) extracted.`,
+          text: `✅ Report analyzed — Overall Status: **${data.overall_status}**. Extracted **${data.results?.length ?? 0}** biomarker(s).\n\nThe document preview and biomarker breakdown panel is open on the right. Ask me any questions about your lab results!`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          cardType: undefined,
-          // Custom field to store the report link
-          reportLink: `/reports/${reportId}`,
         };
 
         setThreadMap((prev) => ({
           ...prev,
-          [activeId]: [...(prev[activeId] || []), stubMsg],
+          [activeId]: [...(prev[activeId] || []), aiMsg],
         }));
-
         setIsGenerating(false);
-        // Navigate to full split-view report page
-        router.push(`/reports/${reportId}`);
       } catch (err: unknown) {
         const errMsg: Message = {
           id: "m-" + (Date.now() + 1),
           sender: "ai",
-          text: `❌ Failed to analyze report: ${err instanceof Error ? err.message : "Unknown error"}. Please try uploading again or visit the Upload page directly.`,
+          text: `❌ Failed to analyze report: ${err instanceof Error ? err.message : "Unknown error"}. Please try uploading again.`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
         setThreadMap((prev) => ({
@@ -299,7 +229,7 @@ export default function ChatPage() {
       return;
     }
 
-    // ── KEYWORD-MATCHED FALLBACK for text-only messages ───────────────────
+    // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
     setTimeout(() => {
       let replyCardType: "medicine" | "lab" | "prescription" | "emergency" | undefined;
       let replyCardData: Message["cardData"];
@@ -307,31 +237,21 @@ export default function ChatPage() {
 
       const lower = text.toLowerCase();
 
-      if (lower.includes("chest pain") || lower.includes("heart attack") || lower.includes("emergency")) {
+      // If active report is open, contextually answer questions about the report!
+      if (activeReport && (lower.includes("report") || lower.includes("result") || lower.includes("test") || lower.includes("value") || lower.includes("status"))) {
+        replyText = `Based on your analyzed report (Overall Status: **${activeReport.overall_status}**):\n\n` +
+          activeReport.results.map((r) => `• **${r.test_name}:** ${r.value} ${r.unit} (${r.status} — Ref: ${r.normal_range} ${r.unit})`).join("\n") +
+          `\n\nFeel free to ask for specific advice or recommendations on any of these parameters.`;
+      } else if (lower.includes("chest pain") || lower.includes("heart attack") || lower.includes("emergency")) {
         replyCardType = "emergency";
-        replyText = "URGENT SAFETY NOTICE: Sudden severe symptoms require immediate triage.";
+        replyText = "URGENT SAFETY NOTICE: Sudden severe symptoms require immediate emergency evaluation.";
         replyCardData = {
           message: "Please do not delay seeking professional emergency care.",
         };
-      } else if (lower.includes("lab") || lower.includes("blood test") || lower.includes("lipid") || lower.includes("cholesterol")) {
-        replyCardType = "lab";
-        replyText = "Analysis of your diagnostic values:";
-        replyCardData = {
-          reportTitle: "Complete Metabolic & Lipid Panel",
-          patientName: "Patient Record",
-          date: new Date().toISOString().split("T")[0],
-          labName: "Clinical Diagnostics Center",
-          items: [
-            { biomarker: "Glucose (Fasting)", result: "92", unit: "mg/dL", referenceRange: "70 - 99 mg/dL", status: "Normal" },
-            { biomarker: "HbA1c", result: "5.4", unit: "%", referenceRange: "< 5.7 %", status: "Normal" },
-            { biomarker: "Total Cholesterol", result: "215", unit: "mg/dL", referenceRange: "< 200 mg/dL", status: "High" },
-          ],
-          overallSummary: "Fasting glucose and glycemic control parameters are excellent. Mild elevation in Total Cholesterol; lifestyle optimization recommended.",
-        };
       } else if (lower.includes("cough") || lower.includes("fever") || lower.includes("symptom")) {
-        replyText = "Based on your described symptoms (cough/fever):\n• Stay well hydrated with fluids & rest.\n• Monitor body temperature twice daily.\n• If high fever (>102°F) persists past 3 days or shortness of breath develops, consult your physician immediately.";
+        replyText = "Based on your described symptoms:\n• Stay well hydrated with fluids & rest.\n• Monitor body temperature twice daily.\n• If high fever (>102°F) persists past 3 days or shortness of breath develops, consult your physician immediately.";
       } else {
-        replyText = "I'm here to help with your health queries. You can ask me about symptoms, medications, lab results, or upload a lab report PDF/image for detailed analysis.";
+        replyText = `Thank you for your question. For general health guidance:\n• Ensure adequate hydration and balanced nutrition.\n• Always follow dosage instructions on prescription labels.\n• You can attach a lab report PDF or scan anytime using the paperclip icon for instant biomarker breakdown!`;
       }
 
       const aiMsg: Message = {
@@ -348,7 +268,7 @@ export default function ChatPage() {
         [activeId]: [...(prev[activeId] || []), aiMsg],
       }));
       setIsGenerating(false);
-    }, 1500);
+    }, 1200);
   };
 
   if (loading || !user) {
@@ -361,7 +281,7 @@ export default function ChatPage() {
       <div 
         onMouseEnter={() => setIsSidebarHovered(true)}
         onMouseLeave={() => setIsSidebarHovered(false)}
-        className="z-50 h-screen"
+        className="z-50 h-screen shrink-0"
       >
         <Sidebar
           isCollapsed={isSidebarCollapsed && !isSidebarHovered}
@@ -376,46 +296,56 @@ export default function ChatPage() {
         />
       </div>
 
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col h-full min-w-0 relative">
-        {/* Top Header */}
-        <TopBar
-          title={activeConversation?.title || "Elixora Health Assistant"}
-          onOpenVoiceMode={() => setIsVoiceOpen(true)}
-          onGoToLanding={() => router.push("/")}
-        />
-
-        {/* Dynamic Center Stage: Empty State OR Message Thread */}
-        <main className="flex-1 overflow-y-auto flex flex-col relative">
-          {activeMessages.length === 0 ? (
-            <EmptyState 
-              onSelectPrompt={(pText) => handleSendMessage(pText)} 
-              InputBarComponent={
-                <InputBar
-                  onSendMessage={handleSendMessage}
-                  onOpenVoiceMode={() => setIsVoiceOpen(true)}
-                  isLoading={isGenerating}
-                  className=""
-                />
-              }
-            />
-          ) : (
-            <MessageThread messages={activeMessages} isGenerating={isGenerating} />
-          )}
-        </main>
-
-        {/* Floating Pill Input Bar */}
-        {activeMessages.length > 0 && (
-          <InputBar
-            onSendMessage={handleSendMessage}
+      {/* Main Content Area — Partitions when activeReport is present */}
+      <div className="flex-1 flex h-full min-w-0 relative overflow-hidden">
+        {/* Chat Stream (Left Partition) */}
+        <div className="flex-1 flex flex-col h-full min-w-0 relative">
+          <TopBar
+            title={activeConversation?.title || "Elixora Health Assistant"}
             onOpenVoiceMode={() => setIsVoiceOpen(true)}
-            isLoading={isGenerating}
-            className="sticky bottom-0 z-20 pb-4"
+            onGoToLanding={() => router.push("/")}
           />
+
+          <main className="flex-1 overflow-y-auto flex flex-col relative">
+            {activeMessages.length === 0 ? (
+              <EmptyState 
+                onSelectPrompt={(pText) => handleSendMessage(pText)} 
+                InputBarComponent={
+                  <InputBar
+                    onSendMessage={handleSendMessage}
+                    onOpenVoiceMode={() => setIsVoiceOpen(true)}
+                    isLoading={isGenerating}
+                    className=""
+                  />
+                }
+              />
+            ) : (
+              <MessageThread messages={activeMessages} isGenerating={isGenerating} />
+            )}
+          </main>
+
+          {activeMessages.length > 0 && (
+            <InputBar
+              onSendMessage={handleSendMessage}
+              onOpenVoiceMode={() => setIsVoiceOpen(true)}
+              isLoading={isGenerating}
+              className="sticky bottom-0 z-20 pb-4"
+            />
+          )}
+        </div>
+
+        {/* ── Report Analyzer Side Panel (Right Partition Screen) ─────────────── */}
+        {activeReport && (
+          <div className="w-full md:w-[480px] lg:w-[520px] xl:w-[580px] h-full shrink-0 z-30">
+            <ReportSidePanel
+              report={activeReport}
+              onClose={() => setActiveReport(null)}
+            />
+          </div>
         )}
       </div>
 
-      {/* Full-Screen Immersive Voice Mode Overlay */}
+      {/* Voice Overlay */}
       <VoiceModeModal isOpen={isVoiceOpen} onClose={() => setIsVoiceOpen(false)} />
     </div>
   );

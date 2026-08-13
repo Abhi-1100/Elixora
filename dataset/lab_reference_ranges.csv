@@ -1,41 +1,41 @@
-Category,Test_Name,Gender,Normal_Min,Normal_Max,Unit,Critical_Low,Critical_High,Notes
-CBC,White Blood Cell Count (WBC),Both,4.0,11.0,x10^9/L,2.0,30.0,Below critical = severe infection risk; above = possible infection/leukemia
-CBC,Red Blood Cell Count (RBC),Male,4.7,6.1,x10^12/L,2.5,7.0,
-CBC,Red Blood Cell Count (RBC),Female,4.2,5.4,x10^12/L,2.5,7.0,
-CBC,Hemoglobin (Hb),Male,13.8,17.2,g/dL,7.0,20.0,Below 7 = severe anemia; requires urgent attention
-CBC,Hemoglobin (Hb),Female,12.1,15.1,g/dL,7.0,20.0,Below 7 = severe anemia; requires urgent attention
-CBC,Hematocrit (Hct),Male,40.7,50.3,%,20.0,60.0,
-CBC,Hematocrit (Hct),Female,36.1,44.3,%,20.0,60.0,
-CBC,Platelet Count,Both,150,450,x10^9/L,50,1000,Below 50 = high bleeding risk
-CBC,Mean Corpuscular Volume (MCV),Both,80,100,fL,60,120,
-CBC,Mean Corpuscular Hemoglobin (MCH),Both,27,33,pg,20,40,
-CBC,MCHC,Both,32,36,g/dL,28,40,
-Glucose,Fasting Blood Sugar (FBS),Both,70,99,mg/dL,54,250,100-125 = prediabetes; 126+ = diabetes range; below 54 = hypoglycemia emergency
-Glucose,Postprandial Blood Sugar (PPBS),Both,70,140,mg/dL,54,300,Measured 2 hrs after meal
-Glucose,Random Blood Sugar (RBS),Both,70,140,mg/dL,54,300,
-Glucose,HbA1c,Both,4.0,5.6,%,,9.0,5.7-6.4 = prediabetes; 6.5+ = diabetes
-Lipid Profile,Total Cholesterol,Both,0,200,mg/dL,,300,200-239 = borderline high; 240+ = high
-Lipid Profile,HDL Cholesterol (Good),Male,40,60,mg/dL,20,,Below 40 = increased cardiac risk
-Lipid Profile,HDL Cholesterol (Good),Female,50,60,mg/dL,20,,Below 50 = increased cardiac risk
-Lipid Profile,LDL Cholesterol (Bad),Both,0,100,mg/dL,,190,100-129 near optimal; 130-159 borderline high; 160-189 high; 190+ very high
-Lipid Profile,Triglycerides,Both,0,150,mg/dL,,500,150-199 borderline high; 200-499 high; 500+ very high (pancreatitis risk)
-Liver Function,ALT (SGPT),Both,7,56,U/L,,200,Elevated indicates liver cell damage
-Liver Function,AST (SGOT),Both,10,40,U/L,,200,Elevated indicates liver/muscle damage
-Liver Function,Total Bilirubin,Both,0.1,1.2,mg/dL,,10.0,Elevated = jaundice/liver dysfunction
-Liver Function,Direct Bilirubin,Both,0.0,0.3,mg/dL,,5.0,
-Liver Function,Alkaline Phosphatase (ALP),Both,44,147,U/L,,400,
-Liver Function,Total Protein,Both,6.0,8.3,g/dL,4.0,10.0,
-Liver Function,Albumin,Both,3.5,5.0,g/dL,2.0,,Low albumin = liver/kidney/nutrition issue
-Kidney Function,Creatinine,Male,0.7,1.3,mg/dL,0.3,4.0,Elevated = impaired kidney function
-Kidney Function,Creatinine,Female,0.6,1.1,mg/dL,0.3,4.0,Elevated = impaired kidney function
-Kidney Function,Blood Urea Nitrogen (BUN),Both,7,20,mg/dL,2,100,
-Kidney Function,Uric Acid,Male,3.4,7.0,mg/dL,,12.0,Elevated = gout risk
-Kidney Function,Uric Acid,Female,2.4,6.0,mg/dL,,12.0,Elevated = gout risk
-Thyroid,TSH (Thyroid Stimulating Hormone),Both,0.4,4.0,mIU/L,0.01,20.0,Low = hyperthyroidism; High = hypothyroidism
-Thyroid,T3 (Triiodothyronine),Both,80,200,ng/dL,,,
-Thyroid,T4 (Thyroxine),Both,5.0,12.0,ug/dL,,,
-Vitals,Blood Pressure Systolic,Both,90,120,mmHg,70,180,120-139 elevated; 140+ hypertension stage
-Vitals,Blood Pressure Diastolic,Both,60,80,mmHg,40,120,80-89 elevated; 90+ hypertension stage
-Vitals,Body Temperature,Both,97.0,99.0,F,95.0,104.0,Below/above critical = medical emergency
-Vitals,Pulse Rate,Both,60,100,bpm,40,150,
+Category,Test_Name,Gender,Normal_Min,Normal_Max,Unit,Critical_Low,Critical_High,Notes,
+CBC,White Blood Cell Count (WBC),Both,4,11,x10^9/L,2,30,Below critical = severe infection risk; above = possible infection/leukemia,
+CBC,Red Blood Cell Count (RBC),Male,4.7,6.1,x10^12/L,2.5,7,,
+CBC,Red Blood Cell Count (RBC),Female,4.2,5.4,x10^12/L,2.5,7,,
+CBC,Hemoglobin (Hb),Male,13.8,17.2,g/dL,7,20,Below 7 = severe anemia; requires urgent attention,
+CBC,Hemoglobin (Hb),Female,12.1,15.1,g/dL,7,20,Below 7 = severe anemia; requires urgent attention,
+CBC,Hematocrit (Hct),Male,40.7,50.3,%,20,60,,
+CBC,Hematocrit (Hct),Female,36.1,44.3,%,20,60,,
+CBC,Platelet Count,Both,150,450,x10^9/L,50,1000,Below 50 = high bleeding risk,
+CBC,Mean Corpuscular Volume (MCV),Both,80,100,fL,60,120,,
+CBC,Mean Corpuscular Hemoglobin (MCH),Both,27,33,pg,20,40,,
+CBC,MCHC,Both,32,36,g/dL,28,40,,
+Glucose,Fasting Blood Sugar (FBS),Both,70,99,mg/dL,54,250,100-125 = prediabetes; 126+ = diabetes range; below 54 = hypoglycemia emergency,
+Glucose,Postprandial Blood Sugar (PPBS),Both,70,140,mg/dL,54,300,Measured 2 hrs after meal,
+Glucose,Random Blood Sugar (RBS),Both,70,140,mg/dL,54,300,,
+Glucose,HbA1c,Both,4,5.6,%,,9,5.7-6.4 = prediabetes; 6.5+ = diabetes,
+Lipid Profile,Total Cholesterol,Both,0,200,mg/dL,,300,200-239 = borderline high; 240+ = high,
+Lipid Profile,HDL Cholesterol (Good),Male,40,60,mg/dL,20,,Below 40 = increased cardiac risk,
+Lipid Profile,HDL Cholesterol (Good),Female,50,60,mg/dL,20,,Below 50 = increased cardiac risk,
+Lipid Profile,LDL Cholesterol (Bad),Both,0,100,mg/dL,,190,100-129 near optimal; 130-159 borderline high; 160-189 high; 190+ very high,
+Lipid Profile,Triglycerides,Both,0,150,mg/dL,,500,150-199 borderline high; 200-499 high; 500+ very high (pancreatitis risk),
+Liver Function,ALT (SGPT),Both,7,56,U/L,,200,Elevated indicates liver cell damage,
+Liver Function,AST (SGOT),Both,10,40,U/L,,200,Elevated indicates liver/muscle damage,
+Liver Function,Total Bilirubin,Both,0.1,1.2,mg/dL,,10,Elevated = jaundice/liver dysfunction,
+Liver Function,Direct Bilirubin,Both,0,0.3,mg/dL,,5,,
+Liver Function,Alkaline Phosphatase (ALP),Both,44,147,U/L,,400,,
+Liver Function,Total Protein,Both,6,8.3,g/dL,4,10,,
+Liver Function,Albumin,Both,3.5,5,g/dL,2,,Low albumin = liver/kidney/nutrition issue,
+Kidney Function,Creatinine,Male,0.7,1.3,mg/dL,0.3,4,Elevated = impaired kidney function,
+Kidney Function,Creatinine,Female,0.6,1.1,mg/dL,0.3,4,Elevated = impaired kidney function,
+Kidney Function,Blood Urea Nitrogen (BUN),Both,7,20,mg/dL,2,100,,
+Kidney Function,Uric Acid,Male,3.4,7,mg/dL,,12,Elevated = gout risk,
+Kidney Function,Uric Acid,Female,2.4,6,mg/dL,,12,Elevated = gout risk,
+Thyroid,TSH (Thyroid Stimulating Hormone),Both,0.4,4,mIU/L,0.01,20,Low = hyperthyroidism; High = hypothyroidism,
+Thyroid,T3 (Triiodothyronine),Both,80,200,ng/dL,,,,
+Thyroid,T4 (Thyroxine),Both,5,12,ug/dL,,,,
+Vitals,Blood Pressure Systolic,Both,90,120,mmHg,70,180,120-139 elevated; 140+ hypertension stage,
+Vitals,Blood Pressure Diastolic,Both,60,80,mmHg,40,120,80-89 elevated; 90+ hypertension stage,
+Vitals,Body Temperature,Both,97,99,F,95,104,Below/above critical = medical emergency,
+Vitals,Pulse Rate,Both,60,100,bpm,40,150,,
 Vitals,Oxygen Saturation (SpO2),Both,95,100,%,90,100,Below 90 = hypoxemia, urgent

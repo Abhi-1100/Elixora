@@ -1,17 +1,28 @@
 "use client";
-// context/AuthContext.jsx
-// Wrap your app with this in app/layout.jsx so every page can access
-// the logged-in user and token via useAuth().
-
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { getCurrentUser } from "@/lib/api";
 
-const AuthContext = createContext(null);
+export interface User {
+  id?: string;
+  name?: string;
+  email?: string;
+  [key: string]: any;
+}
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
+export interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  saveSession: (accessToken: string, userData: User) => void;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // On first load, check if a token was saved from a previous session
   useEffect(() => {
@@ -32,7 +43,7 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  function saveSession(accessToken, userData) {
+  function saveSession(accessToken: string, userData: User) {
     localStorage.setItem("mg_token", accessToken);
     setToken(accessToken);
     setUser(userData);

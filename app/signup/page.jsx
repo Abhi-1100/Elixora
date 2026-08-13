@@ -6,11 +6,11 @@ import Link from "next/link";
 import { signup } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { BreathOrb } from "@/components/ui/breath-orb";
-import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Loader2, UserCheck, LogOut, ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { saveSession } = useAuth();
+  const { user, logout, saveSession } = useAuth();
 
   const [form, setForm] = useState({
     name: "",
@@ -25,14 +25,13 @@ export default function SignupPage() {
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
-    if (error) setError(""); // clear error on keystroke
+    if (error) setError("");
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
 
-    // Client-side validation
     if (form.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -83,6 +82,37 @@ export default function SignupPage() {
               Sign up to access your personal AI health assistant.
             </p>
           </div>
+
+          {/* Active Session Notice if already logged in */}
+          {user && (
+            <div className="mb-6 p-4 rounded-2xl bg-[var(--accent-soft)]/40 border border-[var(--accent)]/30 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent)]">
+                <UserCheck className="w-4 h-4" />
+                <span>Currently Logged In</span>
+              </div>
+              <p className="text-xs text-[var(--ink)]">
+                You are signed in as <strong>{user.name}</strong> ({user.email}).
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => router.push("/dashboard")}
+                  className="flex-1 py-2 px-3 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-1 shadow-xs"
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="py-2 px-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-rose-600 text-xs font-semibold hover:bg-rose-500/10 transition-colors flex items-center gap-1"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Error banner */}
           {error && (
@@ -173,7 +203,6 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
-              {/* Inline password hint */}
               {form.password.length > 0 && form.password.length < 6 && (
                 <p className="mt-1.5 text-xs text-[var(--warn)]">
                   Password must be at least 6 characters ({form.password.length}/6)
@@ -181,7 +210,7 @@ export default function SignupPage() {
               )}
             </div>
 
-            {/* Age + Gender side by side */}
+            {/* Age + Gender */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label
