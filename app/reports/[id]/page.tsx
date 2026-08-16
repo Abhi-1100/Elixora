@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getReport } from "@/lib/api";
@@ -14,19 +14,33 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
-  Loader2,
   MessageSquare,
   FileText,
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+interface ReportDetail {
+  id: string;
+  overall_status: string;
+  uploaded_at: string;
+  file_url?: string;
+  results?: Array<{
+    test_name: string;
+    value: string | number;
+    unit: string;
+    normal_range: string;
+    status: string;
+  }>;
+  unmatched_lines?: string[];
+  [key: string]: any;
+}
+
 const FLASK_BASE = process.env.NEXT_PUBLIC_API_URL
   ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
   : "http://localhost:5000";
 
-function getStatusPill(status) {
+function getStatusPill(status: string) {
   switch (status) {
     case "Normal":
       return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400";
@@ -39,7 +53,7 @@ function getStatusPill(status) {
   }
 }
 
-function getOverallConfig(status) {
+function getOverallConfig(status: string) {
   switch (status) {
     case "Normal":
       return {
@@ -72,7 +86,7 @@ function getOverallConfig(status) {
   }
 }
 
-function formatDate(iso) {
+function formatDate(iso: string) {
   try {
     return new Date(iso).toLocaleString("en-US", {
       year: "numeric",
@@ -86,8 +100,7 @@ function formatDate(iso) {
   }
 }
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({ label, count, colorClass, icon }) {
+function StatCard({ label, count, colorClass, icon }: { label: string; count: number; colorClass: string; icon: React.ReactNode }) {
   return (
     <div
       className={`flex flex-col items-center justify-center gap-1.5 p-4 rounded-2xl border ${colorClass} text-center flex-1 min-w-0`}
@@ -101,14 +114,13 @@ function StatCard({ label, count, colorClass, icon }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ReportDetailPage() {
   const params = useParams();
-  const reportId = params?.id;
-  const { user, token, loading: authLoading } = useAuth();
+  const reportId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const { user, token, loading: authLoading } = useAuth() as { user: any; token: string | null; loading: boolean };
   const router = useRouter();
 
-  const [report, setReport] = useState(null);
+  const [report, setReport] = useState<ReportDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showUnmatched, setShowUnmatched] = useState(false);
@@ -121,18 +133,17 @@ export default function ReportDetailPage() {
     }
     if (user && token && reportId) {
       getReport(reportId, token)
-        .then((data) => setReport(data))
-        .catch((err) => setError(err.message || "Failed to load report."))
+        .then((data: ReportDetail) => setReport(data))
+        .catch((err: Error) => setError(err.message || "Failed to load report."))
         .finally(() => setLoading(false));
     }
   }, [authLoading, user, token, reportId, router]);
 
-  // Stat counts — derived from real results array
   const statCounts = useMemo(() => {
     if (!report?.results) return { Critical: 0, Borderline: 0, Normal: 0 };
     return report.results.reduce(
       (acc, r) => {
-        const s = r.status;
+        const s = r.status as "Critical" | "Borderline" | "Normal";
         if (s in acc) acc[s]++;
         return acc;
       },
@@ -140,7 +151,6 @@ export default function ReportDetailPage() {
     );
   }, [report]);
 
-  // ── Loading / error states ─────────────────────────────────────────────────
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] flex flex-col transition-colors duration-200">
@@ -188,12 +198,11 @@ export default function ReportDetailPage() {
     );
   }
 
-  if (!report) return null;
+  if (!report || !reportId) return null;
 
   const isUnreadable = report.overall_status === "Unreadable";
   const overallCfg = getOverallConfig(report.overall_status);
 
-  // File preview — derive type from file_url extension
   const fileExt = report.file_url?.split(".").pop()?.toLowerCase();
   const isPdf = fileExt === "pdf";
   const filePreviewUrl = report.file_url
@@ -204,7 +213,6 @@ export default function ReportDetailPage() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] flex flex-col transition-colors duration-200">
       <Navbar />
 
-      {/* ── Top nav strip ─────────────────────────────────────────────────── */}
       <div className="border-b border-[var(--border)] bg-[var(--surface)] px-6 py-3 flex items-center justify-between gap-4">
         <Link
           href="/reports"
@@ -215,7 +223,6 @@ export default function ReportDetailPage() {
         </Link>
 
         <div className="flex items-center gap-2">
-          {/* Overall status badge */}
           <span
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-semibold ${overallCfg.badge}`}
           >
@@ -233,9 +240,7 @@ export default function ReportDetailPage() {
         </Link>
       </div>
 
-      {/* ── Split-view body ───────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
-        {/* ─── LEFT PANEL: File Preview (40%) ─────────────────────────────── */}
         <div
           className={`
             lg:w-[42%] shrink-0 border-b lg:border-b-0 lg:border-r border-[var(--border)]
@@ -244,7 +249,6 @@ export default function ReportDetailPage() {
             transition-all duration-300
           `}
         >
-          {/* Preview panel header (collapsible on mobile) */}
           <div className="flex items-center justify-between px-4 py-3 bg-[var(--surface)] border-b border-[var(--border)] shrink-0">
             <div className="flex items-center gap-2 text-xs font-semibold text-[var(--ink-muted)]">
               <FileText className="w-3.5 h-3.5" />
@@ -275,7 +279,6 @@ export default function ReportDetailPage() {
             </div>
           </div>
 
-          {/* Preview content */}
           {!previewCollapsed && (
             <div className="flex-1 overflow-hidden relative">
               {filePreviewUrl ? (
@@ -308,12 +311,8 @@ export default function ReportDetailPage() {
           )}
         </div>
 
-        {/* ─── RIGHT PANEL: Summary results ───────────────────────────────── */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-
-            {/* Header row */}
             <div>
               <h1 className="font-display text-xl font-semibold text-[var(--ink)] leading-snug">
                 Lab Report Analysis
@@ -324,7 +323,6 @@ export default function ReportDetailPage() {
               </p>
             </div>
 
-            {/* Unreadable state */}
             {isUnreadable ? (
               <div className="p-8 rounded-3xl bg-[var(--surface)] border border-[var(--border)] text-center space-y-4">
                 <FileQuestion className="w-10 h-10 text-[var(--warn)] mx-auto" />
@@ -348,14 +346,12 @@ export default function ReportDetailPage() {
               </div>
             ) : (
               <>
-                {/* Overall status description */}
                 <div
                   className={`px-4 py-3 rounded-2xl border text-xs leading-relaxed ${overallCfg.badge}`}
                 >
                   {overallCfg.desc}
                 </div>
 
-                {/* ── THREE STAT CARDS ──────────────────────────────────── */}
                 <div className="flex gap-3">
                   <StatCard
                     label="Critical"
@@ -377,7 +373,6 @@ export default function ReportDetailPage() {
                   />
                 </div>
 
-                {/* ── RESULTS TABLE ─────────────────────────────────────── */}
                 <div className="rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--surface)]">
                   <div className="px-5 py-3 border-b border-[var(--border)] bg-[var(--surface-muted)]">
                     <h2 className="text-xs font-semibold text-[var(--ink-muted)] uppercase tracking-wider font-mono">
@@ -438,7 +433,6 @@ export default function ReportDetailPage() {
                   </div>
                 </div>
 
-                {/* ── UNMATCHED LINES (collapsed) ────────────────────────── */}
                 {report.unmatched_lines && report.unmatched_lines.length > 0 && (
                   <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
                     <button
@@ -469,7 +463,6 @@ export default function ReportDetailPage() {
             )}
           </div>
 
-          {/* ── Sticky bottom CTA ───────────────────────────────────────── */}
           <div className="shrink-0 px-6 py-4 border-t border-[var(--border)] bg-[var(--surface)] flex items-center justify-between gap-3">
             <Link
               href="/reports"

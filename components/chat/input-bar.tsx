@@ -133,7 +133,7 @@ export function InputBar({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2.5 rounded-full text-[var(--ink-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-muted)] transition-colors"
+            className="p-2.5 rounded-full text-[var(--ink-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-muted)] active:scale-95 transition-all focus-ring"
             title="Attach lab report or prescription (PDF, Image)"
             aria-label="Attach file"
           >
@@ -155,10 +155,11 @@ export function InputBar({
             type="button"
             onClick={toggleLocalMic}
             onDoubleClick={onOpenVoiceMode}
-            className={`p-2.5 rounded-full transition-all ${isListeningLocal
+            className={`p-2.5 rounded-full active:scale-95 transition-all focus-ring ${
+              isListeningLocal
                 ? "bg-red-500 text-white animate-pulse"
                 : "text-[var(--ink-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-muted)]"
-              }`}
+            }`}
             title="Click to dictate, Double-click for Fullscreen Voice Mode"
             aria-label="Voice input"
           >
@@ -169,10 +170,11 @@ export function InputBar({
           <button
             type="submit"
             disabled={(!text.trim() && !attachedFile) || isLoading}
-            className={`p-2.5 rounded-full transition-all ${text.trim() || attachedFile
-                ? "bg-[var(--accent)] text-white hover:opacity-90 shadow-md scale-100"
+            className={`p-2.5 rounded-full transition-all focus-ring ${
+              text.trim() || attachedFile
+                ? "bg-[var(--accent)] text-white hover:opacity-90 active:scale-95 shadow-xs"
                 : "bg-[var(--surface-muted)] text-[var(--ink-muted)] cursor-not-allowed opacity-50"
-              }`}
+            }`}
             title="Send message"
             aria-label="Send message"
           >

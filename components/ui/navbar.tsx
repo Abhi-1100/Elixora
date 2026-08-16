@@ -38,7 +38,7 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md px-6 py-3.5 flex items-center justify-between transition-colors duration-200">
       {/* Brand */}
-      <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+      <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity focus-ring rounded-xl p-1">
         <BreathOrb size="sm" mode="idle" />
         <div className="flex items-center gap-2">
           <span className="font-semibold text-lg tracking-tight text-[var(--ink)]">
@@ -53,16 +53,16 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
       {/* Center Nav Links (optional) */}
       {showNavLinks && (
         <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-[var(--ink-muted)]">
-          <a href="#features" className="hover:text-[var(--accent)] transition-colors">
+          <a href="#features" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
             Features
           </a>
-          <a href="#how-it-works" className="hover:text-[var(--accent)] transition-colors">
+          <a href="#how-it-works" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
             How it Works
           </a>
-          <a href="#security" className="hover:text-[var(--accent)] transition-colors">
+          <a href="#security" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
             HIPAA Security
           </a>
-          <a href="#pricing" className="hover:text-[var(--accent)] transition-colors">
+          <a href="#pricing" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
             Pricing
           </a>
         </nav>
@@ -78,7 +78,7 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
             <button
               id="user-menu-btn"
               onClick={() => setDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-[var(--surface-muted)] transition-colors text-sm font-medium text-[var(--ink)] border border-[var(--border)]"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-[var(--surface-muted)] transition-colors text-sm font-medium text-[var(--ink)] border border-[var(--border)] focus-ring"
               aria-expanded={dropdownOpen}
               aria-haspopup="true"
             >
@@ -115,7 +115,7 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
                     <Link
                       href="/dashboard"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-[var(--ink)] hover:bg-[var(--surface-muted)] rounded-xl transition-colors"
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-[var(--ink)] hover:bg-[var(--surface-muted)] rounded-xl transition-colors focus-ring"
                     >
                       <LayoutDashboard className="w-4 h-4 text-[var(--accent)]" />
                       Dashboard
@@ -124,7 +124,7 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
                     <Link
                       href="/chat"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-[var(--ink)] hover:bg-[var(--surface-muted)] rounded-xl transition-colors"
+                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-[var(--ink)] hover:bg-[var(--surface-muted)] rounded-xl transition-colors focus-ring"
                     >
                       <MessageSquare className="w-4 h-4 text-[var(--accent)]" />
                       Launch Assistant
@@ -135,7 +135,7 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
                     <button
                       id="logout-btn"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/10 rounded-xl transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/10 rounded-xl transition-colors text-left focus-ring"
                     >
                       <LogOut className="w-4 h-4" />
                       Log out / Switch Account
@@ -151,14 +151,14 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
             <Link
               href="/login"
               id="nav-login-btn"
-              className="text-xs font-semibold px-3.5 py-2 rounded-xl text-[var(--ink)] hover:bg-[var(--surface-muted)] transition-colors border border-transparent hover:border-[var(--border)]"
+              className="text-xs font-semibold px-3.5 py-2 rounded-xl text-[var(--ink)] hover:bg-[var(--surface-muted)] transition-colors border border-transparent hover:border-[var(--border)] focus-ring"
             >
               Log in
             </Link>
             <Link
               href="/signup"
               id="nav-signup-btn"
-              className="text-xs font-semibold px-4 py-2 rounded-full bg-[var(--accent)] text-white hover:opacity-90 transition-all shadow-xs flex items-center gap-1.5"
+              className="text-xs font-semibold px-4 py-2 rounded-full bg-[var(--accent)] text-white hover:opacity-90 active:scale-[0.98] transition-all shadow-xs flex items-center gap-1.5 focus-ring"
             >
               <span>Sign up</span>
               <ArrowRight className="w-3.5 h-3.5" />

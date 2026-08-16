@@ -42,12 +42,13 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
         return (
           <div
             key={msg.id}
-            className={`flex items-start gap-3 text-xs sm:text-sm ${isUser ? "flex-row-reverse" : "flex-row"
-              }`}
+            className={`flex items-start gap-3.5 text-xs sm:text-sm animate-fade-in ${
+              isUser ? "flex-row-reverse" : "flex-row"
+            }`}
           >
             {/* Avatar */}
             {isUser ? (
-              <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--ink-muted)] shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[var(--surface-muted)] border border-[var(--border)] flex items-center justify-center text-[var(--ink-muted)] shrink-0 shadow-xs">
                 <User className="w-4 h-4" />
               </div>
             ) : (
@@ -64,8 +65,8 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
                   {msg.text}
                 </div>
               ) : (
-                <div className="group relative bg-[var(--surface)] p-4 rounded-2xl border border-[var(--border)] shadow-xs leading-relaxed text-[var(--ink)] space-y-2">
-                  <p className="whitespace-pre-line">{msg.text}</p>
+                <div className="group relative bg-[var(--surface)] p-4 sm:p-5 rounded-2xl border border-[var(--border)] shadow-xs leading-relaxed text-[var(--ink)] space-y-3">
+                  <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
 
                   {/* Render Specialized Cards if present */}
                   {msg.cardType === "medicine" && msg.cardData && (
@@ -94,7 +95,7 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
                   {msg.reportLink && (
                     <Link
                       href={msg.reportLink}
-                      className="inline-flex items-center gap-2 mt-1 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-md"
+                      className="inline-flex items-center gap-2 mt-1 px-4 py-2 rounded-xl bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-sm focus-ring"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       View full report
@@ -102,18 +103,18 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
                   )}
 
                   {/* Actions Footer */}
-                  <div className="flex items-center justify-between pt-2 border-t border-[var(--border)]/40 text-[11px] text-[var(--ink-muted)]">
+                  <div className="flex items-center justify-between pt-2.5 border-t border-[var(--border)]/60 text-[11px] text-[var(--ink-muted)]">
                     <span className="font-mono text-[10px]">{msg.timestamp}</span>
 
                     <button
                       onClick={() => handleCopy(msg.id, msg.text)}
-                      className="flex items-center gap-1 opacity-70 hover:opacity-100 hover:text-[var(--accent)] transition-opacity"
+                      className="flex items-center gap-1.5 opacity-70 hover:opacity-100 hover:text-[var(--accent)] transition-opacity focus-ring rounded-md px-1.5 py-0.5"
                       title="Copy response text"
                     >
                       {copiedId === msg.id ? (
                         <>
                           <Check className="w-3 h-3 text-emerald-600" />
-                          <span className="text-emerald-600">Copied</span>
+                          <span className="text-emerald-600 font-medium">Copied</span>
                         </>
                       ) : (
                         <>
@@ -130,13 +131,22 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
         );
       })}
 
-      {/* Generating Indicator */}
+      {/* Generating Skeleton Loader Indicator */}
       {isGenerating && (
-        <div className="flex items-center gap-3 text-xs text-[var(--ink-muted)]">
-          <BreathOrb size="sm" mode="thinking" />
-          <div className="flex items-center gap-1 font-medium animate-pulse">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
-            <span>Analyzing health records & phrasing response...</span>
+        <div className="flex items-start gap-3.5 text-xs text-[var(--ink-muted)] animate-fade-in">
+          <div className="shrink-0 mt-0.5">
+            <BreathOrb size="sm" mode="thinking" />
+          </div>
+          <div className="bg-[var(--surface)] p-4 sm:p-5 rounded-2xl border border-[var(--border)] shadow-xs w-full max-w-[75%] space-y-2.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-[var(--accent)]">
+              <Sparkles className="w-3.5 h-3.5 animate-spin" />
+              <span>Synthesizing clinical reference response...</span>
+            </div>
+            <div className="space-y-2 pt-1">
+              <div className="h-3.5 skeleton-shimmer rounded-md w-11/12" />
+              <div className="h-3.5 skeleton-shimmer rounded-md w-4/5" />
+              <div className="h-3.5 skeleton-shimmer rounded-md w-2/3" />
+            </div>
           </div>
         </div>
       )}

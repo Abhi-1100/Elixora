@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/lib/api";
@@ -17,12 +17,12 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (error) setError("");
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
@@ -114,9 +114,9 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="login-email"
-                className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
               >
-                Email
+                Email Address
               </label>
               <input
                 id="login-email"
@@ -126,7 +126,7 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all placeholder:text-[var(--ink-muted)]"
+                className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus-ring placeholder:text-[var(--ink-muted)]"
                 placeholder="you@example.com"
               />
             </div>
@@ -135,7 +135,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="login-password"
-                className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
               >
                 Password
               </label>
@@ -148,14 +148,14 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all placeholder:text-[var(--ink-muted)]"
+                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 pr-11 text-sm focus-ring placeholder:text-[var(--ink-muted)]"
                   placeholder="Your password"
                 />
                 <button
                   type="button"
                   id="toggle-password-login"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors p-1 focus-ring rounded-lg"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -172,7 +172,7 @@ export default function LoginPage() {
               id="login-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-[var(--accent)] text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md mt-1"
+              className="w-full bg-[var(--accent)] text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs mt-1 focus-ring"
             >
               {isSubmitting ? (
                 <>
@@ -190,7 +190,7 @@ export default function LoginPage() {
             <Link
               href="/signup"
               id="go-to-signup"
-              className="text-[var(--accent)] font-semibold hover:underline"
+              className="text-[var(--accent)] font-semibold hover:underline focus-ring rounded-md px-1"
             >
               Sign up
             </Link>

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Sidebar, Conversation } from "@/components/chat/sidebar";
 import { TopBar } from "@/components/chat/top-bar";
 import { EmptyState } from "@/components/chat/empty-state";
@@ -8,12 +9,22 @@ import { MessageThread, Message } from "@/components/chat/message-thread";
 import { InputBar } from "@/components/chat/input-bar";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { uploadReport, getReport } from "@/lib/api";
+import { Loader2 } from "lucide-react";
 
-// Initial Demo Conversations
+const NEW_CHAT_ID = "conv-new";
+
+const DEFAULT_NEW_CONVERSATION: Conversation = {
+  id: NEW_CHAT_ID,
+  title: "New Health Query",
+  date: "Just now",
+  category: "Today",
+};
+
+// Initial Demo Conversations (history)
 const INITIAL_CONVERSATIONS: Conversation[] = [
+  DEFAULT_NEW_CONVERSATION,
   {
     id: "conv-1",
     title: "Amoxicillin 500mg Guidance",
@@ -43,6 +54,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
 
 // Initial Messages mapping for demo conversations
 const MOCK_THREAD_DATA: Record<string, Message[]> = {
+  [NEW_CHAT_ID]: [],
   "conv-1": [
     {
       id: "m-1",
@@ -111,10 +123,11 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
   ],
 };
 
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
-  const [activeId, setActiveId] = useState<string>("conv-1");
+  const [activeId, setActiveId] = useState<string>(NEW_CHAT_ID);
   const [threadMap, setThreadMap] = useState<Record<string, Message[]>>(MOCK_THREAD_DATA);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
@@ -123,6 +136,7 @@ export default function ChatPage() {
 
   // Active Report state for side-by-side partition view
   const [activeReport, setActiveReport] = useState<ReportData | null>(null);
+  const [isReportExpanded, setIsReportExpanded] = useState(false);
 
   const { user, token, loading } = useAuth() as { user: any; token: string | null; loading: boolean };
 
@@ -137,6 +151,22 @@ export default function ChatPage() {
     }
   }, [user, loading, router]);
 
+  // Handle URL query parameters (e.g. mode=voice or report=ID)
+  useEffect(() => {
+    if (!searchParams) return;
+
+    if (searchParams.get("mode") === "voice") {
+      setIsVoiceOpen(true);
+    }
+
+    const reportId = searchParams.get("report");
+    if (reportId && token) {
+      getReport(reportId, token)
+        .then((rep) => setActiveReport(rep))
+        .catch((err) => console.error("Failed to load report for chat:", err));
+    }
+  }, [searchParams, token]);
+
   const activeConversation = conversations.find((c) => c.id === activeId);
   const activeMessages = threadMap[activeId] || [];
 
@@ -149,7 +179,7 @@ export default function ChatPage() {
       category: "Today",
     };
     setConversations([newConv, ...conversations]);
-    setThreadMap({ ...threadMap, [newId]: [] });
+    setThreadMap((prev) => ({ ...prev, [newId]: [] }));
     setActiveId(newId);
     setActiveReport(null);
   };
@@ -163,8 +193,8 @@ export default function ChatPage() {
   };
 
   const handleRenameConversation = (id: string, newTitle: string) => {
-    setConversations(
-      conversations.map((c) => (c.id === id ? { ...c, title: newTitle } : c))
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c))
     );
   };
 
@@ -181,12 +211,12 @@ export default function ChatPage() {
     const currentMsgs = threadMap[activeId] || [];
     const updatedMsgs = [...currentMsgs, userMsg];
 
-    if (activeConversation && activeConversation.title === "New Health Query") {
+    if (activeConversation && (activeConversation.title === "New Health Query" || activeId === NEW_CHAT_ID)) {
       const summaryTitle = text.slice(0, 28) + (text.length > 28 ? "..." : "");
       handleRenameConversation(activeId, summaryTitle || (attachment ? "Lab Report Analysis" : "Health Query"));
     }
 
-    setThreadMap({ ...threadMap, [activeId]: updatedMsgs });
+    setThreadMap((prev) => ({ ...prev, [activeId]: updatedMsgs }));
     setIsGenerating(true);
 
     // ── REAL REPORT ATTACHMENT PATH: Upload to backend & Open Side Panel in Chat ───────
@@ -196,6 +226,9 @@ export default function ChatPage() {
 
       try {
         const currentToken = tokenRef.current;
+        if (!currentToken) {
+          throw new Error("Authentication required. Please log in to upload and analyze lab reports.");
+        }
         const data = await uploadReport(formData, currentToken);
 
         // Set active report to display in partition side panel right inside chat!
@@ -272,7 +305,12 @@ export default function ChatPage() {
   };
 
   if (loading || !user) {
-    return <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center text-[var(--ink)]">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-center text-[var(--ink)] gap-3">
+        <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin" />
+        <p className="text-xs text-[var(--ink-muted)]">Loading AI Assistant...</p>
+      </div>
+    );
   }
 
   return (
@@ -336,9 +374,15 @@ export default function ChatPage() {
 
         {/* ── Report Analyzer Side Panel (Right Partition Screen) ─────────────── */}
         {activeReport && (
-          <div className="w-full md:w-[480px] lg:w-[520px] xl:w-[580px] h-full shrink-0 z-30">
+          <div className={`h-full shrink-0 z-30 transition-all duration-300 ${
+            isReportExpanded
+              ? "w-full md:w-[750px] lg:w-[840px] xl:w-[920px]"
+              : "w-full md:w-[480px] lg:w-[520px] xl:w-[580px]"
+          }`}>
             <ReportSidePanel
               report={activeReport}
+              isExpanded={isReportExpanded}
+              onToggleExpand={() => setIsReportExpanded((v) => !v)}
               onClose={() => setActiveReport(null)}
             />
           </div>
@@ -348,5 +392,17 @@ export default function ChatPage() {
       {/* Voice Overlay */}
       <VoiceModeModal isOpen={isVoiceOpen} onClose={() => setIsVoiceOpen(false)} />
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin" />
+      </div>
+    }>
+      <ChatPageContent />
+    </Suspense>
   );
 }

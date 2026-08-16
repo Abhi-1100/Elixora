@@ -67,10 +67,14 @@ def create_app():
     app = Flask(__name__)
 
     # --- Config ---
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        db_path = os.path.join(os.path.dirname(__file__), "..", "elixora.db")
+        db_url = f"sqlite:///{os.path.abspath(db_path)}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "elixora-jwt-secret-key-2026")
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "elixora-secret-key-2026")
 
     # Upload folder config
     app.config["UPLOAD_FOLDER"] = os.path.join(

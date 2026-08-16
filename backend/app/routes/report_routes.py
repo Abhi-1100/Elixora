@@ -419,7 +419,7 @@ def upload_report():
     except Exception as e:
         db.session.rollback()
         print(f"[REPORT UPLOAD ERROR] {e}")
-        return jsonify({"error": "An error occurred while processing the report. Please try again."}), 500
+        return jsonify({"error": f"An error occurred while processing the report: {str(e)}"}), 500
 
 
 @report_bp.route("/<report_id>", methods=["GET"])

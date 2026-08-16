@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signup } from "@/lib/api";
@@ -23,12 +23,12 @@ export default function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (error) setError("");
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
 
@@ -131,7 +131,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="signup-name"
-                className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
               >
                 Full Name
               </label>
@@ -143,7 +143,7 @@ export default function SignupPage() {
                 autoComplete="name"
                 value={form.name}
                 onChange={handleChange}
-                className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all placeholder:text-[var(--ink-muted)]"
+                className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus-ring placeholder:text-[var(--ink-muted)]"
                 placeholder="Jane Doe"
               />
             </div>
@@ -152,9 +152,9 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="signup-email"
-                className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
               >
-                Email
+                Email Address
               </label>
               <input
                 id="signup-email"
@@ -164,7 +164,7 @@ export default function SignupPage() {
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all placeholder:text-[var(--ink-muted)]"
+                className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus-ring placeholder:text-[var(--ink-muted)]"
                 placeholder="you@example.com"
               />
             </div>
@@ -173,7 +173,7 @@ export default function SignupPage() {
             <div>
               <label
                 htmlFor="signup-password"
-                className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
               >
                 Password
               </label>
@@ -186,14 +186,14 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   value={form.password}
                   onChange={handleChange}
-                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all placeholder:text-[var(--ink-muted)]"
+                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 pr-11 text-sm focus-ring placeholder:text-[var(--ink-muted)]"
                   placeholder="At least 6 characters"
                 />
                 <button
                   type="button"
                   id="toggle-password-signup"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors p-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors p-1 focus-ring rounded-lg"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
@@ -204,7 +204,7 @@ export default function SignupPage() {
                 </button>
               </div>
               {form.password.length > 0 && form.password.length < 6 && (
-                <p className="mt-1.5 text-xs text-[var(--warn)]">
+                <p className="mt-1.5 text-xs text-[var(--warn)] font-medium">
                   Password must be at least 6 characters ({form.password.length}/6)
                 </p>
               )}
@@ -215,10 +215,9 @@ export default function SignupPage() {
               <div>
                 <label
                   htmlFor="signup-age"
-                  className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                  className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
                 >
-                  Age{" "}
-                  <span className="text-[var(--ink-muted)] font-normal text-xs">(optional)</span>
+                  Age <span className="text-[var(--ink-muted)] font-normal text-[10px] lowercase">(optional)</span>
                 </label>
                 <input
                   id="signup-age"
@@ -228,14 +227,14 @@ export default function SignupPage() {
                   max={120}
                   value={form.age}
                   onChange={handleChange}
-                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all placeholder:text-[var(--ink-muted)]"
+                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus-ring placeholder:text-[var(--ink-muted)]"
                   placeholder="25"
                 />
               </div>
               <div>
                 <label
                   htmlFor="signup-gender"
-                  className="block text-sm font-medium text-[var(--ink)] mb-1.5"
+                  className="block text-xs font-semibold text-[var(--ink)] mb-1.5 font-mono uppercase tracking-wider"
                 >
                   Gender
                 </label>
@@ -244,7 +243,7 @@ export default function SignupPage() {
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30 focus:border-[var(--accent)] transition-all"
+                  className="w-full rounded-xl bg-[var(--surface-muted)] text-[var(--ink)] border border-[var(--border)] px-4 py-3 text-sm focus-ring"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -258,7 +257,7 @@ export default function SignupPage() {
               id="signup-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-[var(--accent)] text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md mt-1"
+              className="w-full bg-[var(--accent)] text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs mt-1 focus-ring"
             >
               {isSubmitting ? (
                 <>
@@ -276,7 +275,7 @@ export default function SignupPage() {
             <Link
               href="/login"
               id="go-to-login"
-              className="text-[var(--accent)] font-semibold hover:underline"
+              className="text-[var(--accent)] font-semibold hover:underline focus-ring rounded-md px-1"
             >
               Log in
             </Link>
