@@ -41,9 +41,9 @@ export function BreathOrb({
     >
       {/* Outer Ring 3 */}
       <motion.div
-        className="absolute inset-0 rounded-full mix-blend-multiply dark:mix-blend-screen opacity-30 blur-md"
+        className="absolute inset-0 rounded-full border border-[var(--accent)] opacity-30"
         style={{
-          background: "linear-gradient(135deg, var(--glow-a), var(--glow-b))",
+          background: "var(--accent-soft)",
         }}
         animate={{
           scale: isFast ? [1, 1.25, 1] : [1, 1.15, 1],
@@ -58,7 +58,7 @@ export function BreathOrb({
 
       {/* Middle Ring 2 */}
       <motion.div
-        className="absolute inset-1.5 rounded-full mix-blend-normal opacity-50 blur-sm"
+        className="absolute inset-1.5 rounded-full border border-[var(--accent)] opacity-50"
         style={{
           background: "linear-gradient(135deg, var(--glow-a), var(--glow-b))",
         }}
@@ -76,7 +76,7 @@ export function BreathOrb({
 
       {/* Inner Ring 1 */}
       <motion.div
-        className="absolute inset-3 rounded-full opacity-70 blur-[2px]"
+        className="absolute inset-3 rounded-full opacity-70"
         style={{
           background: "linear-gradient(135deg, var(--accent-soft), var(--glow-b))",
         }}
@@ -94,10 +94,10 @@ export function BreathOrb({
 
       {/* Core Glowing Center */}
       <motion.div
-        className={`relative rounded-full shadow-sm flex items-center justify-center ${coreSizes[size]}`}
+        className={`relative rounded-full flex items-center justify-center ${coreSizes[size]}`}
         style={{
           background: "linear-gradient(135deg, var(--glow-a), var(--glow-b))",
-          boxShadow: "0 0 15px rgba(201, 184, 240, 0.4)",
+          boxShadow: "none",
         }}
         animate={{
           scale: isFast ? [0.95, 1.08, 0.95] : [0.98, 1.03, 0.98],

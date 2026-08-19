@@ -3,18 +3,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BreathOrb } from "@/components/ui/breath-orb";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { useAuth } from "@/context/AuthContext";
-import { ArrowRight, LogOut, ChevronDown, LayoutDashboard, MessageSquare } from "lucide-react";
+import { useAuth, type User } from "@/context/AuthContext";
+import { LogOut, ChevronDown, LayoutDashboard, MessageSquare } from "lucide-react";
 
 interface NavbarProps {
-  /** Show the centered nav links (Features, How it Works, etc.) */
   showNavLinks?: boolean;
 }
 
-export function Navbar({ showNavLinks = false }: NavbarProps) {
-  const { user, logout } = useAuth() as { user: any; logout: () => void };
+export function Navbar({ showNavLinks = true }: NavbarProps) {
+  const { user, logout } = useAuth() as { user: User | null; logout: () => void };
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -24,7 +21,6 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
     router.push("/login");
   }
 
-  // Derive initials from name (up to 2 chars)
   const initials = user?.name
     ? user.name
         .trim()
@@ -36,136 +32,95 @@ export function Navbar({ showNavLinks = false }: NavbarProps) {
     : "?";
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-md px-6 py-3.5 flex items-center justify-between transition-colors duration-200">
-      {/* Brand */}
-      <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity focus-ring rounded-xl p-1">
-        <BreathOrb size="sm" mode="idle" />
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-lg tracking-tight text-[var(--ink)]">
-            Elixora
+    <header className="sticky top-0 z-50 w-full bg-[#050507]/90 backdrop-blur-md transition-colors duration-200 border-b border-white/[0.04]">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        {/* Brand logo left matching screenshot: /Elixora. */}
+        <Link href="/" className="flex items-center gap-1.5 group select-none">
+          <span className="text-xl font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors">
+            /Elixora.
           </span>
-          <span className="hidden sm:inline text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-[var(--accent-soft)] text-[var(--accent)] font-semibold">
-            AI Healthcare Assistant
-          </span>
-        </div>
-      </Link>
+        </Link>
 
-      {/* Center Nav Links (optional) */}
-      {showNavLinks && (
-        <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-[var(--ink-muted)]">
-          <a href="#features" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
-            Features
-          </a>
-          <a href="#how-it-works" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
-            How it Works
-          </a>
-          <a href="#security" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
-            HIPAA Security
-          </a>
-          <a href="#pricing" className="hover:text-[var(--accent)] transition-colors focus-ring rounded-lg px-2 py-1">
-            Pricing
-          </a>
-        </nav>
-      )}
+        {/* Center Nav Links matching screenshot: Product, Services, About us, Research */}
+        {showNavLinks && (
+          <nav className="hidden md:flex items-center gap-10 text-xs sm:text-sm font-normal text-zinc-400">
+            <a href="#features" className="hover:text-white transition-colors">
+              Product
+            </a>
+            <a href="#services" className="hover:text-white transition-colors">
+              Services
+            </a>
+            <a href="#about" className="hover:text-white transition-colors">
+              About us
+            </a>
+            <a href="#research" className="hover:text-white transition-colors">
+              Research
+            </a>
+          </nav>
+        )}
 
-      {/* Right-side Actions */}
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
+        {/* Right Action: White Pill CTA 'Get started' matching screenshot */}
+        <div className="flex items-center gap-4">
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="btn-pill-secondary py-2 px-4 text-xs flex items-center gap-2"
+              >
+                <span className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
+                  {initials}
+                </span>
+                <span className="hidden sm:inline text-white font-medium">{user.name}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
+              </button>
 
-        {user ? (
-          /* ── Logged-in state ── */
-          <div className="relative">
-            <button
-              id="user-menu-btn"
-              onClick={() => setDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-[var(--surface-muted)] transition-colors text-sm font-medium text-[var(--ink)] border border-[var(--border)] focus-ring"
-              aria-expanded={dropdownOpen}
-              aria-haspopup="true"
-            >
-              {/* Avatar circle with initials */}
-              <span className="w-7 h-7 rounded-full bg-[var(--accent)] text-white text-[11px] font-bold flex items-center justify-center shrink-0 shadow-sm">
-                {initials}
-              </span>
-              <span className="hidden sm:inline max-w-[120px] truncate">{user.name}</span>
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-[var(--ink-muted)] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {/* Dropdown */}
-            {dropdownOpen && (
-              <>
-                {/* Backdrop */}
-                <div
-                  className="fixed inset-0 z-40"
-                  onClick={() => setDropdownOpen(false)}
-                  aria-hidden="true"
-                />
-                <div
-                  id="user-dropdown"
-                  className="absolute right-0 top-full mt-2 w-56 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in"
-                >
-                  {/* User info row */}
-                  <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--surface-muted)]/50">
-                    <p className="text-sm font-semibold text-[var(--ink)] truncate">{user.name}</p>
-                    <p className="text-xs text-[var(--ink-muted)] truncate">{user.email}</p>
-                  </div>
-
-                  <div className="p-1 space-y-0.5">
+              {dropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setDropdownOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-56 glass-panel p-2 shadow-2xl z-50 space-y-1 bg-[#0A0E1A] border border-white/10">
+                    <div className="px-3 py-2 border-b border-white/10">
+                      <p className="text-xs font-semibold text-white truncate">{user.name}</p>
+                      <p className="text-[11px] text-zinc-400 truncate">{user.email}</p>
+                    </div>
                     <Link
                       href="/dashboard"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-[var(--ink)] hover:bg-[var(--surface-muted)] rounded-xl transition-colors focus-ring"
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/5 rounded-xl"
                     >
-                      <LayoutDashboard className="w-4 h-4 text-[var(--accent)]" />
+                      <LayoutDashboard className="w-4 h-4 text-blue-400" />
                       Dashboard
                     </Link>
-
                     <Link
                       href="/chat"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-[var(--ink)] hover:bg-[var(--surface-muted)] rounded-xl transition-colors focus-ring"
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/5 rounded-xl"
                     >
-                      <MessageSquare className="w-4 h-4 text-[var(--accent)]" />
+                      <MessageSquare className="w-4 h-4 text-blue-400" />
                       Launch Assistant
                     </Link>
-                  </div>
-
-                  <div className="border-t border-[var(--border)] p-1">
                     <button
-                      id="logout-btn"
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/10 rounded-xl transition-colors text-left focus-ring"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 rounded-xl text-left"
                     >
                       <LogOut className="w-4 h-4" />
-                      Log out / Switch Account
+                      Log out
                     </button>
                   </div>
-                </div>
-              </>
-            )}
-          </div>
-        ) : (
-          /* ── Logged-out state ── */
-          <div className="flex items-center gap-2">
+                </>
+              )}
+            </div>
+          ) : (
             <Link
-              href="/login"
-              id="nav-login-btn"
-              className="text-xs font-semibold px-3.5 py-2 rounded-xl text-[var(--ink)] hover:bg-[var(--surface-muted)] transition-colors border border-transparent hover:border-[var(--border)] focus-ring"
+              href="/chat"
+              className="rounded-full bg-white text-black text-xs sm:text-sm font-medium px-5 py-2 hover:bg-zinc-200 transition-all shadow-sm"
             >
-              Log in
+              Get started
             </Link>
-            <Link
-              href="/signup"
-              id="nav-signup-btn"
-              className="text-xs font-semibold px-4 py-2 rounded-full bg-[var(--accent)] text-white hover:opacity-90 active:scale-[0.98] transition-all shadow-xs flex items-center gap-1.5 focus-ring"
-            >
-              <span>Sign up</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );
 }
+
+

@@ -84,11 +84,11 @@ export function Sidebar({
   return (
     <aside
       className={`h-screen bg-[var(--surface)] border-r border-[var(--border)] transition-all duration-300 flex flex-col z-30 select-none ${
-        isCollapsed ? "w-16" : "w-64"
+        isCollapsed ? "w-16" : "w-72"
       }`}
     >
       {/* Top Header & New Chat Button */}
-      <div className="p-3 border-b border-[var(--border)] flex flex-col gap-3">
+      <div className="p-3 border-b border-[var(--border)] flex flex-col gap-3 bg-[var(--surface)]">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center gap-2 px-1">
@@ -121,7 +121,7 @@ export function Sidebar({
         {/* New Conversation Button */}
         <button
           onClick={onNewConversation}
-          className={`flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] text-white hover:opacity-90 active:scale-[0.98] transition-all py-2.5 px-3 font-medium text-xs shadow-sm ${
+          className={`flex items-center justify-center gap-2 clinical-button active:scale-[0.98] py-2.5 px-3 text-xs ${
             isCollapsed ? "w-10 h-10 p-0 mx-auto" : "w-full"
           }`}
           title="New Health Query"
@@ -160,7 +160,7 @@ export function Sidebar({
       )}
 
       {/* Conversation List */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 space-y-4 bg-[var(--surface-muted)]/35">
         {isCollapsed ? (
           /* Collapsed Icon Rail View */
           <div className="flex flex-col gap-1.5 items-center">
@@ -207,7 +207,7 @@ export function Sidebar({
                       onClick={() => onSelectConversation(c.id)}
                       className={`group relative flex items-center justify-between px-2.5 py-2 rounded-xl text-xs cursor-pointer transition-all ${
                         isActive
-                          ? "bg-[var(--accent-soft)] text-[var(--accent)] font-medium"
+                          ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold shadow-sm"
                           : "text-[var(--ink)] hover:bg-[var(--surface-muted)]"
                       }`}
                     >

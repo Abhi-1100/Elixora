@@ -129,8 +129,7 @@ function ChatPageContent() {
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [activeId, setActiveId] = useState<string>(NEW_CHAT_ID);
   const [threadMap, setThreadMap] = useState<Record<string, Message[]>>(MOCK_THREAD_DATA);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -316,13 +315,9 @@ function ChatPageContent() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
       {/* Icon-Rail & Collapsible Sidebar */}
-      <div 
-        onMouseEnter={() => setIsSidebarHovered(true)}
-        onMouseLeave={() => setIsSidebarHovered(false)}
-        className="z-50 h-screen shrink-0"
-      >
+      <div className="z-50 h-screen shrink-0">
         <Sidebar
-          isCollapsed={isSidebarCollapsed && !isSidebarHovered}
+          isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           conversations={conversations}
           activeConversationId={activeId}

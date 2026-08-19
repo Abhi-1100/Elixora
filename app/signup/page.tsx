@@ -73,8 +73,9 @@ export default function SignupPage() {
         {/* Top accent strip */}
         <div className="absolute -top-px left-8 right-8 h-0.5 rounded-full bg-gradient-to-r from-[var(--glow-a)] via-[var(--accent)] to-[var(--glow-b)]" />
 
-        <div className="w-full bg-[var(--surface)] rounded-3xl border border-[var(--border)] shadow-2xl p-8 transition-colors duration-200">
+        <div className="w-full clinical-card rounded-2xl shadow-xl p-7 sm:p-8 transition-colors duration-200">
           <div className="mb-7">
+            <p className="clinical-eyebrow mb-2">Create your secure workspace</p>
             <h1 className="text-2xl font-display font-semibold text-[var(--ink)] mb-1.5">
               Create an account
             </h1>
@@ -257,7 +258,7 @@ export default function SignupPage() {
               id="signup-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-[var(--accent)] text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xs mt-1 focus-ring"
+              className="w-full clinical-button py-3 text-sm disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-1 focus-ring"
             >
               {isSubmitting ? (
                 <>

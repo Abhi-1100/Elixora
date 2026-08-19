@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Claude Design — explore an idea before it becomes a deadline." />
+    <title>Claude Design</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Claude home"><span class="sun" aria-hidden="true"></span><span>Claude</span></a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <button class="nav-trigger" data-menu="Meet Claude">Meet Claude <i></i></button>
+        <button class="nav-trigger" data-menu="Platform">Platform <i></i></button>
+        <button class="nav-trigger" data-menu="Solutions">Solutions <i></i></button>
+        <a href="#design">Pricing</a>
+        <button class="nav-trigger" data-menu="Resources">Resources <i></i></button>
+      </nav>
+      <div class="nav-actions">
+        <a class="login" href="#design">Login</a>
+        <a class="button button-outline" href="#contact">Contact sales</a>
+        <button class="button button-dark" id="tryButton">Try Claude</button>
+      </div>
+      <button class="mobile-menu" aria-label="Open menu" aria-expanded="false"><span></span><span></span></button>
+      <div class="menu-popover" id="popover" hidden><p>Explore</p><a href="#design">Product overview</a><a href="#design">How it works</a><a href="#design">Customer stories</a></div>
+    </header>
+
+    <div class="subnav">
+      <div class="subnav-inner"><p>Product <span>/</span> Claude Design</p><button id="exploreButton">Explore here <i></i></button></div>
+    </div>
+
+    <main id="top">
+      <section class="hero" id="design">
+        <p class="eyebrow">Claude Design</p>
+        <h1>Your idea, designed with Claude</h1>
+        <p class="intro">Explore more directions than a deadline allows. Describe a prototype, deck, or one-pager, and Claude builds a draft. Refine it yourself, or hand it off to your tools or Claude Code. You’re the designer, from start to finish.</p>
+        <button class="button button-dark hero-button" id="startButton">Start designing <span aria-hidden="true">↗</span></button>
+      </section>
+
+      <section class="globe-section" aria-label="A connected world of design">
+        <div class="globe-card">
+          <div class="grid-lines"></div>
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div>
+          <div class="world world-one"></div><div class="world world-two"></div><div class="world world-three"></div>
+          <span class="place place-one">Seattle</span><span class="place place-two">San Francisco</span><span class="place place-three">Delhi</span><span class="place place-four">Mumbai</span>
+          <div class="globe-copy"><p>Design in motion</p><strong>Make the first draft feel like a beginning.</strong></div>
+          <button class="play" id="playButton" aria-label="Play design story"><span></span></button>
+        </div>
+      </section>
+
+      <section class="feature-grid">
+        <p class="eyebrow">A new creative surface</p>
+        <h2>Start with a thought.<br />Keep what surprises you.</h2>
+        <p>Turn early instincts into expressive work without losing your point of view. Claude gives you room to explore, revise, and make the next move yours.</p>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="modal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="close" id="closeModal" aria-label="Close">×</button>
+        <p class="eyebrow">Claude Design</p><h2 id="modal-title">What are you making?</h2>
+        <p>Describe a starting point and begin a new creative direction.</p>
+        <label for="idea">Your idea</label><textarea id="idea" placeholder="A one-page site for a quiet, thoughtful brand..." rows="3"></textarea>
+        <button class="button button-dark" id="createButton">Create a draft <span aria-hidden="true">↗</span></button>
+      </section>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite">Your canvas is ready.</div>
+    <script src="script.js"></script>
+  </body>
+</html>

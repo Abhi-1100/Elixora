@@ -96,7 +96,7 @@ export default function ReportUploadPage() {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] flex flex-col transition-colors duration-200">
       <Navbar />
 
-      <main className="flex-1 max-w-2xl mx-auto w-full px-6 py-10 animate-fade-in">
+      <main className="page-container flex-1 max-w-2xl py-8 sm:py-10 animate-fade-in">
         <Link
           href="/reports"
           className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--ink-muted)] hover:text-[var(--accent)] mb-6 transition-colors focus-ring rounded-lg p-1"
@@ -105,11 +105,10 @@ export default function ReportUploadPage() {
           Back to Reports History
         </Link>
 
-        <div className="bg-[var(--surface)] rounded-3xl border border-[var(--border)] shadow-xl p-8 sm:p-10 transition-colors duration-200">
+        <div className="clinical-card rounded-2xl p-6 sm:p-8 transition-colors duration-200">
           <div className="mb-6 space-y-1.5">
-            <h1 className="text-2xl font-display font-semibold text-[var(--ink)]">
-              Upload Lab Report
-            </h1>
+            <p className="clinical-eyebrow">Secure document analysis</p>
+            <h1 className="text-2xl sm:text-3xl font-display font-semibold text-[var(--ink)]">Upload a lab report</h1>
             <p className="text-sm text-[var(--ink-muted)] leading-relaxed">
               Upload your blood test or clinical report (PDF, JPG, or PNG) for instant AI extraction and reference analysis.
             </p>
@@ -215,7 +214,7 @@ export default function ReportUploadPage() {
               <button
                 type="submit"
                 disabled={!file}
-                className="w-full bg-[var(--accent)] text-white rounded-xl py-3 text-sm font-semibold hover:opacity-90 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xs focus-ring"
+                className="w-full clinical-button py-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed focus-ring"
               >
                 Submit for Analysis
               </button>

@@ -2,162 +2,148 @@
 
 @layer base {
   :root {
-    --bg: #F7F8F6;
-    --surface: #FFFFFF;
-    --surface-muted: #EEF2EF;
-    --ink: #16211D;
-    --ink-muted: #5B6B64;
-    --accent: #2F6F62;
-    --accent-soft: #DCEAE4;
-    --warn: #B65C39;
-    --warn-soft: #F6E9E3;
-    --glow-a: #C9B8F0;
-    --glow-b: #FFD8B8;
-    --border: #DFE6E1;
+    --bg-primary: #050507;
+    --bg-secondary: #0A0E1A;
+    --accent-blue: #3B82F6;
+    --accent-blue-glow: #5B9CFF;
+    --text-primary: #F5F5F7;
+    --text-secondary: #9CA3AF;
+    --border-subtle: rgba(255, 255, 255, 0.08);
 
-    --font-serif: var(--font-fraunces), Georgia, serif;
-    --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-    --font-mono: var(--font-ibm-plex-mono), monospace;
-  }
-
-  .dark {
-    --bg: #101713;
-    --surface: #17221D;
-    --surface-muted: #1F2E27;
-    --ink: #EAF2ED;
-    --ink-muted: #8AA096;
-    --accent: #3F8C7C;
-    --accent-soft: #1B362F;
-    --warn: #D9754E;
-    --warn-soft: #382117;
-    --glow-a: #A08ED1;
-    --glow-b: #E5B493;
-    --border: #25382F;
+    /* Legacy mapping fallback */
+    --bg: var(--bg-primary);
+    --surface: var(--bg-secondary);
+    --surface-muted: rgba(255, 255, 255, 0.03);
+    --ink: var(--text-primary);
+    --ink-muted: var(--text-secondary);
+    --accent: var(--accent-blue);
+    --accent-dark: #2563EB;
+    --accent-soft: rgba(59, 130, 246, 0.15);
+    --border: var(--border-subtle);
+    --glow-a: rgba(91, 156, 255, 0.4);
+    --glow-b: rgba(59, 130, 246, 0.1);
   }
 }
 
+@font-face { font-family: "Geist Sans"; src: url("https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGkyMCo.woff2") format("woff2"); font-weight: 400 600; font-style: normal; font-display: swap; }
+
 body {
-  background-color: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
-  line-height: 1.6;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "Geist Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
   overflow-x: hidden;
+  letter-spacing: -0.015em;
   transition: background-color 0.25s ease, color 0.2s ease;
 }
 
-.font-display {
-  font-family: var(--font-serif);
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
 }
 
-.font-data {
-  font-family: var(--font-mono);
+/* Background noise texture layer */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
-/* Accessible focus ring style */
-.focus-ring {
-  outline: none;
-  transition: box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+/* Glassmorphism panel card */
+.glass-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.glass-panel:hover {
+  border-color: rgba(91, 156, 255, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.15);
+}
+
+/* Shared Pill Button Styles */
+.btn-pill-primary {
+  border-radius: 9999px;
+  background-color: var(--accent-blue);
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.875rem;
+  display: inline-flex;
+  items-center: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 0px rgba(59, 130, 246, 0);
+  cursor: pointer;
+  border: none;
+}
+
+.btn-pill-primary:hover {
+  background-color: var(--accent-blue-glow);
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-pill-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-pill-secondary {
+  border-radius: 9999px;
+  background-color: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.875rem;
+  display: inline-flex;
+  items-center: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.btn-pill-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-pill-secondary:active {
+  transform: translateY(1px);
+}
+
+.font-headline {
+  font-family: "Geist Sans", Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+/* Focus ring accessibility */
 .focus-ring:focus-visible {
-  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  outline: 2px solid var(--accent-blue-glow);
+  outline-offset: 2px;
 }
 
-/* Animations & Micro-interactions */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--surface-muted) 25%,
-    var(--border) 50%,
-    var(--surface-muted) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.8s infinite ease-in-out;
-}
-
-/* Custom subtle scrollbar */
+/* Custom subtle dark scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #050507;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-muted);
+  background: var(--accent-blue);
 }
 
-/* Breath Orb keyframe animation for fallback / reduced motion */
-@keyframes orb-pulse-slow {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-
-  50% {
-    transform: scale(1.18);
-    opacity: 1;
-  }
-}
-
-@keyframes orb-pulse-fast {
-  0%,
-  100% {
-    transform: scale(0.95);
-    opacity: 0.8;
-  }
-
-  50% {
-    transform: scale(1.25);
-    opacity: 1;
-  }
-}
-
-.animate-orb-slow {
-  animation: orb-pulse-slow 4s ease-in-out infinite;
-}
-
-.animate-orb-fast {
-  animation: orb-pulse-fast 1.5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-orb-slow,
-  .animate-orb-fast,
-  .animate-fade-in,
-  .skeleton-shimmer {
-    animation: none !important;
-    transform: none !important;
-  }
-}

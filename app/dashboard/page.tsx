@@ -91,12 +91,12 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] flex flex-col transition-colors duration-200">
+    <div className="page-shell flex flex-col transition-colors duration-200">
       <Navbar />
 
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-10 space-y-8 animate-fade-in">
+      <main className="page-container flex-1 py-8 sm:py-10 space-y-7 animate-fade-in">
         {/* Welcome header */}
-        <div className="relative p-7 sm:p-8 rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-sm overflow-hidden">
+        <div className="relative p-6 sm:p-8 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-sm overflow-hidden">
           {/* Subtle background glow */}
           <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-gradient-to-bl from-[var(--glow-a)] to-[var(--glow-b)] opacity-15 blur-3xl pointer-events-none" />
 
@@ -108,7 +108,8 @@ export default function DashboardPage() {
               </div>
 
               <div className="min-w-0">
-                <h1 className="font-display text-2xl font-semibold text-[var(--ink)] truncate">
+                <p className="clinical-eyebrow mb-1">Your health overview</p>
+                <h1 className="font-display text-2xl sm:text-3xl font-semibold text-[var(--ink)] truncate">
                   Welcome back, {user.name ? user.name.split(" ")[0] : "User"}
                 </h1>
                 <p className="text-xs sm:text-sm text-[var(--ink-muted)] mt-0.5">
@@ -120,7 +121,7 @@ export default function DashboardPage() {
             <Link
               href="/chat"
               id="launch-assistant-btn"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent)] text-white text-xs sm:text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-xs shrink-0 focus-ring"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 clinical-button text-xs sm:text-sm shrink-0 focus-ring"
             >
               Launch Assistant
               <ArrowRight className="w-4 h-4" />
@@ -130,7 +131,7 @@ export default function DashboardPage() {
 
         {/* Profile summary cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xs">
+          <div className="flex items-center gap-3.5 p-4 rounded-xl clinical-card">
             <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0">
               <Mail className="w-4 h-4" />
             </div>
@@ -141,7 +142,7 @@ export default function DashboardPage() {
           </div>
 
           {user.age && (
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xs">
+            <div className="flex items-center gap-3.5 p-4 rounded-xl clinical-card">
               <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0">
                 <Calendar className="w-4 h-4" />
               </div>
@@ -153,7 +154,7 @@ export default function DashboardPage() {
           )}
 
           {user.gender && (
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xs">
+            <div className="flex items-center gap-3.5 p-4 rounded-xl clinical-card">
               <div className="w-9 h-9 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0">
                 <User className="w-4 h-4" />
               </div>
@@ -167,15 +168,16 @@ export default function DashboardPage() {
 
         {/* Quick actions */}
         <div className="space-y-4">
-          <h2 className="text-xs font-semibold text-[var(--ink-muted)] uppercase tracking-wider font-mono px-0.5">
-            Quick Actions
-          </h2>
+          <div>
+            <p className="clinical-eyebrow">Care tools</p>
+            <h2 className="text-xl font-display font-semibold text-[var(--ink)] mt-1">What would you like to do?</h2>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {quickActions.map((action, i) => (
               <Link
                 key={i}
                 href={action.href}
-                className="group flex items-center gap-4 p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--accent)] transition-all shadow-xs hover:shadow-md focus-ring"
+                className="group flex items-center gap-4 p-5 rounded-xl clinical-card hover:border-[var(--accent)] transition-all focus-ring"
               >
                 <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   {action.icon}
@@ -191,7 +193,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Disclaimer */}
-        <div className="p-4.5 rounded-2xl bg-[var(--surface-muted)] border border-[var(--border)] text-xs text-[var(--ink-muted)] leading-relaxed">
+        <div className="p-4 rounded-xl bg-[var(--surface-muted)] border border-[var(--border)] text-xs text-[var(--ink-muted)] leading-relaxed">
           <strong className="text-[var(--ink)] font-semibold">Medical Disclaimer:</strong> Elixora
           is an AI healthcare guidance assistant for informational reference only. It does not provide formal medical diagnosis or prescription treatments.
         </div>
