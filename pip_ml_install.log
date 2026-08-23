@@ -1,0 +1,18 @@
+Requirement already satisfied: numpy in C:\Users\abhik\AppData\Roaming\Python\Python313\site-packages (2.5.2)
+Collecting scipy
+  Using cached scipy-1.18.1-cp313-cp313-win_amd64.whl.metadata (61 kB)
+Collecting scikit-learn
+  Using cached scikit_learn-1.9.0-cp313-cp313-win_amd64.whl.metadata (11 kB)
+Collecting pandas
+  Using cached pandas-3.0.5-cp313-cp313-win_amd64.whl.metadata (19 kB)
+Requirement already satisfied: joblib>=1.4.0 in C:\Users\abhik\AppData\Roaming\Python\Python313\site-packages (from scikit-learn) (1.5.3)
+Requirement already satisfied: narwhals>=2.0.1 in C:\Users\abhik\AppData\Roaming\Python\Python313\site-packages (from scikit-learn) (2.25.0)
+Requirement already satisfied: threadpoolctl>=3.5.0 in C:\Users\abhik\AppData\Roaming\Python\Python313\site-packages (from scikit-learn) (3.6.0)
+Requirement already satisfied: python-dateutil>=2.8.2 in C:\Program Files\PostgreSQL\18\pgAdmin 4\python\Lib\site-packages (from pandas) (2.9.0.post0)
+Requirement already satisfied: tzdata in C:\Program Files\PostgreSQL\18\pgAdmin 4\python\Lib\site-packages (from pandas) (2026.2)
+Requirement already satisfied: six>=1.5 in C:\Program Files\PostgreSQL\18\pgAdmin 4\python\Lib\site-packages (from python-dateutil>=2.8.2->pandas) (1.17.0)
+Downloading scipy-1.18.1-cp313-cp313-win_amd64.whl (36.6 MB)
+Using cached scikit_learn-1.9.0-cp313-cp313-win_amd64.whl (8.2 MB)
+Using cached pandas-3.0.5-cp313-cp313-win_amd64.whl (9.8 MB)
+Installing collected packages: scipy, scikit-learn, pandas
+Successfully installed pandas-3.0.5 scikit-learn-1.9.0 scipy-1.18.1

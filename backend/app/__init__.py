@@ -89,12 +89,19 @@ def create_app():
     # Allow requests from your Next.js frontend (update origin for production)
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
+    # Load the model artifacts once per Flask application instance.
+    from app.services.symptom_predictor import init_symptom_predictor
+    init_symptom_predictor(app)
+
     # --- Register blueprints (routes) ---
     from app.routes.auth_routes import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
     from app.routes.report_routes import report_bp
     app.register_blueprint(report_bp, url_prefix="/api/reports")
+
+    from app.routes.chat_routes import chat_bp
+    app.register_blueprint(chat_bp, url_prefix="/api/chat")
 
     # --- Serve uploaded report files for the frontend preview panel ---
     from flask import send_from_directory as _send

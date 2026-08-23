@@ -9,8 +9,9 @@ import { MessageThread, Message } from "@/components/chat/message-thread";
 import { InputBar } from "@/components/chat/input-bar";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
+import { Aurora } from "@/components/ui/aurora";
 import { useAuth } from "@/context/AuthContext";
-import { uploadReport, getReport } from "@/lib/api";
+import { uploadReport, getReport, sendSymptomMessage } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 
 const NEW_CHAT_ID = "conv-new";
@@ -262,6 +263,29 @@ function ChatPageContent() {
     }
 
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
+    try {
+      const data = await sendSymptomMessage(text, tokenRef.current);
+      const topPrediction = data.predictions?.[0];
+      const predictionContext = topPrediction
+        ? `\n\nPossible condition: ${topPrediction.disease} (${Math.round(topPrediction.confidence * 100)}% model confidence).`
+        : "";
+      const aiMsg: Message = {
+        id: "m-" + (Date.now() + 1),
+        sender: "ai",
+        text: `${data.response}${predictionContext}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setThreadMap((prev) => ({
+        ...prev,
+        [activeId]: [...(prev[activeId] || []), aiMsg],
+      }));
+      setIsGenerating(false);
+      return;
+    } catch (error) {
+      // Preserve the existing offline UI behavior if the backend is unreachable.
+      console.error("Symptom advisor request failed; using local UI fallback:", error);
+    }
+
     setTimeout(() => {
       let replyCardType: "medicine" | "lab" | "prescription" | "emergency" | undefined;
       let replyCardData: Message["cardData"];
@@ -331,8 +355,18 @@ function ChatPageContent() {
 
       {/* Main Content Area — Partitions when activeReport is present */}
       <div className="flex-1 flex h-full min-w-0 relative overflow-hidden">
+        {/* Ambient WebGL Aurora background effect for Chat section */}
+        <div className="absolute inset-0 pointer-events-none z-0 opacity-85">
+          <Aurora
+            colorStops={["#3B82F6", "#5B9CFF", "#2563EB"]}
+            blend={0.5}
+            amplitude={1.0}
+            speed={0.5}
+          />
+        </div>
+
         {/* Chat Stream (Left Partition) */}
-        <div className="flex-1 flex flex-col h-full min-w-0 relative">
+        <div className="flex-1 flex flex-col h-full min-w-0 relative z-10">
           <TopBar
             title={activeConversation?.title || "Elixora Health Assistant"}
             onOpenVoiceMode={() => setIsVoiceOpen(true)}

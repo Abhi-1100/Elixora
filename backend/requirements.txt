@@ -11,3 +11,7 @@ PyMuPDF
 opencv-python
 thefuzz
 python-Levenshtein
+pandas
+numpy
+scikit-learn
+joblib

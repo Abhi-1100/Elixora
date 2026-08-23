@@ -5,6 +5,7 @@ import { Navbar } from "@/components/ui/navbar";
 import { ParticleHandsCanvas } from "@/components/landing/particle-hands-canvas";
 import { VoiceAssistantSection } from "@/components/landing/voice-assistant-section";
 import { FeaturesPricingFAQ } from "@/components/landing/features-pricing-faq";
+import { SpecularButton } from "@/components/ui/specular-button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -61,12 +62,28 @@ export default function Home() {
           transition={{ duration: 0.6, delay: 0.25 }}
           className="flex items-center justify-center gap-4 mb-4"
         >
-          <button
+          <SpecularButton
+            size="md"
+            radius={9999}
+            tint="#ffffff"
+            tintOpacity={0.05}
+            blur={10}
+            textColor="#ffffff"
+            lineColor="#5227FF"
+            baseColor="#525252"
+            intensity={1.2}
+            shineSize={12}
+            shineFade={40}
+            thickness={1}
+            speed={0.35}
+            followMouse={true}
+            proximity={250}
+            autoAnimate={false}
+            className="text-xs sm:text-sm font-medium px-8 py-3"
             onClick={() => handleLaunchSandbox()}
-            className="rounded-full bg-blue-500 hover:bg-blue-600 text-white text-xs sm:text-sm font-medium px-8 py-3 transition-all shadow-[0_0_24px_rgba(59,130,246,0.45)] cursor-pointer"
           >
             Get started
-          </button>
+          </SpecularButton>
 
           <a
             href="#features"
@@ -78,7 +95,7 @@ export default function Home() {
       </section>
 
       {/* 3. Signature Particle ASCII Point-Cloud Canvas */}
-      <section className="relative w-full z-0 overflow-hidden">
+      <section className="relative w-full max-w-full overflow-hidden flex flex-col items-center justify-center my-0 px-4 z-0">
         <ParticleHandsCanvas />
       </section>
 
