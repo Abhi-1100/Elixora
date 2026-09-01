@@ -83,14 +83,6 @@ export function Navbar({ showNavLinks = true }: NavbarProps) {
                       <p className="text-[11px] text-zinc-400 truncate">{user.email}</p>
                     </div>
                     <Link
-                      href="/dashboard"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/5 rounded-xl"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-blue-400" />
-                      Dashboard
-                    </Link>
-                    <Link
                       href="/chat"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 text-xs text-zinc-200 hover:bg-white/5 rounded-xl"

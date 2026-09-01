@@ -23,6 +23,9 @@ source venv/bin/activate      # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+Google Sign-In additionally requires `google-auth`; it is included in
+`requirements.txt` (or install it directly with `pip install google-auth --break-system-packages`).
+
 ## 4. Configure environment variables
 Copy `.env.example` to `.env` and fill in your real values:
 ```bash
@@ -32,6 +35,12 @@ Edit `.env`:
 - `DATABASE_URL` — your Postgres connection string
 - `JWT_SECRET_KEY` — any long random string (for signing login tokens)
 - `SECRET_KEY` — any long random string
+- `GOOGLE_CLIENT_ID` — the same Google OAuth 2.0 Web client ID configured as
+  `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in the Next.js app
+
+If this database already exists, run `migrations/001_google_signin.sql` once
+against it before starting the API. New databases get these columns from the
+updated model when `db.create_all()` runs.
 
 ## 5. Run the server
 ```bash
@@ -68,6 +77,20 @@ Returns: { "access_token": "...", "user": {...} }
 GET /api/auth/me
 Header: Authorization: Bearer <access_token>
 Returns: { "user": {...} }
+```
+
+### Google Sign-In
+```
+POST /api/auth/google
+Body: { "credential": "<Google Identity Services ID token>" }
+Returns: { "access_token": "...", "user": {..., "profile_complete": false} }
+```
+
+### Complete profile (protected route)
+```
+PATCH /api/auth/profile
+Body: { "age": 25, "gender": "Female" }
+Returns: { "user": {..., "profile_complete": true} }
 ```
 
 ## 8. Connecting from your Next.js frontend

@@ -1,0 +1,35 @@
+{
+  "en": {
+    "symptom_match_intro": "Your symptom pattern has been matched with {disease} as one possible condition.",
+    "advice_note": "Please arrange prompt medical evaluation, especially if symptoms worsen, persist, or you cannot keep fluids down.",
+    "ml_prediction_label": "ML prediction: {disease} ({confidence}% model confidence).",
+    "what_it_is_label": "What it is:",
+    "precautions_label": "Precautions:",
+    "unrecognized_symptom_note": "Note: I couldn't recognize these symptoms: {symptoms}",
+    "low_confidence_note": "This match has low confidence. It's best to get a doctor's opinion rather than rely on this alone.",
+    "disclaimer": "AI guidance only. Not a medical diagnosis. Consult a physician for emergencies.",
+    "no_match": "I couldn't confidently match your symptoms to a condition. Please consult a doctor, especially if symptoms are severe."
+  },
+  "hi": {
+    "symptom_match_intro": "आपके लक्षणों का मिलान {disease} नामक एक संभावित स्थिति से किया गया है।",
+    "advice_note": "कृपया जल्द से जल्द डॉक्टर से जांच कराएं, खासकर अगर लक्षण बढ़ें, बने रहें, या आप तरल पदार्थ नहीं ले पा रहे हों।",
+    "ml_prediction_label": "एआई अनुमान: {disease} ({confidence}% विश्वास स्तर)।",
+    "what_it_is_label": "यह क्या है:",
+    "precautions_label": "सावधानियां:",
+    "unrecognized_symptom_note": "सूचना: इन लक्षणों को पहचाना नहीं जा सका: {symptoms}",
+    "low_confidence_note": "इस अनुमान का विश्वास स्तर कम है। कृपया केवल इस पर निर्भर न रहें, डॉक्टर की सलाह अवश्य लें।",
+    "disclaimer": "यह केवल एआई मार्गदर्शन है, चिकित्सीय निदान नहीं। आपातकाल में डॉक्टर से संपर्क करें।",
+    "no_match": "मैं आपके लक्षणों को विश्वसनीय रूप से किसी स्थिति से नहीं जोड़ पाया। कृपया डॉक्टर से सलाह लें, खासकर यदि लक्षण गंभीर हों।"
+  },
+  "gu": {
+    "symptom_match_intro": "તમારા લક્ષણોનું મિલાન {disease} નામની એક સંભવિત સ્થિતિ સાથે કરવામાં આવ્યું છે.",
+    "advice_note": "કૃપા કરી શક્ય તેટલી વહેલી તકે તબીબી તપાસ કરાવો, ખાસ કરીને જો લક્ષણો વધે, ચાલુ રહે, અથવા તમે પ્રવાહી લઈ શકતા ન હો.",
+    "ml_prediction_label": "એઆઈ અનુમાન: {disease} ({confidence}% વિશ્વાસ સ્તર).",
+    "what_it_is_label": "આ શું છે:",
+    "precautions_label": "સાવચેતીઓ:",
+    "unrecognized_symptom_note": "નોંધ: આ લક્ષણો ઓળખી શકાયા નથી: {symptoms}",
+    "low_confidence_note": "આ અનુમાનનું વિશ્વાસ સ્તર ઓછું છે. ફક્ત આના પર આધાર ન રાખો, ડૉક્ટરની સલાહ જરૂર લો.",
+    "disclaimer": "આ ફક્ત એઆઈ માર્ગદર્શન છે, તબીબી નિદાન નથી. કટોકટીમાં ડૉક્ટરનો સંપર્ક કરો.",
+    "no_match": "હું તમારા લક્ષણોને વિશ્વસનીય રીતે કોઈ સ્થિતિ સાથે જોડી શક્યો નથી. કૃપા કરી ડૉક્ટરની સલાહ લો, ખાસ કરીને જો લક્ષણો ગંભીર હોય."
+  }
+}

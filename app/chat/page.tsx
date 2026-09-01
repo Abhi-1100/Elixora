@@ -133,6 +133,7 @@ function ChatPageContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<"en" | "hi" | "gu">("en");
 
   // Active Report state for side-by-side partition view
   const [activeReport, setActiveReport] = useState<ReportData | null>(null);
@@ -201,11 +202,25 @@ function ChatPageContent() {
   const handleSendMessage = async (text: string, attachment?: File | null) => {
     if (!text && !attachment) return;
 
+    let attachmentData;
+    if (attachment) {
+      const isPdf = attachment.type.includes("pdf") || attachment.name.endsWith(".pdf");
+      const isImg = attachment.type.startsWith("image/");
+      attachmentData = {
+        name: attachment.name,
+        size: (attachment.size / 1024).toFixed(1) + " KB",
+        type: isPdf ? "PDF Lab Document" : isImg ? "Medical Image" : "Document",
+        fileType: (isPdf ? "pdf" : isImg ? "image" : "doc") as "pdf" | "image" | "doc",
+        url: isImg ? URL.createObjectURL(attachment) : undefined,
+      };
+    }
+
     const userMsg: Message = {
       id: "m-" + Date.now(),
       sender: "user",
-      text: text || (attachment ? `📎 ${attachment.name}` : "Uploaded document"),
+      text: text || (attachment ? `Uploaded document: ${attachment.name}` : ""),
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      attachment: attachmentData,
     };
 
     const currentMsgs = threadMap[activeId] || [];
@@ -237,7 +252,7 @@ function ChatPageContent() {
         const aiMsg: Message = {
           id: "m-" + (Date.now() + 1),
           sender: "ai",
-          text: `✅ Report analyzed — Overall Status: **${data.overall_status}**. Extracted **${data.results?.length ?? 0}** biomarker(s).\n\nThe document preview and biomarker breakdown panel is open on the right. Ask me any questions about your lab results!`,
+          text: `Report analyzed — Overall Status: ${data.overall_status}. Extracted ${data.results?.length ?? 0} biomarker(s).\n\nThe document preview and biomarker breakdown panel is open on the right. Ask me any questions about your lab results!`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         };
 
@@ -264,15 +279,11 @@ function ChatPageContent() {
 
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
     try {
-      const data = await sendSymptomMessage(text, tokenRef.current);
-      const topPrediction = data.predictions?.[0];
-      const predictionContext = topPrediction
-        ? `\n\nPossible condition: ${topPrediction.disease} (${Math.round(topPrediction.confidence * 100)}% model confidence).`
-        : "";
+      const data = await sendSymptomMessage(text, tokenRef.current, selectedLanguage);
       const aiMsg: Message = {
         id: "m-" + (Date.now() + 1),
         sender: "ai",
-        text: `${data.response}${predictionContext}`,
+        text: data.text,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setThreadMap((prev) => ({
@@ -283,13 +294,26 @@ function ChatPageContent() {
       return;
     } catch (error) {
       // Preserve the existing offline UI behavior if the backend is unreachable.
-      console.error("Symptom advisor request failed; using local UI fallback:", error);
+      const errorText = error instanceof Error ? error.message : "Unknown API error";
+      console.error("Symptom-check request failed:", error);
+      const errorMsg: Message = {
+        id: "m-" + (Date.now() + 1),
+        sender: "ai",
+        text: `Model response unavailable: ${errorText}\n\nPlease make sure the Flask backend is running and restart it after the API changes.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setThreadMap((prev) => ({
+        ...prev,
+        [activeId]: [...(prev[activeId] || []), errorMsg],
+      }));
+      setIsGenerating(false);
+      return;
     }
 
     setTimeout(() => {
       let replyCardType: "medicine" | "lab" | "prescription" | "emergency" | undefined;
       let replyCardData: Message["cardData"];
-      let replyText = "I have processed your query based on current clinical reference guidelines.";
+      let replyText = "The symptom prediction service is unavailable. Please start the Flask backend on http://localhost:5000 and try again.";
 
       const lower = text.toLowerCase();
 
@@ -371,6 +395,8 @@ function ChatPageContent() {
             title={activeConversation?.title || "Elixora Health Assistant"}
             onOpenVoiceMode={() => setIsVoiceOpen(true)}
             onGoToLanding={() => router.push("/")}
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={setSelectedLanguage}
           />
 
           <main className="flex-1 overflow-y-auto flex flex-col relative">

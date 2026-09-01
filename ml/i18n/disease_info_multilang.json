@@ -1,0 +1,1308 @@
+{
+  "(vertigo) Paroymsal  Positional Vertigo": {
+    "en": {
+      "name": "(vertigo) Paroymsal  Positional Vertigo",
+      "description": "Benign paroxysmal positional vertigo (BPPV) is one of the most common causes of vertigo — the sudden sensation that you're spinning or that the inside of your head is spinning. Benign paroxysmal positional vertigo causes brief episodes of mild to intense dizziness.",
+      "precautions": [
+        "lie down",
+        "avoid sudden change in body",
+        "avoid abrupt head movment",
+        "relax"
+      ]
+    },
+    "hi": {
+      "name": "सौम्य पैरॉक्सिस्मल पोजिशनल वर्टिगो (चक्कर आना)",
+      "description": "सौम्य पैरॉक्सिस्मल पोजिशनल वर्टिगो (BPPV) चक्कर आने के सबसे सामान्य कारणों में से एक है — अचानक ऐसा महसूस होना कि आप घूम रहे हैं या आपके सिर के अंदर सब कुछ घूम रहा है। यह कुछ समय के लिए हल्के से तेज़ चक्कर के एपिसोड पैदा करता है।",
+      "precautions": [
+        "लेट जाएं",
+        "शरीर में अचानक बदलाव से बचें",
+        "सिर की अचानक हलचल से बचें",
+        "आराम करें"
+      ]
+    },
+    "gu": {
+      "name": "સૌમ્ય પેરોક્સિસ્મલ પોઝિશનલ વર્ટિગો (ચક્કર)",
+      "description": "સૌમ્ય પેરોક્સિસ્મલ પોઝિશનલ વર્ટિગો (BPPV) ચક્કર આવવાના સૌથી સામાન્ય કારણોમાંનું એક છે — અચાનક એવું લાગવું કે તમે ફરી રહ્યા છો અથવા તમારા માથાની અંદર બધું ફરી રહ્યું છે. આનાથી થોડા સમય માટે હળવાથી તીવ્ર ચક્કર આવે છે.",
+      "precautions": [
+        "સૂઈ જાઓ",
+        "શરીરમાં અચાનક ફેરફાર ટાળો",
+        "માથાની અચાનક હલનચલન ટાળો",
+        "આરામ કરો"
+      ]
+    }
+  },
+  "AIDS": {
+    "en": {
+      "name": "AIDS",
+      "description": "Acquired immunodeficiency syndrome (AIDS) is a chronic, potentially life-threatening condition caused by the human immunodeficiency virus (HIV). By damaging your immune system, HIV interferes with your body's ability to fight infection and disease.",
+      "precautions": [
+        "avoid open cuts",
+        "wear ppe if possible",
+        "consult doctor",
+        "follow up"
+      ]
+    },
+    "hi": {
+      "name": "एड्स",
+      "description": "एड्स (एक्वायर्ड इम्यूनोडेफिशिएंसी सिंड्रोम) एक दीर्घकालिक, संभावित रूप से जानलेवा स्थिति है जो एचआईवी (ह्यूमन इम्यूनोडेफिशिएंसी वायरस) के कारण होती है। यह वायरस प्रतिरक्षा प्रणाली को नुकसान पहुंचाकर शरीर की संक्रमण और बीमारी से लड़ने की क्षमता को प्रभावित करता है।",
+      "precautions": [
+        "खुले घावों से बचें",
+        "संभव हो तो सुरक्षा उपकरण (पीपीई) पहनें",
+        "डॉक्टर से सलाह लें",
+        "फॉलो-अप कराएं"
+      ]
+    },
+    "gu": {
+      "name": "એઇડ્સ",
+      "description": "એઇડ્સ (એક્વાયર્ડ ઇમ્યુનોડેફિશિયન્સી સિન્ડ્રોમ) એ એક ક્રોનિક, સંભવિત રીતે જીવલેણ સ્થિતિ છે જે એચઆઇવીના કારણે થાય છે. આ વાયરસ રોગપ્રતિકારક શક્તિને નુકસાન પહોંચાડીને શરીરની ચેપ અને રોગ સામે લડવાની ક્ષમતાને અસર કરે છે.",
+      "precautions": [
+        "ખુલ્લા ઘાવથી બચો",
+        "શક્ય હોય તો સુરક્ષા સાધનો (પીપીઈ) પહેરો",
+        "ડૉક્ટરની સલાહ લો",
+        "ફોલો-અપ કરાવો"
+      ]
+    }
+  },
+  "Acne": {
+    "en": {
+      "name": "Acne",
+      "description": "Acne vulgaris is the formation of comedones, papules, pustules, nodules, and/or cysts as a result of obstruction and inflammation of pilosebaceous units (hair follicles and their accompanying sebaceous gland). Acne develops on the face and upper trunk. It most often affects adolescents.",
+      "precautions": [
+        "bath twice",
+        "avoid fatty spicy food",
+        "drink plenty of water",
+        "avoid too many products"
+      ]
+    },
+    "hi": {
+      "name": "मुंहासे (एक्ने)",
+      "description": "एक्ने वल्गैरिस बालों के रोम और उनकी तेल ग्रंथियों में रुकावट और सूजन के कारण कॉमेडोन, दाने, फुंसियां, गांठें और/या सिस्ट बनने की स्थिति है। यह चेहरे और शरीर के ऊपरी हिस्से पर होता है और किशोरों को सबसे अधिक प्रभावित करता है।",
+      "precautions": [
+        "दिन में दो बार नहाएं",
+        "तैलीय और मसालेदार भोजन से बचें",
+        "खूब पानी पिएं",
+        "बहुत सारे उत्पादों के इस्तेमाल से बचें"
+      ]
+    },
+    "gu": {
+      "name": "ખીલ (એક્ને)",
+      "description": "એક્ને વલ્ગેરિસ એ વાળના મૂળ અને તેમની તેલ ગ્રંથિઓમાં અવરોધ અને સોજાના કારણે કોમેડોન, ફોડલી, પરુવાળી ફોડલી, ગાંઠો અને/અથવા સિસ્ટ બનવાની સ્થિતિ છે. તે ચહેરા અને શરીરના ઉપરના ભાગ પર થાય છે અને કિશોરોને સૌથી વધુ અસર કરે છે.",
+      "precautions": [
+        "દિવસમાં બે વાર સ્નાન કરો",
+        "તેલયુક્ત અને મસાલેદાર ખોરાક ટાળો",
+        "પુષ્કળ પાણી પીવો",
+        "ઘણા બધા ઉત્પાદનોનો ઉપયોગ ટાળો"
+      ]
+    }
+  },
+  "Alcoholic hepatitis": {
+    "en": {
+      "name": "Alcoholic hepatitis",
+      "description": "Alcoholic hepatitis is a diseased, inflammatory condition of the liver caused by heavy alcohol consumption over an extended period of time. It's also aggravated by binge drinking and ongoing alcohol use. If you develop this condition, you must stop drinking alcohol",
+      "precautions": [
+        "stop alcohol consumption",
+        "consult doctor",
+        "medication",
+        "follow up"
+      ]
+    },
+    "hi": {
+      "name": "अल्कोहलिक हेपेटाइटिस",
+      "description": "अल्कोहलिक हेपेटाइटिस लंबे समय तक अत्यधिक शराब सेवन के कारण होने वाली लिवर की सूजन वाली बीमारी है। अत्यधिक शराब पीने और लगातार शराब के सेवन से यह और बिगड़ जाती है। अगर यह स्थिति हो तो शराब पीना तुरंत बंद करना चाहिए।",
+      "precautions": [
+        "शराब पीना बंद करें",
+        "डॉक्टर से सलाह लें",
+        "दवा लें",
+        "फॉलो-अप कराएं"
+      ]
+    },
+    "gu": {
+      "name": "આલ્કોહોલિક હેપેટાઇટિસ",
+      "description": "આલ્કોહોલિક હેપેટાઇટિસ એ લાંબા સમય સુધી વધુ પડતા દારૂના સેવનથી થતી લિવરની સોજાવાળી બીમારી છે. વધુ પડતું પીવાથી અને સતત દારૂના સેવનથી તે વધુ બગડે છે. જો આ સ્થિતિ થાય તો દારૂ પીવાનું તરત બંધ કરવું જોઈએ.",
+      "precautions": [
+        "દારૂ પીવાનું બંધ કરો",
+        "ડૉક્ટરની સલાહ લો",
+        "દવા લો",
+        "ફોલો-અપ કરાવો"
+      ]
+    }
+  },
+  "Allergy": {
+    "en": {
+      "name": "Allergy",
+      "description": "An allergy is an immune system response to a foreign substance that's not typically harmful to your body.They can include certain foods, pollen, or pet dander. Your immune system's job is to keep you healthy by fighting harmful pathogens.",
+      "precautions": [
+        "apply calamine",
+        "cover area with bandage",
+        "use ice to compress itching"
+      ]
+    },
+    "hi": {
+      "name": "एलर्जी",
+      "description": "एलर्जी किसी बाहरी पदार्थ के प्रति प्रतिरक्षा प्रणाली की प्रतिक्रिया है जो सामान्यतः शरीर के लिए हानिकारक नहीं होता। इसमें कुछ खाद्य पदार्थ, पराग या पालतू जानवरों के बाल शामिल हो सकते हैं। प्रतिरक्षा प्रणाली का काम हानिकारक रोगजनकों से लड़कर शरीर को स्वस्थ रखना है।",
+      "precautions": [
+        "कैलामाइन लगाएं",
+        "प्रभावित हिस्से को पट्टी से ढकें",
+        "खुजली कम करने के लिए बर्फ का प्रयोग करें"
+      ]
+    },
+    "gu": {
+      "name": "એલર્જી",
+      "description": "એલર્જી એ કોઈ બાહ્ય પદાર્થ પ્રત્યે રોગપ્રતિકારક શક્તિની પ્રતિક્રિયા છે જે સામાન્ય રીતે શરીર માટે હાનિકારક નથી હોતો. તેમાં અમુક ખોરાક, પરાગ અથવા પાળતુ પ્રાણીના વાળનો સમાવેશ થઈ શકે છે.",
+      "precautions": [
+        "કેલામાઇન લગાવો",
+        "અસરગ્રસ્ત ભાગને પાટાથી ઢાંકો",
+        "ખંજવાળ ઘટાડવા બરફનો ઉપયોગ કરો"
+      ]
+    }
+  },
+  "Arthritis": {
+    "en": {
+      "name": "Arthritis",
+      "description": "Arthritis is the swelling and tenderness of one or more of your joints. The main symptoms of arthritis are joint pain and stiffness, which typically worsen with age. The most common types of arthritis are osteoarthritis and rheumatoid arthritis.",
+      "precautions": [
+        "exercise",
+        "use hot and cold therapy",
+        "try acupuncture",
+        "massage"
+      ]
+    },
+    "hi": {
+      "name": "गठिया",
+      "description": "गठिया एक या अधिक जोड़ों में सूजन और कोमलता की स्थिति है। इसके मुख्य लक्षण जोड़ों में दर्द और अकड़न हैं, जो आमतौर पर उम्र के साथ बढ़ते हैं। गठिया के सबसे सामान्य प्रकार ऑस्टियोआर्थराइटिस और रुमेटीइड आर्थराइटिस हैं।",
+      "precautions": [
+        "व्यायाम करें",
+        "गर्म और ठंडी सिकाई करें",
+        "एक्यूपंक्चर आज़माएं",
+        "मालिश करें"
+      ]
+    },
+    "gu": {
+      "name": "સંધિવા",
+      "description": "સંધિવા એ એક અથવા વધુ સાંધામાં સોજો અને દુખાવાની સ્થિતિ છે. તેના મુખ્ય લક્ષણો સાંધાનો દુખાવો અને જકડાઈ જવું છે, જે સામાન્ય રીતે ઉંમર સાથે વધે છે. સંધિવાના સૌથી સામાન્ય પ્રકારો ઓસ્ટિયોઆર્થરાઇટિસ અને રુમેટોઇડ આર્થરાઇટિસ છે.",
+      "precautions": [
+        "કસરત કરો",
+        "ગરમ અને ઠંડા શેકનો ઉપયોગ કરો",
+        "એક્યુપંક્ચર અજમાવો",
+        "માલિશ કરો"
+      ]
+    }
+  },
+  "Bronchial Asthma": {
+    "en": {
+      "name": "Bronchial Asthma",
+      "description": "Bronchial asthma is a medical condition which causes the airway path of the lungs to swell and narrow. Due to this swelling, the air path produces excess mucus making it hard to breathe, which results in coughing, short breath, and wheezing. The disease is chronic and interferes with daily working.",
+      "precautions": [
+        "switch to loose cloothing",
+        "take deep breaths",
+        "get away from trigger",
+        "seek help"
+      ]
+    },
+    "hi": {
+      "name": "ब्रोन्कियल अस्थमा",
+      "description": "ब्रोन्कियल अस्थमा एक ऐसी चिकित्सीय स्थिति है जिसमें फेफड़ों की वायुमार्ग में सूजन और संकुचन होता है। इस सूजन के कारण वायुमार्ग में अतिरिक्त बलगम बनता है जिससे सांस लेना मुश्किल हो जाता है, और खांसी, सांस फूलना और घरघराहट होती है। यह एक दीर्घकालिक बीमारी है जो रोज़मर्रा के कामों में बाधा डालती है।",
+      "precautions": [
+        "ढीले कपड़े पहनें",
+        "गहरी सांस लें",
+        "ट्रिगर करने वाली चीज़ों से दूर रहें",
+        "मदद लें"
+      ]
+    },
+    "gu": {
+      "name": "બ્રોન્કિયલ અસ્થમા",
+      "description": "બ્રોન્કિયલ અસ્થમા એ એક તબીબી સ્થિતિ છે જેમાં ફેફસાંના શ્વાસમાર્ગમાં સોજો અને સંકોચન થાય છે. આ સોજાના કારણે શ્વાસમાર્ગમાં વધારે લાળ બને છે જેનાથી શ્વાસ લેવો મુશ્કેલ બને છે, અને ખાંસી, શ્વાસ ફૂલવો અને ઘરઘરાટી થાય છે.",
+      "precautions": [
+        "ઢીલા કપડાં પહેરો",
+        "ઊંડા શ્વાસ લો",
+        "ટ્રિગર કરતી વસ્તુઓથી દૂર રહો",
+        "મદદ લો"
+      ]
+    }
+  },
+  "Cervical spondylosis": {
+    "en": {
+      "name": "Cervical spondylosis",
+      "description": "Cervical spondylosis is a general term for age-related wear and tear affecting the spinal disks in your neck. As the disks dehydrate and shrink, signs of osteoarthritis develop, including bony projections along the edges of bones (bone spurs).",
+      "precautions": [
+        "use heating pad or cold pack",
+        "exercise",
+        "take otc pain reliver",
+        "consult doctor"
+      ]
+    },
+    "hi": {
+      "name": "सर्वाइकल स्पॉन्डिलोसिस",
+      "description": "सर्वाइकल स्पॉन्डिलोसिस गर्दन की रीढ़ की डिस्क में उम्र के साथ होने वाली टूट-फूट के लिए एक सामान्य शब्द है। जैसे-जैसे डिस्क सूखती और सिकुड़ती हैं, ऑस्टियोआर्थराइटिस के लक्षण विकसित होते हैं, जिसमें हड्डियों के किनारों पर उभार (बोन स्पर्स) शामिल हैं।",
+      "precautions": [
+        "हीटिंग पैड या कोल्ड पैक का उपयोग करें",
+        "व्यायाम करें",
+        "दर्द निवारक दवा लें",
+        "डॉक्टर से सलाह लें"
+      ]
+    },
+    "gu": {
+      "name": "સર્વાઇકલ સ્પોન્ડિલોસિસ",
+      "description": "સર્વાઇકલ સ્પોન્ડિલોસિસ એ ગરદનની કરોડરજ્જુની ડિસ્કમાં ઉંમર સાથે થતા ઘસારા માટેનો સામાન્ય શબ્દ છે. જેમ જેમ ડિસ્ક સુકાય અને સંકોચાય છે, ઓસ્ટિયોઆર્થરાઇટિસના લક્ષણો વિકસે છે, જેમાં હાડકાની ધાર પર ઉભાર (બોન સ્પર્સ)નો સમાવેશ થાય છે.",
+      "precautions": [
+        "હીટિંગ પેડ અથવા કોલ્ડ પેકનો ઉપયોગ કરો",
+        "કસરત કરો",
+        "દુખાવાની દવા લો",
+        "ડૉક્ટરની સલાહ લો"
+      ]
+    }
+  },
+  "Chicken pox": {
+    "en": {
+      "name": "Chicken pox",
+      "description": "Chickenpox is a highly contagious disease caused by the varicella-zoster virus (VZV). It can cause an itchy, blister-like rash. The rash first appears on the chest, back, and face, and then spreads over the entire body, causing between 250 and 500 itchy blisters.",
+      "precautions": [
+        "use neem in bathing ",
+        "consume neem leaves",
+        "take vaccine",
+        "avoid public places"
+      ]
+    },
+    "hi": {
+      "name": "चिकनपॉक्स",
+      "description": "चिकनपॉक्स वेरिसेला-ज़ोस्टर वायरस (VZV) के कारण होने वाली एक अत्यधिक संक्रामक बीमारी है। इससे खुजलीदार, छाले जैसे दाने हो सकते हैं। दाने सबसे पहले छाती, पीठ और चेहरे पर दिखाई देते हैं और फिर पूरे शरीर में फैल जाते हैं, जिससे 250 से 500 तक खुजलीदार छाले हो सकते हैं।",
+      "precautions": [
+        "नहाने के पानी में नीम का उपयोग करें",
+        "नीम की पत्तियां खाएं",
+        "टीका लगवाएं",
+        "सार्वजनिक स्थानों से बचें"
+      ]
+    },
+    "gu": {
+      "name": "ચિકનપોક્સ",
+      "description": "ચિકનપોક્સ એ વેરિસેલા-ઝોસ્ટર વાયરસ (VZV)ના કારણે થતો અત્યંત ચેપી રોગ છે. તેનાથી ખંજવાળવાળા, ફોલ્લા જેવા ફોડલા થઈ શકે છે. ફોડલા સૌપ્રથમ છાતી, પીઠ અને ચહેરા પર દેખાય છે અને પછી આખા શરીરમાં ફેલાય છે.",
+      "precautions": [
+        "સ્નાનના પાણીમાં લીમડાનો ઉપયોગ કરો",
+        "લીમડાના પાન ખાઓ",
+        "રસી લો",
+        "જાહેર સ્થળોથી બચો"
+      ]
+    }
+  },
+  "Chronic cholestasis": {
+    "en": {
+      "name": "Chronic cholestasis",
+      "description": "Chronic cholestatic diseases, whether occurring in infancy, childhood or adulthood, are characterized by defective bile acid transport from the liver to the intestine, which is caused by primary damage to the biliary epithelium in most cases",
+      "precautions": [
+        "cold baths",
+        "anti itch medicine",
+        "consult doctor",
+        "eat healthy"
+      ]
+    },
+    "hi": {
+      "name": "क्रॉनिक कोलेस्टेसिस",
+      "description": "क्रॉनिक कोलेस्टेटिक बीमारियां, चाहे शैशवावस्था, बचपन या वयस्कता में हों, लिवर से आंत तक बाइल एसिड के परिवहन में गड़बड़ी से पहचानी जाती हैं, जो अधिकतर मामलों में बाइलरी एपिथेलियम को हुए प्रारंभिक नुकसान के कारण होती है।",
+      "precautions": [
+        "ठंडे पानी से नहाएं",
+        "खुजली-रोधी दवा लें",
+        "डॉक्टर से सलाह लें",
+        "स्वस्थ भोजन करें"
+      ]
+    },
+    "gu": {
+      "name": "ક્રોનિક કોલેસ્ટેસિસ",
+      "description": "ક્રોનિક કોલેસ્ટેટિક રોગો, ભલે તે બાળપણ કે પુખ્તાવસ્થામાં થાય, લિવરથી આંતરડા સુધી બાઇલ એસિડના પરિવહનમાં ખામીથી ઓળખાય છે, જે મોટાભાગના કિસ્સાઓમાં બાઇલરી એપિથેલિયમને થયેલા પ્રારંભિક નુકસાનને કારણે થાય છે.",
+      "precautions": [
+        "ઠંડા પાણીથી સ્નાન કરો",
+        "ખંજવાળ વિરોધી દવા લો",
+        "ડૉક્ટરની સલાહ લો",
+        "સ્વસ્થ ખોરાક લો"
+      ]
+    }
+  },
+  "Common Cold": {
+    "en": {
+      "name": "Common Cold",
+      "description": "The common cold is a viral infection of your nose and throat (upper respiratory tract). It's usually harmless, although it might not feel that way. Many types of viruses can cause a common cold.",
+      "precautions": [
+        "drink vitamin c rich drinks",
+        "take vapour",
+        "avoid cold food",
+        "keep fever in check"
+      ]
+    },
+    "hi": {
+      "name": "सामान्य सर्दी-जुकाम",
+      "description": "सामान्य सर्दी-जुकाम आपकी नाक और गले (ऊपरी श्वसन तंत्र) का एक वायरल संक्रमण है। यह आमतौर पर हानिरहित होता है, हालांकि ऐसा महसूस नहीं होता। कई प्रकार के वायरस सामान्य सर्दी-जुकाम का कारण बन सकते हैं।",
+      "precautions": [
+        "विटामिन सी युक्त पेय पिएं",
+        "भाप लें",
+        "ठंडी चीज़ों से बचें",
+        "बुखार पर नज़र रखें"
+      ]
+    },
+    "gu": {
+      "name": "સામાન્ય શરદી",
+      "description": "સામાન્ય શરદી એ તમારા નાક અને ગળા (ઉપલા શ્વસનતંત્ર)નો વાયરલ ચેપ છે. તે સામાન્ય રીતે હાનિકારક નથી હોતો, જોકે એવું લાગતું નથી. ઘણા પ્રકારના વાયરસ સામાન્ય શરદીનું કારણ બની શકે છે.",
+      "precautions": [
+        "વિટામિન સી યુક્ત પીણાં પીવો",
+        "વરાળ લો",
+        "ઠંડી વસ્તુઓ ટાળો",
+        "તાવ પર નજર રાખો"
+      ]
+    }
+  },
+  "Dengue": {
+    "en": {
+      "name": "Dengue",
+      "description": "an acute infectious disease caused by a flavivirus (species Dengue virus of the genus Flavivirus), transmitted by aedes mosquitoes, and characterized by headache, severe joint pain, and a rash. — called also breakbone fever, dengue fever.",
+      "precautions": [
+        "drink papaya leaf juice",
+        "avoid fatty spicy food",
+        "keep mosquitos away",
+        "keep hydrated"
+      ]
+    },
+    "hi": {
+      "name": "डेंगू",
+      "description": "यह फ्लेविवायरस (डेंगू वायरस प्रजाति) के कारण होने वाली एक तीव्र संक्रामक बीमारी है, जो एडीज मच्छरों से फैलती है, और सिरदर्द, गंभीर जोड़ों के दर्द और चकत्ते से पहचानी जाती है। इसे \"ब्रेकबोन फीवर\" या डेंगू बुखार भी कहा जाता है।",
+      "precautions": [
+        "पपीते के पत्तों का रस पिएं",
+        "तैलीय और मसालेदार भोजन से बचें",
+        "मच्छरों से बचाव करें",
+        "शरीर में पानी की कमी न होने दें"
+      ]
+    },
+    "gu": {
+      "name": "ડેન્ગ્યુ",
+      "description": "આ ફ્લેવિવાયરસ (ડેન્ગ્યુ વાયરસ પ્રજાતિ)ના કારણે થતો તીવ્ર ચેપી રોગ છે, જે એડીસ મચ્છરોથી ફેલાય છે, અને માથાનો દુખાવો, ગંભીર સાંધાનો દુખાવો અને ચકામાથી ઓળખાય છે. તેને \"બ્રેકબોન ફીવર\" અથવા ડેન્ગ્યુ તાવ પણ કહેવાય છે.",
+      "precautions": [
+        "પપૈયાના પાનનો રસ પીવો",
+        "તેલયુક્ત અને મસાલેદાર ખોરાક ટાળો",
+        "મચ્છરોથી બચાવ કરો",
+        "શરીરમાં પાણીની ઉણપ ન થવા દો"
+      ]
+    }
+  },
+  "Diabetes": {
+    "en": {
+      "name": "Diabetes",
+      "description": "Diabetes is a disease that occurs when your blood glucose, also called blood sugar, is too high. Blood glucose is your main source of energy and comes from the food you eat. Insulin, a hormone made by the pancreas, helps glucose from food get into your cells to be used for energy.",
+      "precautions": [
+        "have balanced diet",
+        "exercise",
+        "consult doctor",
+        "follow up"
+      ]
+    },
+    "hi": {
+      "name": "डायबिटीज (मधुमेह)",
+      "description": "डायबिटीज एक ऐसी बीमारी है जो तब होती है जब आपका रक्त शर्करा, जिसे ब्लड ग्लूकोज़ भी कहा जाता है, बहुत अधिक हो जाता है। ब्लड ग्लूकोज़ आपकी ऊर्जा का मुख्य स्रोत है और यह आपके खाए गए भोजन से आता है। इंसुलिन, जो अग्न्याशय द्वारा बनाया गया एक हार्मोन है, भोजन से ग्लूकोज़ को कोशिकाओं में जाने में मदद करता है ताकि ऊर्जा के लिए उपयोग किया जा सके।",
+      "precautions": [
+        "संतुलित आहार लें",
+        "व्यायाम करें",
+        "डॉक्टर से सलाह लें",
+        "फॉलो-अप कराएं"
+      ]
+    },
+    "gu": {
+      "name": "ડાયાબિટીસ",
+      "description": "ડાયાબિટીસ એ એવો રોગ છે જે ત્યારે થાય છે જ્યારે તમારું બ્લડ ગ્લુકોઝ (બ્લડ સુગર) ખૂબ વધારે થઈ જાય છે. બ્લડ ગ્લુકોઝ તમારી ઊર્જાનો મુખ્ય સ્ત્રોત છે અને તે તમે ખાધેલા ખોરાકમાંથી આવે છે. ઇન્સ્યુલિન, જે સ્વાદુપિંડ દ્વારા બનાવવામાં આવતું હોર્મોન છે, ગ્લુકોઝને કોષોમાં જવા મદદ કરે છે.",
+      "precautions": [
+        "સંતુલિત આહાર લો",
+        "કસરત કરો",
+        "ડૉક્ટરની સલાહ લો",
+        "ફોલો-અપ કરાવો"
+      ]
+    }
+  },
+  "Dimorphic hemmorhoids(piles)": {
+    "en": {
+      "name": "Dimorphic hemmorhoids(piles)",
+      "description": "No description available.",
+      "precautions": [
+        "avoid fatty spicy food",
+        "consume witch hazel",
+        "warm bath with epsom salt",
+        "consume alovera juice"
+      ]
+    },
+    "hi": {
+      "name": "बवासीर (पाइल्स)",
+      "description": "बवासीर (पाइल्स) मलाशय और गुदा के आसपास की नसों में सूजन की स्थिति है, जिसमें दर्द, खुजली और कभी-कभी रक्तस्राव हो सकता है।",
+      "precautions": [
+        "तैलीय और मसालेदार भोजन से बचें",
+        "विच हेज़ल का प्रयोग करें",
+        "एप्सम सॉल्ट के साथ गुनगुने पानी से स्नान करें",
+        "एलोवेरा जूस पिएं"
+      ]
+    },
+    "gu": {
+      "name": "હરસ (પાઇલ્સ)",
+      "description": "હરસ (પાઇલ્સ) એ ગુદામાર્ગ અને ગુદાની આસપાસની નસોમાં સોજાની સ્થિતિ છે, જેમાં દુખાવો, ખંજવાળ અને ક્યારેક રક્તસ્રાવ થઈ શકે છે.",
+      "precautions": [
+        "તેલયુક્ત અને મસાલેદાર ખોરાક ટાળો",
+        "વિચ હેઝલનો ઉપયોગ કરો",
+        "એપ્સમ સોલ્ટ સાથે હૂંફાળા પાણીથી સ્નાન કરો",
+        "એલોવેરા જ્યુસ પીવો"
+      ]
+    }
+  },
+  "Drug Reaction": {
+    "en": {
+      "name": "Drug Reaction",
+      "description": "An adverse drug reaction (ADR) is an injury caused by taking medication. ADRs may occur following a single dose or prolonged administration of a drug or result from the combination of two or more drugs.",
+      "precautions": [
+        "stop irritation",
+        "consult nearest hospital",
+        "stop taking drug",
+        "follow up"
+      ]
+    },
+    "hi": {
+      "name": "दवा से प्रतिक्रिया",
+      "description": "प्रतिकूल दवा प्रतिक्रिया (ADR) दवा लेने के कारण होने वाली चोट है। यह एक ही खुराक के बाद या लंबे समय तक दवा लेने के बाद हो सकती है, या दो या अधिक दवाओं के संयोजन से हो सकती है।",
+      "precautions": [
+        "जलन पैदा करने वाली चीज़ से दूर रहें",
+        "नज़दीकी अस्पताल जाएं",
+        "दवा लेना बंद करें",
+        "फॉलो-अप कराएं"
+      ]
+    },
+    "gu": {
+      "name": "દવાની પ્રતિક્રિયા",
+      "description": "પ્રતિકૂળ દવા પ્રતિક્રિયા (ADR) એ દવા લેવાથી થતી ઈજા છે. તે એક જ ડોઝ પછી અથવા લાંબા સમય સુધી દવા લીધા પછી થઈ શકે છે, અથવા બે કે વધુ દવાઓના સંયોજનથી થઈ શકે છે.",
+      "precautions": [
+        "બળતરા કરતી વસ્તુથી દૂર રહો",
+        "નજીકની હોસ્પિટલમાં જાવ",
+        "દવા લેવાનું બંધ કરો",
+        "ફોલો-અપ કરાવો"
+      ]
+    }
+  },
+  "Fungal infection": {
+    "en": {
+      "name": "Fungal infection",
+      "description": "In humans, fungal infections occur when an invading fungus takes over an area of the body and is too much for the immune system to handle. Fungi can live in the air, soil, water, and plants. There are also some fungi that live naturally in the human body. Like many microbes, there are helpful fungi and harmful fungi.",
+      "precautions": [
+        "bath twice",
+        "use detol or neem in bathing water",
+        "keep infected area dry",
+        "use clean cloths"
+      ]
+    },
+    "hi": {
+      "name": "फंगल संक्रमण",
+      "description": "इंसानों में फंगल संक्रमण तब होता है जब कोई आक्रामक फंगस शरीर के किसी हिस्से पर कब्ज़ा कर लेता है और प्रतिरक्षा प्रणाली के लिए उसे संभालना मुश्किल हो जाता है। फंगस हवा, मिट्टी, पानी और पौधों में रह सकते हैं। कुछ फंगस इंसानी शरीर में स्वाभाविक रूप से भी रहते हैं।",
+      "precautions": [
+        "दिन में दो बार नहाएं",
+        "नहाने के पानी में डेटॉल या नीम मिलाएं",
+        "संक्रमित हिस्से को सूखा रखें",
+        "साफ कपड़ों का उपयोग करें"
+      ]
+    },
+    "gu": {
+      "name": "ફૂગનો ચેપ",
+      "description": "માણસોમાં ફૂગનો ચેપ ત્યારે થાય છે જ્યારે કોઈ આક્રમક ફૂગ શરીરના કોઈ ભાગ પર કબજો કરી લે છે અને રોગપ્રતિકારક શક્તિ માટે તેને સંભાળવું મુશ્કેલ બની જાય છે. ફૂગ હવા, માટી, પાણી અને છોડમાં રહી શકે છે.",
+      "precautions": [
+        "દિવસમાં બે વાર સ્નાન કરો",
+        "સ્નાનના પાણીમાં ડેટોલ અથવા લીમડો ઉમેરો",
+        "ચેપગ્રસ્ત ભાગને સૂકો રાખો",
+        "સ્વચ્છ કપડાંનો ઉપયોગ કરો"
+      ]
+    }
+  },
+  "GERD": {
+    "en": {
+      "name": "GERD",
+      "description": "Gastroesophageal reflux disease, or GERD, is a digestive disorder that affects the lower esophageal sphincter (LES), the ring of muscle between the esophagus and stomach. Many people, including pregnant women, suffer from heartburn or acid indigestion caused by GERD.",
+      "precautions": [
+        "avoid fatty spicy food",
+        "avoid lying down after eating",
+        "maintain healthy weight",
+        "exercise"
+      ]
+    },
+    "hi": {
+      "name": "गर्ड (एसिड रिफ्लक्स)",
+      "description": "गैस्ट्रोइसोफेगल रिफ्लक्स डिज़ीज़ (GERD) एक पाचन विकार है जो निचले इसोफेजियल स्फिंक्टर (LES) को प्रभावित करता है, जो इसोफेगस और पेट के बीच की मांसपेशी की रिंग है। गर्भवती महिलाओं सहित कई लोग GERD के कारण होने वाली सीने में जलन या एसिड अपच से पीड़ित होते हैं।",
+      "precautions": [
+        "तैलीय और मसालेदार भोजन से बचें",
+        "खाने के बाद तुरंत न लेटें",
+        "स्वस्थ वजन बनाए रखें",
+        "व्यायाम करें"
+      ]
+    },
+    "gu": {
+      "name": "ગર્ડ (એસિડ રિફ્લક્સ)",
+      "description": "ગેસ્ટ્રોઇસોફેજિયલ રિફ્લક્સ ડિસીઝ (GERD) એ પાચનતંત્રનો વિકાર છે જે નીચલા ઇસોફેજિયલ સ્ફિન્ક્ટર (LES)ને અસર કરે છે, જે ઇસોફેગસ અને પેટ વચ્ચેની સ્નાયુની રિંગ છે. ઘણા લોકો GERDના કારણે થતી છાતીમાં બળતરાથી પીડાય છે.",
+      "precautions": [
+        "તેલયુક્ત અને મસાલેદાર ખોરાક ટાળો",
+        "ખાધા પછી તરત સૂવાનું ટાળો",
+        "સ્વસ્થ વજન જાળવો",
+        "કસરત કરો"
+      ]
+    }
+  },
+  "Gastroenteritis": {
+    "en": {
+      "name": "Gastroenteritis",
+      "description": "Gastroenteritis is an inflammation of the digestive tract, particularly the stomach, and large and small intestines. Viral and bacterial gastroenteritis are intestinal infections associated with symptoms of diarrhea , abdominal cramps, nausea , and vomiting .",
+      "precautions": [
+        "stop eating solid food for while",
+        "try taking small sips of water",
+        "rest",
+        "ease back into eating"
+      ]
+    },
+    "hi": {
+      "name": "गैस्ट्रोएंटेराइटिस",
+      "description": "गैस्ट्रोएंटेराइटिस पाचन तंत्र, विशेष रूप से पेट और छोटी-बड़ी आंतों की सूजन है। वायरल और बैक्टीरियल गैस्ट्रोएंटेराइटिस आंतों के संक्रमण हैं जो दस्त, पेट में मरोड़, मतली और उल्टी जैसे लक्षणों से जुड़े होते हैं।",
+      "precautions": [
+        "कुछ समय के लिए ठोस भोजन न लें",
+        "थोड़ा-थोड़ा पानी पिएं",
+        "आराम करें",
+        "धीरे-धीरे खाना फिर से शुरू करें"
+      ]
+    },
+    "gu": {
+      "name": "ગેસ્ટ્રોએન્ટેરાઇટિસ",
+      "description": "ગેસ્ટ્રોએન્ટેરાઇટિસ એ પાચનતંત્રનો, ખાસ કરીને પેટ અને નાના-મોટા આંતરડાનો સોજો છે. વાયરલ અને બેક્ટેરિયલ ગેસ્ટ્રોએન્ટેરાઇટિસ એ આંતરડાના ચેપ છે જે ઝાડા, પેટમાં મરોડ, ઉબકા અને ઉલટી જેવા લક્ષણો સાથે સંકળાયેલા છે.",
+      "precautions": [
+        "થોડા સમય માટે ઘન ખોરાક ન લો",
+        "થોડું થોડું પાણી પીવો",
+        "આરામ કરો",
+        "ધીમે ધીમે ખોરાક ફરી શરૂ કરો"
+      ]
+    }
+  },
+  "Heart attack": {
+    "en": {
+      "name": "Heart attack",
+      "description": "The death of heart muscle due to the loss of blood supply. The loss of blood supply is usually caused by a complete blockage of a coronary artery, one of the arteries that supplies blood to the heart muscle.",
+      "precautions": [
+        "call ambulance",
+        "chew or swallow asprin",
+        "keep calm"
+      ]
+    },
+    "hi": {
+      "name": "हार्ट अटैक (दिल का दौरा)",
+      "description": "हृदय की मांसपेशी की मृत्यु रक्त आपूर्ति में कमी के कारण होती है। रक्त आपूर्ति में यह कमी आमतौर पर कोरोनरी धमनी में पूर्ण रुकावट के कारण होती है, जो हृदय की मांसपेशी को रक्त पहुंचाने वाली धमनियों में से एक है।",
+      "precautions": [
+        "एम्बुलेंस बुलाएं",
+        "एस्पिरिन चबाएं या निगलें",
+        "शांत रहें"
+      ]
+    },
+    "gu": {
+      "name": "હાર્ટ એટેક",
+      "description": "હૃદયના સ્નાયુનું મૃત્યુ રક્ત પુરવઠામાં ઘટાડાના કારણે થાય છે. રક્ત પુરવઠામાં આ ઘટાડો સામાન્ય રીતે કોરોનરી ધમનીમાં સંપૂર્ણ અવરોધના કારણે થાય છે.",
+      "precautions": [
+        "એમ્બ્યુલન્સ બોલાવો",
+        "એસ્પિરિન ચાવો અથવા ગળી જાવ",
+        "શાંત રહો"
+      ]
+    }
+  },
+  "Hepatitis B": {
+    "en": {
+      "name": "Hepatitis B",
+      "description": "Hepatitis B is an infection of your liver. It can cause scarring of the organ, liver failure, and cancer. It can be fatal if it isn't treated. It's spread when people come in contact with the blood, open sores, or body fluids of someone who has the hepatitis B virus.",
+      "precautions": [
+        "consult nearest hospital",
+        "vaccination",
+        "eat healthy",
+        "medication"
+      ]
+    },
+    "hi": {
+      "name": "हेपेटाइटिस बी",
+      "description": "हेपेटाइटिस बी आपके लिवर का एक संक्रमण है। यह अंग पर घाव, लिवर फेलियर और कैंसर का कारण बन सकता है। अगर इसका इलाज न किया जाए तो यह जानलेवा हो सकता है। यह हेपेटाइटिस बी वायरस से संक्रमित व्यक्ति के रक्त, खुले घाव या शारीरिक तरल पदार्थों के संपर्क में आने से फैलता है।",
+      "precautions": [
+        "नज़दीकी अस्पताल जाएं",
+        "टीकाकरण कराएं",
+        "स्वस्थ भोजन करें",
+        "दवा लें"
+      ]
+    },
+    "gu": {
+      "name": "હેપેટાઇટિસ બી",
+      "description": "હેપેટાઇટિસ બી એ તમારા લિવરનો ચેપ છે. તે અંગ પર ડાઘ, લિવર ફેલ્યોર અને કેન્સરનું કારણ બની શકે છે. જો તેની સારવાર ન કરવામાં આવે તો તે જીવલેણ બની શકે છે. તે ચેપગ્રસ્ત વ્યક્તિના લોહી કે શારીરિક પ્રવાહીના સંપર્કમાં આવવાથી ફેલાય છે.",
+      "precautions": [
+        "નજીકની હોસ્પિટલમાં જાવ",
+        "રસીકરણ કરાવો",
+        "સ્વસ્થ ખોરાક લો",
+        "દવા લો"
+      ]
+    }
+  },
+  "Hepatitis C": {
+    "en": {
+      "name": "Hepatitis C",
+      "description": "Inflammation of the liver due to the hepatitis C virus (HCV), which is usually spread via blood transfusion (rare), hemodialysis, and needle sticks. The damage hepatitis C does to the liver can lead to cirrhosis and its complications as well as cancer.",
+      "precautions": [
+        "Consult nearest hospital",
+        "vaccination",
+        "eat healthy",
+        "medication"
+      ]
+    },
+    "hi": {
+      "name": "हेपेटाइटिस सी",
+      "description": "हेपेटाइटिस सी वायरस (HCV) के कारण लिवर में सूजन, जो आमतौर पर रक्त चढ़ाने (दुर्लभ), हीमोडायलिसिस और सुई की चुभन से फैलती है। हेपेटाइटिस सी से लिवर को होने वाला नुकसान सिरोसिस और उसकी जटिलताओं के साथ-साथ कैंसर का कारण बन सकता है।",
+      "precautions": [
+        "नज़दीकी अस्पताल जाएं",
+        "टीकाकरण कराएं",
+        "स्वस्थ भोजन करें",
+        "दवा लें"
+      ]
+    },
+    "gu": {
+      "name": "હેપેટાઇટિસ સી",
+      "description": "હેપેટાઇટિસ સી વાયરસ (HCV)ના કારણે લિવરમાં સોજો, જે સામાન્ય રીતે લોહી ચઢાવવાથી (દુર્લભ), હિમોડાયલિસિસ અને સોયની ચૂભનથી ફેલાય છે. તેનાથી લિવરને થતું નુકસાન સિરોસિસ અને કેન્સરનું કારણ પણ બની શકે છે.",
+      "precautions": [
+        "નજીકની હોસ્પિટલમાં જાવ",
+        "રસીકરણ કરાવો",
+        "સ્વસ્થ ખોરાક લો",
+        "દવા લો"
+      ]
+    }
+  },
+  "Hepatitis D": {
+    "en": {
+      "name": "Hepatitis D",
+      "description": "Hepatitis D, also known as the hepatitis delta virus, is an infection that causes the liver to become inflamed. This swelling can impair liver function and cause long-term liver problems, including liver scarring and cancer. The condition is caused by the hepatitis D virus (HDV).",
+      "precautions": [
+        "consult doctor",
+        "medication",
+        "eat healthy",
+        "follow up"
+      ]
+    },
+    "hi": {
+      "name": "हेपेटाइटिस डी",
+      "description": "हेपेटाइटिस डी, जिसे हेपेटाइटिस डेल्टा वायरस भी कहा जाता है, एक संक्रमण है जो लिवर में सूजन का कारण बनता है। यह सूजन लिवर के कामकाज को बिगाड़ सकती है और लंबे समय तक लिवर की समस्याएं, जिसमें लिवर पर घाव और कैंसर शामिल हैं, पैदा कर सकती है।",
+      "precautions": [
+        "डॉक्टर से सलाह लें",
+        "दवा लें",
+        "स्वस्थ भोजन करें",
+        "फॉलो-अप कराएं"
+      ]
+    },
+    "gu": {
+      "name": "હેપેટાઇટિસ ડી",
+      "description": "હેપેટાઇટિસ ડી, જેને હેપેટાઇટિસ ડેલ્ટા વાયરસ પણ કહેવાય છે, એ એક ચેપ છે જે લિવરમાં સોજાનું કારણ બને છે. આ સોજો લિવરની કામગીરીને બગાડી શકે છે અને લાંબા ગાળાની લિવર સમસ્યાઓ પેદા કરી શકે છે.",
+      "precautions": [
+        "ડૉક્ટરની સલાહ લો",
+        "દવા લો",
+        "સ્વસ્થ ખોરાક લો",
+        "ફોલો-અપ કરાવો"
+      ]
+    }
+  },
+  "Hepatitis E": {
+    "en": {
+      "name": "Hepatitis E",
+      "description": "A rare form of liver inflammation caused by infection with the hepatitis E virus (HEV). It is transmitted via food or drink handled by an infected person or through infected water supplies in areas where fecal matter may get into the water. Hepatitis E does not cause chronic liver disease.",
+      "precautions": [
+        "stop alcohol consumption",
+        "rest",
+        "consult doctor",
+        "medication"
+      ]
+    },
+    "hi": {
+      "name": "हेपेटाइटिस ई",
+      "description": "यह हेपेटाइटिस ई वायरस (HEV) के संक्रमण के कारण होने वाली लिवर की सूजन का एक दुर्लभ रूप है। यह संक्रमित व्यक्ति द्वारा संभाले गए भोजन या पेय के माध्यम से, या दूषित पानी की आपूर्ति के माध्यम से फैलता है। हेपेटाइटिस ई लंबे समय तक चलने वाली लिवर की बीमारी का कारण नहीं बनता।",
+      "precautions": [
+        "शराब पीना बंद करें",
+        "आराम करें",
+        "डॉक्टर से सलाह लें",
+        "दवा लें"
+      ]
+    },
+    "gu": {
+      "name": "હેપેટાઇટિસ ઇ",
+      "description": "આ હેપેટાઇટિસ ઇ વાયરસ (HEV)ના ચેપના કારણે થતો લિવરના સોજાનો એક દુર્લભ પ્રકાર છે. તે ચેપગ્રસ્ત ખોરાક, પીણા અથવા દૂષિત પાણી પુરવઠા દ્વારા ફેલાય છે. તે લાંબા ગાળાની લિવર બીમારીનું કારણ નથી બનતું.",
+      "precautions": [
+        "દારૂ પીવાનું બંધ કરો",
+        "આરામ કરો",
+        "ડૉક્ટરની સલાહ લો",
+        "દવા લો"
+      ]
+    }
+  },
+  "Hypertension": {
+    "en": {
+      "name": "Hypertension",
+      "description": "Hypertension (HTN or HT), also known as high blood pressure (HBP), is a long-term medical condition in which the blood pressure in the arteries is persistently elevated. High blood pressure typically does not cause symptoms.",
+      "precautions": [
+        "meditation",
+        "salt baths",
+        "reduce stress",
+        "get proper sleep"
+      ]
+    },
+    "hi": {
+      "name": "उच्च रक्तचाप",
+      "description": "हाइपरटेंशन (उच्च रक्तचाप) एक दीर्घकालिक चिकित्सीय स्थिति है जिसमें धमनियों में रक्तचाप लगातार बढ़ा रहता है। उच्च रक्तचाप आमतौर पर कोई लक्षण पैदा नहीं करता।",
+      "precautions": [
+        "ध्यान करें",
+        "नमक के पानी से स्नान करें",
+        "तनाव कम करें",
+        "पर्याप्त नींद लें"
+      ]
+    },
+    "gu": {
+      "name": "હાઈ બ્લડ પ્રેશર",
+      "description": "હાયપરટેન્શન (હાઈ બ્લડ પ્રેશર) એ એક લાંબા ગાળાની તબીબી સ્થિતિ છે જેમાં ધમનીઓમાં બ્લડ પ્રેશર સતત વધારે રહે છે. હાઈ બ્લડ પ્રેશર સામાન્ય રીતે કોઈ લક્ષણો પેદા કરતું નથી.",
+      "precautions": [
+        "ધ્યાન કરો",
+        "મીઠાના પાણીથી સ્નાન કરો",
+        "તણાવ ઓછો કરો",
+        "પૂરતી ઊંઘ લો"
+      ]
+    }
+  },
+  "Hyperthyroidism": {
+    "en": {
+      "name": "Hyperthyroidism",
+      "description": "Hyperthyroidism (overactive thyroid) occurs when your thyroid gland produces too much of the hormone thyroxine. Hyperthyroidism can accelerate your body's metabolism, causing unintentional weight loss and a rapid or irregular heartbeat.",
+      "precautions": [
+        "eat healthy",
+        "massage",
+        "use lemon balm",
+        "take radioactive iodine treatment"
+      ]
+    },
+    "hi": {
+      "name": "हाइपरथायरायडिज्म",
+      "description": "हाइपरथायरायडिज्म (अतिसक्रिय थायरॉइड) तब होता है जब आपकी थायरॉइड ग्रंथि हार्मोन थायरॉक्सिन का बहुत अधिक उत्पादन करती है। इससे अनजाने में वजन कम होना और तेज़ या अनियमित दिल की धड़कन हो सकती है।",
+      "precautions": [
+        "स्वस्थ भोजन करें",
+        "मालिश करें",
+        "लेमन बाम का उपयोग करें",
+        "रेडियोएक्टिव आयोडीन उपचार लें"
+      ]
+    },
+    "gu": {
+      "name": "હાયપરથાઇરોઇડિઝમ",
+      "description": "હાયપરથાઇરોઇડિઝમ (અતિસક્રિય થાઇરોઇડ) ત્યારે થાય છે જ્યારે તમારી થાઇરોઇડ ગ્રંથિ થાયરોક્સિન હોર્મોનનું ખૂબ વધારે ઉત્પાદન કરે છે. તેનાથી અજાણતાં વજન ઘટવું અને ઝડપી ધબકારા થઈ શકે છે.",
+      "precautions": [
+        "સ્વસ્થ ખોરાક લો",
+        "માલિશ કરો",
+        "લેમન બામનો ઉપયોગ કરો",
+        "રેડિયોએક્ટિવ આયોડિન સારવાર લો"
+      ]
+    }
+  },
+  "Hypoglycemia": {
+    "en": {
+      "name": "Hypoglycemia",
+      "description": " Hypoglycemia is a condition in which your blood sugar (glucose) level is lower than normal. Glucose is your body's main energy source. Hypoglycemia is often related to diabetes treatment. But other drugs and a variety of conditions — many rare — can cause low blood sugar in people who don't have diabetes.",
+      "precautions": [
+        "lie down on side",
+        "check in pulse",
+        "drink sugary drinks",
+        "consult doctor"
+      ]
+    },
+    "hi": {
+      "name": "हाइपोग्लाइसीमिया (लो ब्लड शुगर)",
+      "description": "हाइपोग्लाइसीमिया एक ऐसी स्थिति है जिसमें आपका ब्लड शुगर (ग्लूकोज़) सामान्य से कम हो जाता है। यह अक्सर डायबिटीज के इलाज से जुड़ा होता है, लेकिन अन्य दवाएं और स्थितियां भी उन लोगों में लो ब्लड शुगर पैदा कर सकती हैं जिन्हें डायबिटीज नहीं है।",
+      "precautions": [
+        "करवट लेकर लेटें",
+        "नब्ज़ जांचें",
+        "मीठा पेय पिएं",
+        "डॉक्टर से सलाह लें"
+      ]
+    },
+    "gu": {
+      "name": "હાયપોગ્લાયસેમિયા",
+      "description": "હાયપોગ્લાયસેમિયા એ એવી સ્થિતિ છે જેમાં તમારું બ્લડ સુગર (ગ્લુકોઝ) સામાન્ય કરતાં ઓછું થઈ જાય છે. તે ઘણીવાર ડાયાબિટીસની સારવાર સાથે સંકળાયેલું હોય છે, પરંતુ અન્ય કારણોસર પણ થઈ શકે છે.",
+      "precautions": [
+        "પડખું ફેરવીને સૂઈ જાવ",
+        "નાડી તપાસો",
+        "મીઠું પીણું પીવો",
+        "ડૉક્ટરની સલાહ લો"
+      ]
+    }
+  },
+  "Hypothyroidism": {
+    "en": {
+      "name": "Hypothyroidism",
+      "description": "Hypothyroidism, also called underactive thyroid or low thyroid, is a disorder of the endocrine system in which the thyroid gland does not produce enough thyroid hormone.",
+      "precautions": [
+        "reduce stress",
+        "exercise",
+        "eat healthy",
+        "get proper sleep"
+      ]
+    },
+    "hi": {
+      "name": "हाइपोथायरायडिज्म",
+      "description": "हाइपोथायरायडिज्म, जिसे अंडरएक्टिव थायरॉइड या लो थायरॉइड भी कहा जाता है, एंडोक्राइन सिस्टम का एक विकार है जिसमें थायरॉइड ग्रंथि पर्याप्त थायरॉइड हार्मोन नहीं बनाती।",
+      "precautions": [
+        "तनाव कम करें",
+        "व्यायाम करें",
+        "स्वस्थ भोजन करें",
+        "पर्याप्त नींद लें"
+      ]
+    },
+    "gu": {
+      "name": "હાયપોથાઇરોઇડિઝમ",
+      "description": "હાયપોથાઇરોઇડિઝમ, જેને અન્ડરએક્ટિવ થાઇરોઇડ પણ કહેવાય છે, તે અંતઃસ્ત્રાવી તંત્રનો એક વિકાર છે જેમાં થાઇરોઇડ ગ્રંથિ પૂરતું થાઇરોઇડ હોર્મોન નથી બનાવતી.",
+      "precautions": [
+        "તણાવ ઓછો કરો",
+        "કસરત કરો",
+        "સ્વસ્થ ખોરાક લો",
+        "પૂરતી ઊંઘ લો"
+      ]
+    }
+  },
+  "Impetigo": {
+    "en": {
+      "name": "Impetigo",
+      "description": "Impetigo (im-puh-TIE-go) is a common and highly contagious skin infection that mainly affects infants and children. Impetigo usually appears as red sores on the face, especially around a child's nose and mouth, and on hands and feet. The sores burst and develop honey-colored crusts.",
+      "precautions": [
+        "soak affected area in warm water",
+        "use antibiotics",
+        "remove scabs with wet compressed cloth",
+        "consult doctor"
+      ]
+    },
+    "hi": {
+      "name": "इम्पेटिगो",
+      "description": "इम्पेटिगो एक सामान्य और अत्यधिक संक्रामक त्वचा संक्रमण है जो मुख्य रूप से शिशुओं और बच्चों को प्रभावित करता है। यह आमतौर पर चेहरे पर, खासकर नाक और मुंह के आसपास, और हाथों-पैरों पर लाल घावों के रूप में दिखाई देता है। ये घाव फूटकर शहद के रंग की पपड़ी बना लेते हैं।",
+      "precautions": [
+        "प्रभावित हिस्से को गुनगुने पानी में भिगोएं",
+        "एंटीबायोटिक का उपयोग करें",
+        "गीले कपड़े से पपड़ी हटाएं",
+        "डॉक्टर से सलाह लें"
+      ]
+    },
+    "gu": {
+      "name": "ઇમ્પેટિગો",
+      "description": "ઇમ્પેટિગો એ એક સામાન્ય અને અત્યંત ચેપી ત્વચા ચેપ છે જે મુખ્યત્વે શિશુઓ અને બાળકોને અસર કરે છે. તે સામાન્ય રીતે ચહેરા પર, ખાસ કરીને નાક અને મોંની આસપાસ, અને હાથ-પગ પર લાલ ઘા તરીકે દેખાય છે.",
+      "precautions": [
+        "અસરગ્રસ્ત ભાગને હૂંફાળા પાણીમાં પલાળો",
+        "એન્ટિબાયોટિકનો ઉપયોગ કરો",
+        "ભીના કપડાથી પોપડી દૂર કરો",
+        "ડૉક્ટરની સલાહ લો"
+      ]
+    }
+  },
+  "Jaundice": {
+    "en": {
+      "name": "Jaundice",
+      "description": "Yellow staining of the skin and sclerae (the whites of the eyes) by abnormally high blood levels of the bile pigment bilirubin. The yellowing extends to other tissues and body fluids. Jaundice was once called the \"morbus regius\" (the regal disease) in the belief that only the touch of a king could cure it",
+      "precautions": [
+        "drink plenty of water",
+        "consume milk thistle",
+        "eat fruits and high fiberous food",
+        "medication"
+      ]
+    },
+    "hi": {
+      "name": "पीलिया",
+      "description": "पित्त वर्णक बिलीरुबिन के असामान्य रूप से उच्च रक्त स्तर के कारण त्वचा और आंखों के सफेद हिस्से (स्क्लेरा) का पीला पड़ना। यह पीलापन शरीर के अन्य ऊतकों और तरल पदार्थों तक फैल जाता है।",
+      "precautions": [
+        "खूब पानी पिएं",
+        "मिल्क थीस्ल का सेवन करें",
+        "फल और उच्च फाइबर युक्त भोजन खाएं",
+        "दवा लें"
+      ]
+    },
+    "gu": {
+      "name": "કમળો",
+      "description": "પિત્ત રંજકદ્રવ્ય બિલિરુબિનના અસામાન્ય રીતે ઊંચા લોહીના સ્તરના કારણે ત્વચા અને આંખોના સફેદ ભાગ (સ્ક્લેરા)નું પીળું પડવું. આ પીળાશ શરીરના અન્ય પેશીઓ અને પ્રવાહીઓ સુધી ફેલાય છે.",
+      "precautions": [
+        "પુષ્કળ પાણી પીવો",
+        "મિલ્ક થિસલનું સેવન કરો",
+        "ફળો અને ઉચ્ચ ફાઇબરવાળો ખોરાક ખાઓ",
+        "દવા લો"
+      ]
+    }
+  },
+  "Malaria": {
+    "en": {
+      "name": "Malaria",
+      "description": "An infectious disease caused by protozoan parasites from the Plasmodium family that can be transmitted by the bite of the Anopheles mosquito or by a contaminated needle or transfusion. Falciparum malaria is the most deadly type.",
+      "precautions": [
+        "Consult nearest hospital",
+        "avoid oily food",
+        "avoid non veg food",
+        "keep mosquitos out"
+      ]
+    },
+    "hi": {
+      "name": "मलेरिया",
+      "description": "प्लाज़्मोडियम परिवार के प्रोटोज़ोआ परजीवियों के कारण होने वाली एक संक्रामक बीमारी, जो एनाफिलीज़ मच्छर के काटने से या दूषित सुई या रक्त चढ़ाने से फैल सकती है। फैल्सीपेरम मलेरिया सबसे घातक प्रकार है।",
+      "precautions": [
+        "नज़दीकी अस्पताल जाएं",
+        "तैलीय भोजन से बचें",
+        "मांसाहारी भोजन से बचें",
+        "मच्छरों को दूर रखें"
+      ]
+    },
+    "gu": {
+      "name": "મેલેરિયા",
+      "description": "પ્લાઝ્મોડિયમ પરિવારના પ્રોટોઝોઆ પરોપજીવીઓના કારણે થતો ચેપી રોગ, જે એનોફિલિસ મચ્છરના કરડવાથી અથવા દૂષિત સોય કે લોહી ચઢાવવાથી ફેલાઈ શકે છે. ફેલ્સિપેરમ મેલેરિયા સૌથી ઘાતક પ્રકાર છે.",
+      "precautions": [
+        "નજીકની હોસ્પિટલમાં જાવ",
+        "તેલયુક્ત ખોરાક ટાળો",
+        "માંસાહારી ખોરાક ટાળો",
+        "મચ્છરોને દૂર રાખો"
+      ]
+    }
+  },
+  "Migraine": {
+    "en": {
+      "name": "Migraine",
+      "description": "A migraine can cause severe throbbing pain or a pulsing sensation, usually on one side of the head. It's often accompanied by nausea, vomiting, and extreme sensitivity to light and sound. Migraine attacks can last for hours to days, and the pain can be so severe that it interferes with your daily activities.",
+      "precautions": [
+        "meditation",
+        "reduce stress",
+        "use poloroid glasses in sun",
+        "consult doctor"
+      ]
+    },
+    "hi": {
+      "name": "माइग्रेन",
+      "description": "माइग्रेन गंभीर धड़कते हुए दर्द या स्पंदन का एहसास पैदा कर सकता है, आमतौर पर सिर के एक तरफ। इसके साथ अक्सर मतली, उल्टी, और रोशनी व आवाज़ के प्रति अत्यधिक संवेदनशीलता होती है। माइग्रेन के दौरे कुछ घंटों से लेकर कई दिनों तक रह सकते हैं।",
+      "precautions": [
+        "ध्यान करें",
+        "तनाव कम करें",
+        "धूप में पोलेरॉइड चश्मा पहनें",
+        "डॉक्टर से सलाह लें"
+      ]
+    },
+    "gu": {
+      "name": "માઇગ્રેન",
+      "description": "માઇગ્રેન ગંભીર ધબકારા મારતો દુખાવો અથવા સ્પંદનની અનુભૂતિ પેદા કરી શકે છે, સામાન્ય રીતે માથાની એક બાજુએ. તેની સાથે ઘણીવાર ઉબકા, ઉલટી, અને પ્રકાશ-અવાજ પ્રત્યે અતિસંવેદનશીલતા હોય છે.",
+      "precautions": [
+        "ધ્યાન કરો",
+        "તણાવ ઓછો કરો",
+        "તડકામાં પોલેરોઇડ ચશ્મા પહેરો",
+        "ડૉક્ટરની સલાહ લો"
+      ]
+    }
+  },
+  "Osteoarthristis": {
+    "en": {
+      "name": "Osteoarthristis",
+      "description": "Osteoarthritis is the most common form of arthritis, affecting millions of people worldwide. It occurs when the protective cartilage that cushions the ends of your bones wears down over time.",
+      "precautions": [
+        "acetaminophen",
+        "consult nearest hospital",
+        "follow up",
+        "salt baths"
+      ]
+    },
+    "hi": {
+      "name": "ऑस्टियोआर्थराइटिस",
+      "description": "ऑस्टियोआर्थराइटिस गठिया का सबसे सामान्य रूप है, जो दुनिया भर में लाखों लोगों को प्रभावित करता है। यह तब होता है जब आपकी हड्डियों के सिरों को कुशन देने वाली सुरक्षात्मक कार्टिलेज समय के साथ घिस जाती है।",
+      "precautions": [
+        "एसिटामिनोफेन लें",
+        "नज़दीकी अस्पताल जाएं",
+        "फॉलो-अप कराएं",
+        "नमक के पानी से स्नान करें"
+      ]
+    },
+    "gu": {
+      "name": "ઓસ્ટિયોઆર્થરાઇટિસ",
+      "description": "ઓસ્ટિયોઆર્થરાઇટિસ એ સંધિવાનું સૌથી સામાન્ય સ્વરૂપ છે, જે વિશ્વભરમાં લાખો લોકોને અસર કરે છે. તે ત્યારે થાય છે જ્યારે તમારા હાડકાના છેડાને કુશન આપતું રક્ષણાત્મક કોમલાસ્થિ સમય જતાં ઘસાઈ જાય છે.",
+      "precautions": [
+        "એસિટામિનોફેન લો",
+        "નજીકની હોસ્પિટલમાં જાવ",
+        "ફોલો-અપ કરાવો",
+        "મીઠાના પાણીથી સ્નાન કરો"
+      ]
+    }
+  },
+  "Paralysis (brain hemorrhage)": {
+    "en": {
+      "name": "Paralysis (brain hemorrhage)",
+      "description": "Intracerebral hemorrhage (ICH) is when blood suddenly bursts into brain tissue, causing damage to your brain. Symptoms usually appear suddenly during ICH. They include headache, weakness, confusion, and paralysis, particularly on one side of your body.",
+      "precautions": [
+        "massage",
+        "eat healthy",
+        "exercise",
+        "consult doctor"
+      ]
+    },
+    "hi": {
+      "name": "लकवा (मस्तिष्क रक्तस्राव)",
+      "description": "इंट्रासेरेब्रल हेमरेज (ICH) तब होता है जब रक्त अचानक मस्तिष्क के ऊतक में फट जाता है, जिससे मस्तिष्क को नुकसान पहुंचता है। लक्षणों में सिरदर्द, कमज़ोरी, भ्रम और खासकर शरीर के एक तरफ लकवा शामिल है।",
+      "precautions": [
+        "मालिश करें",
+        "स्वस्थ भोजन करें",
+        "व्यायाम करें",
+        "डॉक्टर से सलाह लें"
+      ]
+    },
+    "gu": {
+      "name": "લકવો (મગજમાં રક્તસ્રાવ)",
+      "description": "ઇન્ટ્રાસેરેબ્રલ હેમરેજ (ICH) ત્યારે થાય છે જ્યારે લોહી અચાનક મગજની પેશીમાં ફૂટે છે, જેનાથી મગજને નુકસાન થાય છે. લક્ષણોમાં માથાનો દુખાવો, નબળાઈ, ગૂંચવણ અને શરીરની એક બાજુએ લકવોનો સમાવેશ થાય છે.",
+      "precautions": [
+        "માલિશ કરો",
+        "સ્વસ્થ ખોરાક લો",
+        "કસરત કરો",
+        "ડૉક્ટરની સલાહ લો"
+      ]
+    }
+  },
+  "Peptic ulcer diseae": {
+    "en": {
+      "name": "Peptic ulcer diseae",
+      "description": "Peptic ulcer disease (PUD) is a break in the inner lining of the stomach, the first part of the small intestine, or sometimes the lower esophagus. An ulcer in the stomach is called a gastric ulcer, while one in the first part of the intestines is a duodenal ulcer.",
+      "precautions": [
+        "avoid fatty spicy food",
+        "consume probiotic food",
+        "eliminate milk",
+        "limit alcohol"
+      ]
+    },
+    "hi": {
+      "name": "पेप्टिक अल्सर",
+      "description": "पेप्टिक अल्सर रोग (PUD) पेट, छोटी आंत के पहले हिस्से, या कभी-कभी निचले इसोफेगस की अंदरूनी परत में एक घाव है। पेट में होने वाले अल्सर को गैस्ट्रिक अल्सर कहा जाता है, जबकि आंत के पहले हिस्से में होने वाले को ड्यूओडेनल अल्सर कहा जाता है।",
+      "precautions": [
+        "तैलीय और मसालेदार भोजन से बचें",
+        "प्रोबायोटिक भोजन लें",
+        "दूध का सेवन बंद करें",
+        "शराब सीमित करें"
+      ]
+    },
+    "gu": {
+      "name": "પેપ્ટિક અલ્સર",
+      "description": "પેપ્ટિક અલ્સર રોગ (PUD) એ પેટ, નાના આંતરડાના પ્રથમ ભાગ, અથવા ક્યારેક નીચલા ઇસોફેગસના અંદરના સ્તરમાં એક ઘા છે. પેટમાં થતા અલ્સરને ગેસ્ટ્રિક અલ્સર કહેવાય છે, જ્યારે આંતરડામાં થતાને ડ્યુઓડેનલ અલ્સર કહેવાય છે.",
+      "precautions": [
+        "તેલયુક્ત અને મસાલેદાર ખોરાક ટાળો",
+        "પ્રોબાયોટિક ખોરાક લો",
+        "દૂધનું સેવન બંધ કરો",
+        "દારૂ મર્યાદિત કરો"
+      ]
+    }
+  },
+  "Pneumonia": {
+    "en": {
+      "name": "Pneumonia",
+      "description": "Pneumonia is an infection in one or both lungs. Bacteria, viruses, and fungi cause it. The infection causes inflammation in the air sacs in your lungs, which are called alveoli. The alveoli fill with fluid or pus, making it difficult to breathe.",
+      "precautions": [
+        "consult doctor",
+        "medication",
+        "rest",
+        "follow up"
+      ]
+    },
+    "hi": {
+      "name": "निमोनिया",
+      "description": "निमोनिया एक या दोनों फेफड़ों में होने वाला संक्रमण है। यह बैक्टीरिया, वायरस और फंगस के कारण होता है। यह संक्रमण फेफड़ों की वायु थैलियों में सूजन पैदा करता है, जो द्रव या मवाद से भर जाती हैं, जिससे सांस लेना मुश्किल हो जाता है।",
+      "precautions": [
+        "डॉक्टर से सलाह लें",
+        "दवा लें",
+        "आराम करें",
+        "फॉलो-अप कराएं"
+      ]
+    },
+    "gu": {
+      "name": "ન્યુમોનિયા",
+      "description": "ન્યુમોનિયા એ એક અથવા બંને ફેફસાંમાં થતો ચેપ છે. તે બેક્ટેરિયા, વાયરસ અને ફૂગના કારણે થાય છે. આ ચેપ ફેફસાંની હવાની કોથળીઓમાં સોજો પેદા કરે છે, જેનાથી શ્વાસ લેવો મુશ્કેલ બને છે.",
+      "precautions": [
+        "ડૉક્ટરની સલાહ લો",
+        "દવા લો",
+        "આરામ કરો",
+        "ફોલો-અપ કરાવો"
+      ]
+    }
+  },
+  "Psoriasis": {
+    "en": {
+      "name": "Psoriasis",
+      "description": "Psoriasis is a common skin disorder that forms thick, red, bumpy patches covered with silvery scales. They can pop up anywhere, but most appear on the scalp, elbows, knees, and lower back. Psoriasis can't be passed from person to person. It does sometimes happen in members of the same family.",
+      "precautions": [
+        "wash hands with warm soapy water",
+        "stop bleeding using pressure",
+        "consult doctor",
+        "salt baths"
+      ]
+    },
+    "hi": {
+      "name": "सोरायसिस",
+      "description": "सोरायसिस एक सामान्य त्वचा विकार है जो चांदी जैसी परतों से ढके मोटे, लाल, उभरे हुए पैच बनाता है। ये सिर, कोहनी, घुटनों और पीठ के निचले हिस्से पर सबसे ज़्यादा दिखाई देते हैं। सोरायसिस एक व्यक्ति से दूसरे व्यक्ति में नहीं फैलता।",
+      "precautions": [
+        "गुनगुने साबुन वाले पानी से हाथ धोएं",
+        "दबाव डालकर रक्तस्राव रोकें",
+        "डॉक्टर से सलाह लें",
+        "नमक के पानी से स्नान करें"
+      ]
+    },
+    "gu": {
+      "name": "સોરાયસિસ",
+      "description": "સોરાયસિસ એ એક સામાન્ય ત્વચા વિકાર છે જે ચાંદી જેવા પોપડાથી ઢંકાયેલા જાડા, લાલ, ઉભરેલા ધબ્બા બનાવે છે. તે મોટાભાગે માથા, કોણી, ઘૂંટણ અને પીઠના નીચેના ભાગ પર દેખાય છે. સોરાયસિસ એક વ્યક્તિથી બીજી વ્યક્તિમાં ફેલાતો નથી.",
+      "precautions": [
+        "હૂંફાળા સાબુવાળા પાણીથી હાથ ધુઓ",
+        "દબાણ આપીને રક્તસ્રાવ રોકો",
+        "ડૉક્ટરની સલાહ લો",
+        "મીઠાના પાણીથી સ્નાન કરો"
+      ]
+    }
+  },
+  "Tuberculosis": {
+    "en": {
+      "name": "Tuberculosis",
+      "description": "Tuberculosis (TB) is an infectious disease usually caused by Mycobacterium tuberculosis (MTB) bacteria. Tuberculosis generally affects the lungs, but can also affect other parts of the body. Most infections show no symptoms, in which case it is known as latent tuberculosis.",
+      "precautions": [
+        "cover mouth",
+        "consult doctor",
+        "medication",
+        "rest"
+      ]
+    },
+    "hi": {
+      "name": "तपेदिक (टीबी)",
+      "description": "तपेदिक (टीबी) आमतौर पर माइकोबैक्टीरियम ट्यूबरकुलोसिस बैक्टीरिया के कारण होने वाली एक संक्रामक बीमारी है। यह आमतौर पर फेफड़ों को प्रभावित करता है, लेकिन शरीर के अन्य हिस्सों को भी प्रभावित कर सकता है।",
+      "precautions": [
+        "मुंह ढकें",
+        "डॉक्टर से सलाह लें",
+        "दवा लें",
+        "आराम करें"
+      ]
+    },
+    "gu": {
+      "name": "ક્ષય રોગ (ટીબી)",
+      "description": "ક્ષય રોગ (ટીબી) સામાન્ય રીતે માયકોબેક્ટેરિયમ ટ્યુબરક્યુલોસિસ બેક્ટેરિયાના કારણે થતો ચેપી રોગ છે. તે સામાન્ય રીતે ફેફસાંને અસર કરે છે, પરંતુ શરીરના અન્ય ભાગોને પણ અસર કરી શકે છે.",
+      "precautions": [
+        "મોં ઢાંકો",
+        "ડૉક્ટરની સલાહ લો",
+        "દવા લો",
+        "આરામ કરો"
+      ]
+    }
+  },
+  "Typhoid": {
+    "en": {
+      "name": "Typhoid",
+      "description": "An acute illness characterized by fever caused by infection with the bacterium Salmonella typhi. Typhoid fever has an insidious onset, with fever, headache, constipation, malaise, chills, and muscle pain. Diarrhea is uncommon, and vomiting is not usually severe.",
+      "precautions": [
+        "eat high calorie vegitables",
+        "antiboitic therapy",
+        "consult doctor",
+        "medication"
+      ]
+    },
+    "hi": {
+      "name": "टाइफाइड",
+      "description": "साल्मोनेला टाइफी बैक्टीरिया के संक्रमण के कारण होने वाली एक तीव्र बीमारी जिसमें बुखार होता है। इसमें बुखार, सिरदर्द, कब्ज़, अस्वस्थता, ठंड लगना और मांसपेशियों में दर्द होता है। दस्त कम होता है, और उल्टी आमतौर पर गंभीर नहीं होती।",
+      "precautions": [
+        "उच्च कैलोरी वाली सब्ज़ियां खाएं",
+        "एंटीबायोटिक थेरेपी लें",
+        "डॉक्टर से सलाह लें",
+        "दवा लें"
+      ]
+    },
+    "gu": {
+      "name": "ટાઇફોઇડ",
+      "description": "સાલ્મોનેલા ટાઇફી બેક્ટેરિયાના ચેપના કારણે થતો એક તીવ્ર રોગ જેમાં તાવ આવે છે. તેમાં તાવ, માથાનો દુખાવો, કબજિયાત, અસ્વસ્થતા, ઠંડી લાગવી અને સ્નાયુમાં દુખાવો થાય છે.",
+      "precautions": [
+        "ઉચ્ચ કેલરીવાળા શાકભાજી ખાઓ",
+        "એન્ટિબાયોટિક થેરાપી લો",
+        "ડૉક્ટરની સલાહ લો",
+        "દવા લો"
+      ]
+    }
+  },
+  "Urinary tract infection": {
+    "en": {
+      "name": "Urinary tract infection",
+      "description": "Urinary tract infection: An infection of the kidney, ureter, bladder, or urethra. Abbreviated UTI. Not everyone with a UTI has symptoms, but common symptoms include a frequent urge to urinate and pain or burning when urinating.",
+      "precautions": [
+        "drink plenty of water",
+        "increase vitamin c intake",
+        "drink cranberry juice",
+        "take probiotics"
+      ]
+    },
+    "hi": {
+      "name": "मूत्र मार्ग संक्रमण (UTI)",
+      "description": "किडनी, मूत्रवाहिनी, मूत्राशय या मूत्रमार्ग का संक्रमण (UTI)। हर किसी को इसके लक्षण नहीं होते, लेकिन सामान्य लक्षणों में बार-बार पेशाब करने की इच्छा और पेशाब करते समय दर्द या जलन शामिल है।",
+      "precautions": [
+        "खूब पानी पिएं",
+        "विटामिन सी का सेवन बढ़ाएं",
+        "क्रैनबेरी जूस पिएं",
+        "प्रोबायोटिक्स लें"
+      ]
+    },
+    "gu": {
+      "name": "યુરિનરી ટ્રેક્ટ ઇન્ફેક્શન (UTI)",
+      "description": "કિડની, મૂત્રવાહિની, મૂત્રાશય અથવા મૂત્રમાર્ગનો ચેપ (UTI). દરેકને તેના લક્ષણો હોતા નથી, પરંતુ સામાન્ય લક્ષણોમાં વારંવાર પેશાબ કરવાની ઇચ્છા અને પેશાબ કરતી વખતે દુખાવો કે બળતરાનો સમાવેશ થાય છે.",
+      "precautions": [
+        "પુષ્કળ પાણી પીવો",
+        "વિટામિન સીનું સેવન વધારો",
+        "ક્રેનબેરી જ્યુસ પીવો",
+        "પ્રોબાયોટિક્સ લો"
+      ]
+    }
+  },
+  "Varicose veins": {
+    "en": {
+      "name": "Varicose veins",
+      "description": "A vein that has enlarged and twisted, often appearing as a bulging, blue blood vessel that is clearly visible through the skin. Varicose veins are most common in older adults, particularly women, and occur especially on the legs.",
+      "precautions": [
+        "lie down flat and raise the leg high",
+        "use oinments",
+        "use vein compression",
+        "dont stand still for long"
+      ]
+    },
+    "hi": {
+      "name": "वैरिकोज़ वेन्स",
+      "description": "एक नस जो बढ़ गई हो और मुड़ गई हो, जो अक्सर त्वचा के माध्यम से स्पष्ट रूप से दिखाई देने वाली उभरी हुई, नीली रक्त वाहिका के रूप में दिखाई देती है। यह बड़े वयस्कों में, खासकर महिलाओं में, और विशेष रूप से पैरों पर सबसे सामान्य है।",
+      "precautions": [
+        "सीधे लेटें और पैर ऊंचा उठाएं",
+        "मरहम का उपयोग करें",
+        "नस संपीड़न (कंप्रेशन) का उपयोग करें",
+        "लंबे समय तक एक जगह खड़े न रहें"
+      ]
+    },
+    "gu": {
+      "name": "કાયમની અતિશય ફૂલેલી નસો",
+      "description": "એક નસ જે મોટી થઈ ગઈ હોય અને વળી ગઈ હોય, જે ઘણીવાર ત્વચા દ્વારા સ્પષ્ટ રીતે દેખાતી ઉભરેલી, વાદળી રક્તવાહિની તરીકે દેખાય છે. તે મોટી ઉંમરના પુખ્તોમાં, ખાસ કરીને મહિલાઓમાં અને પગ પર સૌથી સામાન્ય છે.",
+      "precautions": [
+        "સીધા સૂઈ જાવ અને પગ ઊંચો કરો",
+        "મલમનો ઉપયોગ કરો",
+        "નસ કમ્પ્રેશનનો ઉપયોગ કરો",
+        "લાંબા સમય સુધી એક જગ્યાએ ઊભા ન રહો"
+      ]
+    }
+  },
+  "hepatitis A": {
+    "en": {
+      "name": "hepatitis A",
+      "description": "Hepatitis A is a highly contagious liver infection caused by the hepatitis A virus. The virus is one of several types of hepatitis viruses that cause inflammation and affect your liver's ability to function.",
+      "precautions": [
+        "Consult nearest hospital",
+        "wash hands through",
+        "avoid fatty spicy food",
+        "medication"
+      ]
+    },
+    "hi": {
+      "name": "हेपेटाइटिस ए",
+      "description": "हेपेटाइटिस ए एक अत्यधिक संक्रामक लिवर संक्रमण है जो हेपेटाइटिस ए वायरस के कारण होता है। यह वायरस सूजन पैदा करता है और आपके लिवर के कामकाज को प्रभावित करता है।",
+      "precautions": [
+        "नज़दीकी अस्पताल जाएं",
+        "अच्छी तरह हाथ धोएं",
+        "तैलीय और मसालेदार भोजन से बचें",
+        "दवा लें"
+      ]
+    },
+    "gu": {
+      "name": "હેપેટાઇટિસ એ",
+      "description": "હેપેટાઇટિસ એ એ એક અત્યંત ચેપી લિવર ચેપ છે જે હેપેટાઇટિસ એ વાયરસના કારણે થાય છે. આ વાયરસ સોજો પેદા કરે છે અને તમારા લિવરની કામગીરીને અસર કરે છે.",
+      "precautions": [
+        "નજીકની હોસ્પિટલમાં જાવ",
+        "સારી રીતે હાથ ધુઓ",
+        "તેલયુક્ત અને મસાલેદાર ખોરાક ટાળો",
+        "દવા લો"
+      ]
+    }
+  }
+}

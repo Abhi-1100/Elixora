@@ -92,6 +92,8 @@ def create_app():
     # Load the model artifacts once per Flask application instance.
     from app.services.symptom_predictor import init_symptom_predictor
     init_symptom_predictor(app)
+    from app.routes.chat_routes import init_multilang_predictor
+    init_multilang_predictor(app)
 
     # --- Register blueprints (routes) ---
     from app.routes.auth_routes import auth_bp

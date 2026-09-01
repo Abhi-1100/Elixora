@@ -1,12 +1,18 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from dotenv import load_dotenv
 import bcrypt
+import os
 import re
 
 from app import db
 from app.models.models import User
 
 auth_bp = Blueprint("auth_bp", __name__)
+
+load_dotenv()
 
 EMAIL_REGEX = r"^[\w\.-]+@[\w\.-]+\.\w+$"
 
@@ -15,7 +21,9 @@ def hash_password(plain_password: str) -> str:
     return bcrypt.hashpw(plain_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
-def check_password(plain_password: str, hashed_password: str) -> bool:
+def check_password(plain_password: str, hashed_password: str | None) -> bool:
+    if not hashed_password:
+        return False
     return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
@@ -49,6 +57,7 @@ def signup():
         password_hash=hash_password(password),
         age=age,
         gender=gender,
+        profile_complete=age is not None and gender is not None,
     )
     db.session.add(new_user)
     db.session.commit()
@@ -83,6 +92,83 @@ def login():
         "access_token": access_token,
         "user": user.to_dict(),
     }), 200
+
+
+@auth_bp.route("/google", methods=["POST"])
+def google_login():
+    data = request.get_json(silent=True) or {}
+    credential = data.get("credential")
+    client_id = os.getenv("GOOGLE_CLIENT_ID")
+
+    if not credential or not isinstance(credential, str):
+        return jsonify({"error": "Google credential is required"}), 400
+    if not client_id:
+        return jsonify({"error": "Google sign-in is not configured on the server"}), 500
+
+    try:
+        claims = id_token.verify_oauth2_token(
+            credential,
+            google_requests.Request(),
+            client_id,
+        )
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid Google credential"}), 401
+
+    google_id = claims.get("sub")
+    email = (claims.get("email") or "").strip().lower()
+    name = (claims.get("name") or claims.get("given_name") or "Google user").strip()
+
+    if not google_id or not email or claims.get("email_verified") is not True:
+        return jsonify({"error": "Google account email could not be verified"}), 401
+
+    user = User.query.filter_by(google_id=google_id).first()
+    if not user:
+        user = User.query.filter_by(email=email).first()
+
+    if user:
+        if user.google_id and user.google_id != google_id:
+            return jsonify({"error": "This email is linked to a different Google account"}), 409
+        if not user.google_id:
+            user.google_id = google_id
+    else:
+        user = User(
+            name=name,
+            email=email,
+            password_hash=None,
+            google_id=google_id,
+            profile_complete=False,
+        )
+        db.session.add(user)
+
+    db.session.commit()
+    access_token = create_access_token(identity=user.id)
+    return jsonify({
+        "message": "Google login successful",
+        "access_token": access_token,
+        "user": user.to_dict(),
+    }), 200
+
+
+@auth_bp.route("/profile", methods=["PATCH"])
+@jwt_required()
+def update_profile():
+    user = User.query.get(get_jwt_identity())
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json(silent=True) or {}
+    age = data.get("age")
+    gender = data.get("gender")
+    if not isinstance(age, int) or age < 1 or age > 120:
+        return jsonify({"error": "Age must be an integer between 1 and 120"}), 400
+    if gender not in {"Male", "Female", "Other"}:
+        return jsonify({"error": "Gender must be Male, Female, or Other"}), 400
+
+    user.age = age
+    user.gender = gender
+    user.profile_complete = True
+    db.session.commit()
+    return jsonify({"user": user.to_dict()}), 200
 
 
 @auth_bp.route("/me", methods=["GET"])

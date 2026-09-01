@@ -1,8 +1,10 @@
 """Symptom-advisor endpoint backed by the local classifier and an LLM."""
 
 import json
+import importlib.util
 import os
 import re
+from pathlib import Path
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
@@ -16,6 +18,35 @@ except ImportError:
     fuzz = None
 
 chat_bp = Blueprint("chat_bp", __name__)
+
+
+def init_multilang_predictor(app) -> None:
+    """Load the project-root multilingual predictor once at app startup."""
+    project_root = Path(app.root_path).resolve().parents[1]
+    module_path = project_root / "ml" / "predict_multilang.py"
+    if not module_path.is_file():
+        app.logger.warning("Multilingual predictor not found at %s", module_path)
+        app.extensions["multilang_predictor"] = None
+        return
+
+    spec = importlib.util.spec_from_file_location("predict_multilang", module_path)
+    if spec is None or spec.loader is None:
+        app.logger.warning("Unable to load multilingual predictor from %s", module_path)
+        app.extensions["multilang_predictor"] = None
+        return
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+    except (OSError, ImportError, ValueError) as error:
+        app.logger.exception("Multilingual predictor initialization failed: %s", error)
+        app.extensions["multilang_predictor"] = None
+        return
+    app.extensions["multilang_predictor"] = module
+
+
+def _multilang_predictor():
+    """Return the predictor module loaded during Flask app initialization."""
+    return current_app.extensions.get("multilang_predictor")
 
 
 def _normalized(value):
@@ -113,3 +144,33 @@ def symptom_advisor():
         "response": response,
         "response_source": source,
     })
+
+
+@chat_bp.post("/symptom-check")
+def symptom_check():
+    """Return a localized response from the multilingual ML predictor."""
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "A JSON request body is required."}), 400
+
+    symptoms = body.get("symptoms")
+    if isinstance(symptoms, str):
+        if not symptoms.strip():
+            return jsonify({"error": "'symptoms' must not be empty."}), 400
+    elif isinstance(symptoms, list):
+        if not symptoms or not all(isinstance(symptom, str) and symptom.strip() for symptom in symptoms):
+            return jsonify({"error": "'symptoms' must be a non-empty string list."}), 400
+    else:
+        return jsonify({"error": "'symptoms' must be a string or list of strings."}), 400
+
+    lang = body.get("lang", "en")
+    if lang not in {"en", "hi", "gu"}:
+        return jsonify({"error": "'lang' must be one of: en, hi, gu."}), 400
+
+    predictor = _multilang_predictor()
+    if predictor is None:
+        return jsonify({"error": "The multilingual symptom prediction model is unavailable."}), 503
+    prediction = predictor.predict_disease(symptoms)
+    response = predictor.format_response(prediction, lang=lang)
+
+    return jsonify(response)

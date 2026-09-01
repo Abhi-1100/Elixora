@@ -10,6 +10,8 @@ import {
   LayoutDashboard,
   LogOut,
   ArrowRight,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { BreathOrb } from "@/components/ui/breath-orb";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -22,15 +24,25 @@ interface TopBarProps {
   onOpenVoiceMode: () => void;
   onToggleSidebarMobile?: () => void;
   onGoToLanding?: () => void;
+  selectedLanguage: "en" | "hi" | "gu";
+  onLanguageChange: (language: "en" | "hi" | "gu") => void;
 }
+
+const LANGUAGES = [
+  { code: "English (US)", name: "English" },
+  { code: "Hindi (IN)", name: "हिन्दी" },
+  { code: "Gujarati (IN)", name: "ગુજરાતી" },
+];
 
 export function TopBar({
   title,
   onOpenVoiceMode,
   onGoToLanding,
+  selectedLanguage,
+  onLanguageChange,
 }: TopBarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("English (US)");
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const { user, logout } = useAuth() as { user: any; logout: () => void };
   const router = useRouter();
 
@@ -39,6 +51,10 @@ export function TopBar({
     setShowProfileMenu(false);
     router.push("/login");
   }
+
+  const currentLangObj = LANGUAGES[
+    selectedLanguage === "en" ? 0 : selectedLanguage === "hi" ? 1 : 2
+  ];
 
   return (
     <header className="h-14 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-20">
@@ -65,20 +81,56 @@ export function TopBar({
       {/* Right: Language, Voice Mode, Theme Toggle, Profile */}
       <div className="flex items-center gap-2">
         {/* Language Selector Dropdown */}
-        <div className="hidden md:flex items-center gap-1 text-xs text-[var(--ink-muted)] bg-[var(--surface-muted)] px-2.5 py-1 rounded-lg border border-[var(--border)]">
-          <Globe className="w-3.5 h-3.5 text-[var(--accent)]" />
-          <select
-            value={selectedLanguage}
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="bg-transparent text-[var(--ink)] focus:outline-none cursor-pointer"
+        <div className="relative hidden md:block">
+          <button
+            onClick={() => {
+              setShowLanguageMenu(!showLanguageMenu);
+              setShowProfileMenu(false);
+            }}
+            className="flex items-center gap-1.5 text-xs text-[var(--ink)] bg-[var(--surface-muted)] hover:bg-[var(--surface)] px-2.5 py-1.5 rounded-lg border border-[var(--border)] transition-colors focus:outline-none"
+            aria-label="Select language"
           >
-            <option value="English (US)">English</option>
-            <option value="Spanish (ES)">Español</option>
-            <option value="French (FR)">Français</option>
-            <option value="German (DE)">Deutsch</option>
-            <option value="Hindi (IN)">हिन्दी</option>
-            <option value="Mandarin (CN)">中文</option>
-          </select>
+            <Globe className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <span className="font-medium">{currentLangObj.name}</span>
+            <ChevronDown className="w-3 h-3 text-[var(--ink-muted)]" />
+          </button>
+
+          {showLanguageMenu && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowLanguageMenu(false)}
+              />
+              <div className="absolute right-0 mt-2 w-44 bg-[#0A0E1A] border border-[var(--border)] rounded-xl shadow-2xl p-1.5 z-50 text-xs animate-fade-in space-y-0.5">
+                {LANGUAGES.map((lang) => {
+                  const isSelected =
+                    (selectedLanguage === "en" && lang.code === "English (US)") ||
+                    (selectedLanguage === "hi" && lang.code === "Hindi (IN)") ||
+                    (selectedLanguage === "gu" && lang.code === "Gujarati (IN)");
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => {
+                        onLanguageChange(
+                          lang.code === "English (US)" ? "en" :
+                          lang.code === "Hindi (IN)" ? "hi" : "gu"
+                        );
+                        setShowLanguageMenu(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between transition-colors font-medium ${
+                        isSelected
+                          ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                          : "text-slate-200 hover:bg-slate-800/60 hover:text-white"
+                      }`}
+                    >
+                      <span>{lang.name}</span>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-[var(--accent)]" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Live Voice Mode Button */}
@@ -118,14 +170,6 @@ export function TopBar({
                     <p className="text-[var(--ink-muted)] text-[11px] truncate">{user.email}</p>
                   </div>
                   <div className="py-1 space-y-0.5">
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setShowProfileMenu(false)}
-                      className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)] font-medium"
-                    >
-                      <LayoutDashboard className="w-3.5 h-3.5 text-[var(--accent)]" />
-                      <span>Dashboard</span>
-                    </Link>
                     <button
                       onClick={() => setShowProfileMenu(false)}
                       className="w-full text-left px-2.5 py-1.5 hover:bg-[var(--surface-muted)] rounded-lg flex items-center gap-2 text-[var(--ink)]"

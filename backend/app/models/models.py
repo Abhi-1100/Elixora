@@ -13,9 +13,11 @@ class User(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False, index=True)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
     age = db.Column(db.Integer, nullable=True)
     gender = db.Column(db.String(20), nullable=True)  # Male / Female / Other
+    google_id = db.Column(db.String(255), unique=True, nullable=True, index=True)
+    profile_complete = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -30,6 +32,8 @@ class User(db.Model):
             "email": self.email,
             "age": self.age,
             "gender": self.gender,
+            "google_id": self.google_id,
+            "profile_complete": self.profile_complete,
             "created_at": self.created_at.isoformat(),
         }
 
