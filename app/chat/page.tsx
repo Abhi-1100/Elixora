@@ -131,6 +131,7 @@ function ChatPageContent() {
   const [activeId, setActiveId] = useState<string>(NEW_CHAT_ID);
   const [threadMap, setThreadMap] = useState<Record<string, Message[]>>(MOCK_THREAD_DATA);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "hi" | "gu">("en");
@@ -145,6 +146,18 @@ function ChatPageContent() {
   useEffect(() => {
     tokenRef.current = token;
   }, [token]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
+    const syncSidebarLayout = () => {
+      setIsSidebarCollapsed(mediaQuery.matches);
+      if (window.innerWidth >= 1024) setIsMobileSidebarOpen(false);
+    };
+
+    syncSidebarLayout();
+    mediaQuery.addEventListener("change", syncSidebarLayout);
+    return () => mediaQuery.removeEventListener("change", syncSidebarLayout);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -199,8 +212,8 @@ function ChatPageContent() {
     );
   };
 
-  const handleSendMessage = async (text: string, attachment?: File | null) => {
-    if (!text && !attachment) return;
+  const handleSendMessage = async (text: string, attachment?: File | null): Promise<string | null> => {
+    if (!text && !attachment) return null;
 
     let attachmentData;
     if (attachment) {
@@ -274,7 +287,7 @@ function ChatPageContent() {
         }));
         setIsGenerating(false);
       }
-      return;
+      return null;
     }
 
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
@@ -291,7 +304,7 @@ function ChatPageContent() {
         [activeId]: [...(prev[activeId] || []), aiMsg],
       }));
       setIsGenerating(false);
-      return;
+      return data.text;
     } catch (error) {
       // Preserve the existing offline UI behavior if the backend is unreachable.
       const errorText = error instanceof Error ? error.message : "Unknown API error";
@@ -307,7 +320,7 @@ function ChatPageContent() {
         [activeId]: [...(prev[activeId] || []), errorMsg],
       }));
       setIsGenerating(false);
-      return;
+      return null;
     }
 
     setTimeout(() => {
@@ -363,9 +376,19 @@ function ChatPageContent() {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
       {/* Icon-Rail & Collapsible Sidebar */}
-      <div className="z-50 h-screen shrink-0">
+      {isMobileSidebarOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-[var(--surface)]/60 sm:hidden"
+          onClick={() => setIsMobileSidebarOpen(false)}
+          aria-label="Close navigation"
+        />
+      )}
+      <div className="z-50 h-screen shrink-0 sm:relative">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           conversations={conversations}
           activeConversationId={activeId}
@@ -394,15 +417,16 @@ function ChatPageContent() {
           <TopBar
             title={activeConversation?.title || "Elixora Health Assistant"}
             onOpenVoiceMode={() => setIsVoiceOpen(true)}
+            onToggleSidebarMobile={() => setIsMobileSidebarOpen((open) => !open)}
             onGoToLanding={() => router.push("/")}
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}
           />
 
-          <main className="flex-1 overflow-y-auto flex flex-col relative">
+          <main className="flex-1 min-h-0 overflow-y-auto flex flex-col relative">
             {activeMessages.length === 0 ? (
-              <EmptyState 
-                onSelectPrompt={(pText) => handleSendMessage(pText)} 
+              <EmptyState
+                onSelectPrompt={(pText) => handleSendMessage(pText)}
                 InputBarComponent={
                   <InputBar
                     onSendMessage={handleSendMessage}
@@ -429,11 +453,10 @@ function ChatPageContent() {
 
         {/* ── Report Analyzer Side Panel (Right Partition Screen) ─────────────── */}
         {activeReport && (
-          <div className={`h-full shrink-0 z-30 transition-all duration-300 ${
-            isReportExpanded
+          <div className={`h-full shrink-0 z-30 transition-all duration-300 ${isReportExpanded
               ? "w-full md:w-[750px] lg:w-[840px] xl:w-[920px]"
               : "w-full md:w-[480px] lg:w-[520px] xl:w-[580px]"
-          }`}>
+            }`}>
             <ReportSidePanel
               report={activeReport}
               isExpanded={isReportExpanded}
@@ -445,7 +468,11 @@ function ChatPageContent() {
       </div>
 
       {/* Voice Overlay */}
-      <VoiceModeModal isOpen={isVoiceOpen} onClose={() => setIsVoiceOpen(false)} />
+      <VoiceModeModal
+        isOpen={isVoiceOpen}
+        onClose={() => setIsVoiceOpen(false)}
+        onSendTranscript={handleSendMessage}
+      />
     </div>
   );
 }

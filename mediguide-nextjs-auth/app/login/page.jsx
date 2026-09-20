@@ -27,7 +27,7 @@ export default function LoginPage() {
     try {
       const data = await login(form);
       saveSession(data.access_token, data.user);
-      router.push("/dashboard");
+      router.push("/chat");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -42,7 +42,7 @@ export default function LoginPage() {
           Welcome back
         </h1>
         <p className="text-sm text-gray-500 mb-6">
-          Log in to continue to your health dashboard.
+          Log in to continue to your health assistant.
         </p>
 
         {error && (

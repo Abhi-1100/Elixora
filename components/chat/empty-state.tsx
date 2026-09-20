@@ -24,7 +24,7 @@ export function EmptyState({ onSelectPrompt, InputBarComponent, userName }: Empt
   ];
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 text-center max-w-3xl w-full mx-auto my-auto select-none gap-8 animate-fade-in">
+    <div className="flex min-h-full flex-col items-center justify-center p-4 sm:p-10 text-center max-w-3xl w-full mx-auto my-auto select-none gap-5 sm:gap-8 animate-fade-in">
       {/* Greeting Headline */}
       <div className="flex flex-col items-center gap-3">
         <div className="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shadow-xs">
@@ -56,7 +56,7 @@ export function EmptyState({ onSelectPrompt, InputBarComponent, userName }: Empt
 
       {/* Input Bar Placeholder */}
       {InputBarComponent && (
-        <div className="w-full max-w-2xl mt-2">
+        <div className="w-full max-w-2xl mt-0 sm:mt-2">
           {InputBarComponent}
         </div>
       )}

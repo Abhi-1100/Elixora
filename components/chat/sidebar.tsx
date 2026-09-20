@@ -26,6 +26,8 @@ export interface Conversation {
 
 interface SidebarProps {
   isCollapsed: boolean;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
   onToggleCollapse: () => void;
   conversations: Conversation[];
   activeConversationId: string;
@@ -38,6 +40,8 @@ interface SidebarProps {
 
 export function Sidebar({
   isCollapsed,
+  isMobileOpen = false,
+  onCloseMobile,
   onToggleCollapse,
   conversations,
   activeConversationId,
@@ -83,9 +87,8 @@ export function Sidebar({
 
   return (
     <aside
-      className={`h-screen bg-[var(--surface)] border-r border-[var(--border)] transition-all duration-300 flex flex-col z-30 select-none ${
-        isCollapsed ? "w-16" : "w-72"
-      }`}
+      className={`h-screen bg-[var(--surface)] border-r border-[var(--border)] transition-all duration-300 flex flex-col z-30 select-none fixed inset-y-0 left-0 sm:static sm:translate-x-0 ${isMobileOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+        } ${isCollapsed ? "w-16" : "w-72"}`}
     >
       {/* Top Header & New Chat Button */}
       <div className="p-3 border-b border-[var(--border)] flex flex-col gap-3 bg-[var(--surface)]">
@@ -105,7 +108,10 @@ export function Sidebar({
           )}
 
           <button
-            onClick={onToggleCollapse}
+            onClick={() => {
+              if (onCloseMobile) onCloseMobile();
+              onToggleCollapse();
+            }}
             className="p-1.5 rounded-lg hover:bg-[var(--surface-muted)] text-[var(--ink-muted)] hover:text-[var(--ink)] transition-colors mx-auto"
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label="Toggle sidebar collapse"
@@ -121,9 +127,8 @@ export function Sidebar({
         {/* New Conversation Button */}
         <button
           onClick={onNewConversation}
-          className={`flex items-center justify-center gap-2 clinical-button active:scale-[0.98] py-2.5 px-3 text-xs ${
-            isCollapsed ? "w-10 h-10 p-0 mx-auto" : "w-full"
-          }`}
+          className={`flex items-center justify-center gap-2 clinical-button active:scale-[0.98] py-2.5 px-3 text-xs ${isCollapsed ? "w-10 h-10 p-0 mx-auto" : "w-full"
+            }`}
           title="New Health Query"
         >
           <Plus className="w-4 h-4" />
@@ -133,9 +138,8 @@ export function Sidebar({
         {/* Quick Voice Mode Button */}
         <button
           onClick={onOpenVoiceMode}
-          className={`flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] hover:bg-[var(--accent-soft)] text-[var(--ink)] hover:text-[var(--accent)] transition-all py-2 px-3 text-xs font-medium ${
-            isCollapsed ? "w-10 h-10 p-0 mx-auto" : "w-full"
-          }`}
+          className={`flex items-center justify-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] hover:bg-[var(--accent-soft)] text-[var(--ink)] hover:text-[var(--accent)] transition-all py-2 px-3 text-xs font-medium ${isCollapsed ? "w-10 h-10 p-0 mx-auto" : "w-full"
+            }`}
           title="Launch Voice Mode"
         >
           <Mic className="w-3.5 h-3.5 text-[var(--accent)]" />
@@ -168,11 +172,10 @@ export function Sidebar({
               <button
                 key={c.id}
                 onClick={() => onSelectConversation(c.id)}
-                className={`p-2.5 rounded-xl transition-all relative group ${
-                  activeConversationId === c.id
+                className={`p-2.5 rounded-xl transition-all relative group ${activeConversationId === c.id
                     ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold"
                     : "text-[var(--ink-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink)]"
-                }`}
+                  }`}
                 title={c.title}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -205,11 +208,10 @@ export function Sidebar({
                     <div
                       key={c.id}
                       onClick={() => onSelectConversation(c.id)}
-                      className={`group relative flex items-center justify-between px-2.5 py-2 rounded-xl text-xs cursor-pointer transition-all ${
-                        isActive
+                      className={`group relative flex items-center justify-between px-2.5 py-2 rounded-xl text-xs cursor-pointer transition-all ${isActive
                           ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold shadow-sm"
                           : "text-[var(--ink)] hover:bg-[var(--surface-muted)]"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
                         <MessageSquare className="w-3.5 h-3.5 shrink-0 opacity-70" />

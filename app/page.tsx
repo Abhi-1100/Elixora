@@ -60,7 +60,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.25 }}
-          className="flex items-center justify-center gap-4 mb-4"
+          className="flex w-full flex-col items-center justify-center gap-3 mb-4 sm:flex-row sm:gap-4"
         >
           <SpecularButton
             size="md"
@@ -79,7 +79,7 @@ export default function Home() {
             followMouse={true}
             proximity={250}
             autoAnimate={false}
-            className="text-xs sm:text-sm font-medium px-8 py-3"
+            className="w-full max-w-[220px] text-xs sm:w-auto sm:max-w-none sm:text-sm font-medium px-8 py-3"
             onClick={() => handleLaunchSandbox()}
           >
             Get started
@@ -87,7 +87,7 @@ export default function Home() {
 
           <a
             href="#features"
-            className="rounded-full bg-white hover:bg-zinc-200 text-black text-xs sm:text-sm font-medium px-8 py-3 transition-all cursor-pointer"
+            className="w-full max-w-[220px] rounded-full bg-white px-8 py-3 text-xs font-medium text-black transition-all hover:bg-zinc-200 cursor-pointer sm:w-auto sm:max-w-none sm:text-sm"
           >
             Learn more
           </a>
@@ -157,6 +157,5 @@ export default function Home() {
     </div>
   );
 }
-
 
 

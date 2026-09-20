@@ -1,50 +1,72 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ParticleOrbCanvas } from "@/components/landing/particle-orb-canvas";
 import { GradientWaves } from "@/components/ui/gradient-waves";
 import { Mic, X, Sparkles, Volume2 } from "lucide-react";
-import Link from "next/link";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useVoiceOutput } from "@/hooks/useVoiceOutput";
 
 interface VoiceModeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSendTranscript?: (transcript: string) => void;
+  onSendTranscript?: (transcript: string) => void | Promise<string | null | undefined>;
+}
+
+function cleanForSpeech(text: string) {
+  return text
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/[*_~`>#]/g, "")
+    .replace(/^\s*[-•]\s*/gm, "")
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+    .replace(/AI guidance only\. Not a medical diagnosis\. Consult a physician for emergencies\.?/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeModalProps) {
-  const [isListening, setIsListening] = useState(true);
   const [statusText, setStatusText] = useState("Speak with Elixora");
   const [currentSpeech, setCurrentSpeech] = useState<string>("");
+  const { isSpeaking, speak, stopSpeaking } = useVoiceOutput();
+  const { isListening, error, startListening, stopListening } = useVoiceInput(
+    useCallback(async (transcript: string) => {
+      setCurrentSpeech(`You: ${transcript}`);
+      setStatusText("Elixora is processing...");
+      const reply = await onSendTranscript?.(transcript);
+      if (reply) {
+        setCurrentSpeech(`Elixora: ${reply}`);
+        speak(cleanForSpeech(reply));
+      }
+      setStatusText("Speak with Elixora");
+    }, [onSendTranscript, speak])
+  );
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    let timer1: NodeJS.Timeout;
-    let timer2: NodeJS.Timeout;
-
-    if (isListening) {
+    if (isOpen) {
       setStatusText("Listening to your voice...");
-      timer1 = setTimeout(() => {
-        setCurrentSpeech("Checking Amoxicillin 500mg dosage timing & guidelines...");
-        setStatusText("Elixora is processing...");
-      }, 3000);
-
-      timer2 = setTimeout(() => {
-        const userText = "User: What is the recommended timing for taking Amoxicillin 500mg?";
-        const aiText = "Elixora: Take 500mg every 8 hours with meals to prevent stomach upset. Finish the complete course.";
-        onSendTranscript?.(userText);
-        setCurrentSpeech(aiText);
-        setStatusText("Speak with Elixora");
-      }, 6500);
+      startListening();
+      return;
     }
+    stopListening();
+    stopSpeaking();
+  }, [isOpen, startListening, stopListening, stopSpeaking]);
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [isOpen, isListening, onSendTranscript]);
+  const handleClose = () => {
+    stopListening();
+    stopSpeaking();
+    onClose();
+  };
+
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+      return;
+    }
+    stopSpeaking();
+    setStatusText("Listening to your voice...");
+    startListening();
+  };
 
   if (!isOpen) return null;
 
@@ -82,7 +104,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
         {/* Top Close Button */}
         <div className="relative z-20 w-full flex justify-end">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-lg"
             title="Close Voice Mode"
           >
@@ -106,12 +128,12 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
             <ParticleOrbCanvas
               size={360}
               isListening={isListening}
-              onMicClick={() => setIsListening(!isListening)}
+              onMicClick={handleMicClick}
             />
           </div>
 
           {/* Live Transcription / Response Line */}
-          {currentSpeech && (
+          {(currentSpeech || error) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -119,7 +141,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
             >
               <p className="leading-relaxed font-mono flex items-center justify-center gap-2">
                 <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span>{currentSpeech}</span>
+                <span>{error || currentSpeech}</span>
               </p>
             </motion.div>
           )}
@@ -127,7 +149,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
           {/* 4. Bottom Action Pill (Matches Reference Image 1:1) */}
           <div className="pt-2">
             <button
-              onClick={() => setIsListening(!isListening)}
+              onClick={handleMicClick}
               className="group bg-gradient-to-r from-blue-600/90 to-cyan-600/90 hover:from-blue-500 hover:to-cyan-500 border border-cyan-400/40 text-white font-medium text-xs sm:text-sm px-7 py-3 rounded-full flex items-center justify-center gap-2.5 shadow-[0_0_30px_rgba(37,99,235,0.55)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               <div className="relative flex items-center justify-center">
@@ -136,7 +158,7 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
                   <span className="absolute -inset-1 rounded-full bg-cyan-400/40 animate-ping pointer-events-none" />
                 )}
               </div>
-              <span className="tracking-wide">{statusText}</span>
+              <span className="tracking-wide">{isSpeaking ? "Tap to interrupt" : statusText}</span>
             </button>
           </div>
         </div>
@@ -149,4 +171,3 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
     </AnimatePresence>
   );
 }
-

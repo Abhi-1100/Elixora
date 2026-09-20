@@ -42,7 +42,7 @@ export default function SignupPage() {
       };
       const data = await signup(payload);
       saveSession(data.access_token, data.user);
-      router.push("/dashboard");
+      router.push("/chat");
     } catch (err) {
       setError(err.message);
     } finally {

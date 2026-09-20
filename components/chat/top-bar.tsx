@@ -7,11 +7,11 @@ import {
   User,
   ShieldCheck,
   Globe,
-  LayoutDashboard,
   LogOut,
   ArrowRight,
   ChevronDown,
   Check,
+  Menu,
 } from "lucide-react";
 import { BreathOrb } from "@/components/ui/breath-orb";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -37,6 +37,7 @@ const LANGUAGES = [
 export function TopBar({
   title,
   onOpenVoiceMode,
+  onToggleSidebarMobile,
   onGoToLanding,
   selectedLanguage,
   onLanguageChange,
@@ -57,9 +58,19 @@ export function TopBar({
   ];
 
   return (
-    <header className="h-14 border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-20">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)]/90 px-2 backdrop-blur-md sm:px-4">
       {/* Left: Brand & Thread Title */}
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        {onToggleSidebarMobile && (
+          <button
+            type="button"
+            onClick={onToggleSidebarMobile}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-[var(--ink-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--ink)] transition-colors sm:hidden"
+            aria-label="Open navigation"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={onGoToLanding}
           className="flex items-center gap-2 group text-left focus:outline-none"
@@ -73,13 +84,13 @@ export function TopBar({
 
         <span className="text-[var(--border)] font-light text-sm">/</span>
 
-        <h1 className="text-xs sm:text-sm font-medium text-[var(--ink)] truncate max-w-[200px] sm:max-w-[320px]">
+        <h1 className="max-w-[120px] truncate text-xs font-medium text-[var(--ink)] sm:max-w-[320px] sm:text-sm">
           {title}
         </h1>
       </div>
 
       {/* Right: Language, Voice Mode, Theme Toggle, Profile */}
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         {/* Language Selector Dropdown */}
         <div className="relative hidden md:block">
           <button
@@ -113,15 +124,14 @@ export function TopBar({
                       onClick={() => {
                         onLanguageChange(
                           lang.code === "English (US)" ? "en" :
-                          lang.code === "Hindi (IN)" ? "hi" : "gu"
+                            lang.code === "Hindi (IN)" ? "hi" : "gu"
                         );
                         setShowLanguageMenu(false);
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between transition-colors font-medium ${
-                        isSelected
+                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between transition-colors font-medium ${isSelected
                           ? "bg-[var(--accent-soft)] text-[var(--accent)]"
                           : "text-slate-200 hover:bg-slate-800/60 hover:text-white"
-                      }`}
+                        }`}
                     >
                       <span>{lang.name}</span>
                       {isSelected && <Check className="w-3.5 h-3.5 text-[var(--accent)]" />}

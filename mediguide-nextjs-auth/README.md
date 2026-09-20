@@ -9,7 +9,7 @@ your-nextjs-project/
 ├── app/
 │   ├── login/page.jsx
 │   ├── signup/page.jsx
-│   └── dashboard/page.jsx
+│   └── chat/page.jsx
 ```
 
 ## 2. Wrap your app with AuthProvider
@@ -54,13 +54,13 @@ npm run dev
 
 ## 6. Test the flow
 1. Go to `http://localhost:3000/signup`
-2. Fill the form, submit — you should land on `/dashboard` showing your name
+2. Fill the form, submit — you should land on `/chat` showing your name
 3. Click "Log out", then go to `/login` and log back in with the same credentials
-4. Try visiting `/dashboard` directly while logged out — it should redirect you to `/login`
+4. Try visiting `/chat` directly while logged out — it should redirect you to `/login`
 
 ## 7. Reusing this pattern for other modules
 For any future protected page (chat, report upload, medicine scan), copy the pattern in
-`dashboard/page.jsx`:
+`chat/page.jsx`:
 ```jsx
 const { user, loading } = useAuth();
 useEffect(() => {

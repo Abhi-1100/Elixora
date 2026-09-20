@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth, type User } from "@/context/AuthContext";
-import { LogOut, ChevronDown, LayoutDashboard, MessageSquare } from "lucide-react";
+import { LogOut, ChevronDown, MessageSquare } from "lucide-react";
 
 interface NavbarProps {
   showNavLinks?: boolean;
@@ -33,7 +33,7 @@ export function Navbar({ showNavLinks = true }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#050507]/90 backdrop-blur-md transition-colors duration-200 border-b border-white/[0.04]">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6">
         {/* Brand logo left matching screenshot: /Elixora. */}
         <Link href="/" className="flex items-center gap-1.5 group select-none">
           <span className="text-xl font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors">
@@ -60,7 +60,7 @@ export function Navbar({ showNavLinks = true }: NavbarProps) {
         )}
 
         {/* Right Action: White Pill CTA 'Get started' matching screenshot */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {user ? (
             <div className="relative">
               <button
@@ -104,7 +104,7 @@ export function Navbar({ showNavLinks = true }: NavbarProps) {
           ) : (
             <Link
               href="/chat"
-              className="rounded-full bg-white text-black text-xs sm:text-sm font-medium px-5 py-2 hover:bg-zinc-200 transition-all shadow-sm"
+              className="rounded-full bg-white px-3 py-2 text-xs font-medium text-black shadow-sm transition-all hover:bg-zinc-200 sm:px-5 sm:text-sm"
             >
               Get started
             </Link>
@@ -114,5 +114,3 @@ export function Navbar({ showNavLinks = true }: NavbarProps) {
     </header>
   );
 }
-
-

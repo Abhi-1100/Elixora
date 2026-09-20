@@ -86,7 +86,7 @@ export function LandingPage({ onStartChat, onOpenVoice }: LandingPageProps) {
         </h1>
 
         <p className="text-sm sm:text-base text-[var(--ink-muted)] max-w-xl mb-8 leading-relaxed">
-          Elixora explains prescriptions, analyzes lab reports, and answers medical questions through natural conversation. No clinical jargon, no complex dashboards.
+          Elixora explains prescriptions, analyzes lab reports, and answers medical questions through natural conversation. No clinical jargon, no complex interfaces.
         </p>
 
         {/* Primary Call to Action Buttons */}

@@ -12,6 +12,7 @@ import {
   FileImage,
   FileCode,
 } from "lucide-react";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 interface InputBarProps {
   onSendMessage: (text: string, attachment?: File | null) => void;
@@ -36,9 +37,11 @@ export function InputBar({
   } | null>(null);
   // Keep reference to the real File object so it can be sent to the backend
   const attachedFileRef = useRef<File | null>(null);
-  const [isListeningLocal, setIsListeningLocal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { isListening: isListeningLocal, startListening, stopListening } = useVoiceInput((transcript) => {
+    setText(transcript);
+  });
 
   // Auto-expand textarea based on scrollHeight (ChatGPT & Claude style)
   useEffect(() => {
@@ -108,20 +111,12 @@ export function InputBar({
   };
 
   const toggleLocalMic = () => {
-    if (!isListeningLocal) {
-      setIsListeningLocal(true);
-      // Simulate speech recognition filling text
-      setTimeout(() => {
-        setText("What are the side effects of taking Metformin with meals?");
-        setIsListeningLocal(false);
-      }, 2500);
-    } else {
-      setIsListeningLocal(false);
-    }
+    if (isListeningLocal) stopListening();
+    else startListening();
   };
 
   return (
-    <div className={`w-full max-w-3xl mx-auto px-4 flex flex-col items-center justify-center pointer-events-none gap-2 ${className}`}>
+    <div className={`w-full max-w-3xl mx-auto px-4 pb-[env(safe-area-inset-bottom)] flex flex-col items-center justify-center pointer-events-none gap-2 ${className}`}>
       {/* Container Card */}
       <div className="w-full pointer-events-auto flex flex-col gap-2 relative rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-xl p-3 transition-all focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent-soft)]">
         {/* Attached File Preview Tag */}
@@ -176,7 +171,7 @@ export function InputBar({
               <span>Listening to voice...Speak now</span>
             </div>
             <button
-              onClick={() => setIsListeningLocal(false)}
+              onClick={stopListening}
               className="text-[11px] underline"
             >
               Cancel
@@ -221,11 +216,10 @@ export function InputBar({
             type="button"
             onClick={toggleLocalMic}
             onDoubleClick={onOpenVoiceMode}
-            className={`p-2.5 rounded-full active:scale-95 transition-all focus-ring shrink-0 mb-0.5 ${
-              isListeningLocal
+            className={`p-2.5 rounded-full active:scale-95 transition-all focus-ring shrink-0 mb-0.5 ${isListeningLocal
                 ? "bg-red-500 text-white animate-pulse"
                 : "text-[var(--ink-muted)] hover:text-[var(--accent)] hover:bg-[var(--surface-muted)]"
-            }`}
+              }`}
             title="Click to dictate, Double-click for Fullscreen Voice Mode"
             aria-label="Voice input"
           >
@@ -236,11 +230,10 @@ export function InputBar({
           <button
             type="submit"
             disabled={(!text.trim() && !attachedFile) || isLoading}
-            className={`p-2.5 rounded-full transition-all focus-ring shrink-0 mb-0.5 ${
-              text.trim() || attachedFile
+            className={`p-2.5 rounded-full transition-all focus-ring shrink-0 mb-0.5 ${text.trim() || attachedFile
                 ? "bg-[var(--accent)] text-white hover:opacity-90 active:scale-95 shadow-xs"
                 : "bg-[var(--surface-muted)] text-[var(--ink-muted)] cursor-not-allowed opacity-50"
-            }`}
+              }`}
             title="Send message"
             aria-label="Send message"
           >
@@ -257,4 +250,3 @@ export function InputBar({
     </div>
   );
 }
-

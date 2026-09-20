@@ -32,6 +32,7 @@ export default function LoginPage() {
 
     try {
       const data = await login(form);
+      localStorage.setItem("mg_last_login_method", "email");
       saveSession(data.access_token, data.user);
       router.push("/chat");
     } catch (err) {
@@ -46,11 +47,36 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg)] px-4 py-10 transition-colors duration-200 relative overflow-hidden font-sans">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[var(--bg)] transition-colors duration-200 relative overflow-hidden font-sans">
       {/* Ambient background glows matching template aesthetic in Elixora dark theme */}
       <div className="absolute top-1/4 -left-20 w-[550px] h-[550px] rounded-full bg-gradient-to-br from-[var(--accent)]/30 via-indigo-600/20 to-purple-600/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] rounded-full bg-gradient-to-tl from-purple-500/25 via-blue-600/15 to-transparent blur-[120px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-blue-500/5 blur-[150px] pointer-events-none" />
+
+      {/* Editorial panel inspired by the reference layout, using Elixora colors. */}
+      <aside className="relative hidden min-h-screen w-1/2 p-4 lg:flex">
+        <div className="relative flex h-full w-full flex-col items-center justify-end overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-[#102b67] via-[#071a42] to-[#050507] p-12 text-center shadow-2xl">
+          <div className="absolute -left-24 top-20 h-80 w-80 rounded-full bg-[var(--accent)]/25 blur-[100px]" />
+          <div className="absolute -right-20 bottom-24 h-96 w-96 rounded-full bg-indigo-500/20 blur-[110px]" />
+          <div className="relative z-10 max-w-lg pb-4">
+            <BreathOrb size="lg" mode="idle" />
+            <h1 className="mt-8 text-4xl font-medium tracking-tight text-white xl:text-5xl">
+              Feel better. Live brighter.
+            </h1>
+            <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-blue-100/70">
+              Your calm, intelligent companion for everyday health decisions.
+            </p>
+            <div className="mt-8 flex items-center justify-center gap-2">
+              <div className="h-1 w-6 rounded-full bg-[var(--accent)]" />
+              <div className="h-1 w-1.5 rounded-full bg-white/30" />
+              <div className="h-1 w-1.5 rounded-full bg-white/30" />
+              <div className="h-1 w-1.5 rounded-full bg-white/30" />
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex w-full flex-1 flex-col items-center justify-center px-4 py-10 sm:px-12 lg:w-1/2 lg:px-16">
 
       {/* Brand mark above card */}
       <Link href="/" className="flex items-center gap-2.5 mb-6 group z-10">
@@ -61,8 +87,8 @@ export default function LoginPage() {
       </Link>
 
       {/* Centered Template Card */}
-      <div className="relative w-full max-w-md z-10">
-        <div className="w-full bg-[#0A0E1A]/85 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-blue-950/40 p-8 sm:p-9 transition-all duration-300">
+      <div className="relative z-10 w-full max-w-md lg:max-w-[400px]">
+        <div className="flex w-full flex-col rounded-3xl border border-white/10 bg-[#0A0E1A]/85 p-8 shadow-2xl shadow-blue-950/40 backdrop-blur-xl transition-all duration-300 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-0">
           
           {/* Title Header */}
           <div className="text-center mb-8">
@@ -118,7 +144,7 @@ export default function LoginPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="order-4 space-y-5">
             {/* Email Address */}
             <div className="space-y-2">
               <label
@@ -181,7 +207,7 @@ export default function LoginPage() {
               id="login-submit-btn"
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 px-4 rounded-2xl bg-[#09153a] hover:bg-[#0f2157] text-white text-sm font-semibold transition-all duration-200 shadow-lg shadow-blue-950/50 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-blue-500/30 hover:border-blue-400/50 active:scale-[0.99]"
+              className="w-full rounded-full bg-[#09153a] py-3.5 px-4 text-white text-sm font-semibold transition-all duration-200 shadow-lg shadow-blue-950/50 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 border border-blue-500/30 hover:bg-[#0f2157] hover:border-blue-400/50 active:scale-[0.99]"
             >
               {isSubmitting ? (
                 <>
@@ -195,7 +221,7 @@ export default function LoginPage() {
           </form>
 
           {/* Divider */}
-          <div className="my-6 flex items-center justify-center relative">
+          <div className="order-3 my-6 flex items-center justify-center relative">
             <div className="w-full border-t border-white/10 absolute inset-0 my-auto" />
             <span className="relative bg-[#0A0E1A] px-3 text-[10px] uppercase tracking-wider font-semibold text-[var(--ink-muted)] z-10">
               OR CONTINUE WITH
@@ -203,7 +229,7 @@ export default function LoginPage() {
           </div>
 
           {/* Social Auth Buttons */}
-          <div className="space-y-2.5">
+          <div className="order-2 grid grid-cols-2 gap-3">
             {/* Google Identity Services renders Google's official button here. */}
             <GoogleLoginButton onError={setError} />
 
@@ -211,7 +237,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => handleSocialLogin("Apple")}
-              className="w-full py-3 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[var(--ink)] text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-[0.99]"
+              className="w-full rounded-full bg-white/[0.04] py-3 px-4 border border-white/10 text-[var(--ink)] text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-200 hover:bg-white/[0.08] active:scale-[0.99]"
             >
               <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 24 24">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.93c.63-.78 1.05-1.87.94-2.93-.91.04-2.02.61-2.67 1.37-.58.67-1.09 1.77-.95 2.82 1.02.08 2.05-.48 2.68-1.26" />
@@ -219,21 +245,10 @@ export default function LoginPage() {
               <span>Continue with Apple</span>
             </button>
 
-            {/* Meta */}
-            <button
-              type="button"
-              onClick={() => handleSocialLogin("Meta")}
-              className="w-full py-3 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-[var(--ink)] text-xs font-semibold flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-[0.99]"
-            >
-              <svg className="w-4 h-4 shrink-0 fill-[#1877F2]" viewBox="0 0 24 24">
-                <path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96C18.34 21.21 22 17.06 22 12.06C22 6.53 17.5 2.04 12 2.04Z" />
-              </svg>
-              <span>Continue with Meta</span>
-            </button>
           </div>
 
           {/* Footer links */}
-          <div className="mt-7 pt-2 text-center space-y-3">
+          <div className="order-5 mt-7 pt-2 text-center space-y-3">
             <button
               type="button"
               onClick={() => {
@@ -318,6 +333,7 @@ export default function LoginPage() {
       <p className="mt-6 text-[11px] text-[var(--ink-muted)]/70 text-center max-w-xs z-10">
         By continuing, you agree to Elixora&apos;s terms of service and acknowledge our HIPAA-compliant privacy practices.
       </p>
+      </main>
     </div>
   );
 }

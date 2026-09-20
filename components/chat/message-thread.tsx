@@ -52,9 +52,8 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
         return (
           <div
             key={msg.id}
-            className={`flex items-start gap-3.5 text-xs sm:text-sm animate-fade-in ${
-              isUser ? "flex-row-reverse" : "flex-row"
-            }`}
+            className={`flex items-start gap-3.5 text-xs sm:text-sm animate-fade-in ${isUser ? "flex-row-reverse" : "flex-row"
+              }`}
           >
             {/* Avatar */}
             {isUser ? (
