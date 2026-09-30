@@ -3,9 +3,11 @@
 import React from "react";
 import { Navbar } from "@/components/ui/navbar";
 import { ParticleHandsCanvas } from "@/components/landing/particle-hands-canvas";
-import { VoiceAssistantSection } from "@/components/landing/voice-assistant-section";
+import { InteractiveFolderShowcase } from "@/components/landing/interactive-folder-showcase";
 import { FeaturesPricingFAQ } from "@/components/landing/features-pricing-faq";
+import { GetInTouchSection } from "@/components/landing/get-in-touch-section";
 import { SpecularButton } from "@/components/ui/specular-button";
+import { Threads } from "@/components/ui/threads";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -18,12 +20,20 @@ export default function Home() {
     router.push(`/chat?prompt=${encodeURIComponent(text)}`);
   };
 
-  const handleOpenVoice = () => {
-    router.push("/chat?mode=voice");
-  };
-
   return (
-    <div className="min-h-screen bg-[#050507] text-[#F5F5F7] flex flex-col font-sans select-none transition-colors duration-200">
+    <div className="min-h-screen bg-[#050507] text-[#F5F5F7] flex flex-col font-sans select-none transition-colors duration-200 relative overflow-hidden">
+      {/* Dynamic Threads WebGL Background matching Elixora theme */}
+      <div className="absolute top-0 left-0 right-0 h-[680px] sm:h-[800px] w-full overflow-hidden pointer-events-none z-0 opacity-60 transform-gpu">
+        <Threads
+          color={[0.23, 0.51, 0.96]}
+          amplitude={1.1}
+          distance={0}
+          enableMouseInteraction={true}
+        />
+        {/* Subtle gradient fade to seamlessly blend into #050507 */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050507]/25 to-[#050507] pointer-events-none" />
+      </div>
+
       {/* 1. Navbar matching screenshot */}
       <Navbar showNavLinks={true} />
 
@@ -99,13 +109,16 @@ export default function Home() {
         <ParticleHandsCanvas />
       </section>
 
-      {/* 4. Voice Assistant Section */}
-      <VoiceAssistantSection onOpenVoice={handleOpenVoice} />
+      {/* 4. Interactive Clinical Folder Showcase (Matter.js zero-gravity float) */}
+      <InteractiveFolderShowcase />
 
       {/* 5. Features & Pricing */}
       <FeaturesPricingFAQ />
 
-      {/* 6. Footer matching Elixora branding */}
+      {/* 6. Get in Touch Section */}
+      <GetInTouchSection />
+
+      {/* 7. Footer matching Elixora branding */}
       <footer className="mt-auto border-t border-white/10 py-12 px-6 bg-[#050507] text-xs text-zinc-400">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">

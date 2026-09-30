@@ -11,7 +11,7 @@ import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
 import { Aurora } from "@/components/ui/aurora";
 import { useAuth } from "@/context/AuthContext";
-import { uploadReport, getReport, sendSymptomMessage } from "@/lib/api";
+import { uploadReport, getReport, sendChatMessage } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 
 const NEW_CHAT_ID = "conv-new";
@@ -292,7 +292,7 @@ function ChatPageContent() {
 
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
     try {
-      const data = await sendSymptomMessage(text, tokenRef.current, selectedLanguage);
+      const data = await sendChatMessage(text, selectedLanguage);
       const aiMsg: Message = {
         id: "m-" + (Date.now() + 1),
         sender: "ai",
@@ -308,11 +308,11 @@ function ChatPageContent() {
     } catch (error) {
       // Preserve the existing offline UI behavior if the backend is unreachable.
       const errorText = error instanceof Error ? error.message : "Unknown API error";
-      console.error("Symptom-check request failed:", error);
+      console.error("Chat request failed:", error);
       const errorMsg: Message = {
         id: "m-" + (Date.now() + 1),
         sender: "ai",
-        text: `Model response unavailable: ${errorText}\n\nPlease make sure the Flask backend is running and restart it after the API changes.`,
+        text: `I couldn't complete that request right now. ${errorText}\n\nPlease check the connection and try again.`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setThreadMap((prev) => ({

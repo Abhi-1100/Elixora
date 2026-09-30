@@ -43,7 +43,7 @@ export function ParticleOrbCanvas({
     }
 
     const particles: Particle[] = [];
-    const count = 1500; // High particle count for dense 3D sphere
+    const count = 900; // Balanced density for 60fps performance
 
     for (let i = 0; i < count; i++) {
       // Fibonacci sphere distribution
@@ -59,9 +59,21 @@ export function ParticleOrbCanvas({
       });
     }
 
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0 }
+    );
+    observer.observe(canvas);
+
     let time = 0;
 
     const render = () => {
+      animationFrameId = requestAnimationFrame(render);
+      if (!isVisible || document.hidden) return;
+
       time += isListening ? 0.025 : 0.012;
       ctx.clearRect(0, 0, size, size);
 
@@ -86,10 +98,18 @@ export function ParticleOrbCanvas({
       const rotY = time * 0.35;
       const rotX = Math.sin(time * 0.18) * 0.25;
 
+      interface Dot {
+        x: number;
+        y: number;
+        r: number;
+      }
+      const front: Dot[] = [];
+      const mid: Dot[] = [];
+      const rear: Dot[] = [];
+
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Dynamic 3D sine/cosine harmonic wave deformations
         const wave =
           Math.sin(p.phi * 6 + time * 2.8 + p.phaseShift * 0.2) * 7 +
           Math.cos(p.theta * 5 + time * 2.2) * 5 +
@@ -97,55 +117,63 @@ export function ParticleOrbCanvas({
 
         const currentRadius = p.baseRadius + wave;
 
-        // Spherical to 3D Cartesian coordinates
         let x = currentRadius * Math.sin(p.phi) * Math.cos(p.theta);
         let y = currentRadius * Math.cos(p.phi);
         let z = currentRadius * Math.sin(p.phi) * Math.sin(p.theta);
 
-        // Y-axis rotation
         const x1 = x * Math.cos(rotY) + z * Math.sin(rotY);
         const z1 = -x * Math.sin(rotY) + z * Math.cos(rotY);
 
-        // X-axis rotation
         const y2 = y * Math.cos(rotX) - z1 * Math.sin(rotX);
         const z2 = y * Math.sin(rotX) + z1 * Math.cos(rotX);
 
-        // Perspective calculation
         const fov = 380;
         const scale = fov / (fov + z2);
         const projX = centerX + x1 * scale;
         const projY = centerY + y2 * scale;
+        const r = p.size * scale;
 
-        // Depth sorting and alpha blending
-        const depthNormalized = (z2 + radius) / (radius * 2);
-        const depthAlpha = Math.max(0.12, Math.min(1, depthNormalized));
-        const finalAlpha = p.opacity * depthAlpha;
-
-        // Vibrant cyan-to-electric-blue color palette matching reference image
-        let color: string;
         if (z2 > radius * 0.3) {
-          // Front highlight dots: vivid cyan
-          color = `rgba(56, 189, 248, ${finalAlpha})`;
+          front.push({ x: projX, y: projY, r });
         } else if (z2 > -radius * 0.2) {
-          // Mid-range dots: royal electric blue
-          color = `rgba(37, 99, 235, ${finalAlpha * 0.9})`;
+          mid.push({ x: projX, y: projY, r });
         } else {
-          // Rear dots: deep navy blue fade
-          color = `rgba(29, 78, 216, ${finalAlpha * 0.5})`;
+          rear.push({ x: projX, y: projY, r });
         }
-
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(projX, projY, p.size * scale, 0, Math.PI * 2);
-        ctx.fill();
       }
 
-      animationFrameId = requestAnimationFrame(render);
+      // Draw rear dots in batched path
+      ctx.fillStyle = "rgba(29, 78, 216, 0.45)";
+      ctx.beginPath();
+      for (let i = 0; i < rear.length; i++) {
+        ctx.moveTo(rear[i].x + rear[i].r, rear[i].y);
+        ctx.arc(rear[i].x, rear[i].y, rear[i].r, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Draw mid-range dots in batched path
+      ctx.fillStyle = "rgba(37, 99, 235, 0.85)";
+      ctx.beginPath();
+      for (let i = 0; i < mid.length; i++) {
+        ctx.moveTo(mid[i].x + mid[i].r, mid[i].y);
+        ctx.arc(mid[i].x, mid[i].y, mid[i].r, 0, Math.PI * 2);
+      }
+      ctx.fill();
+
+      // Draw front highlight dots in batched path
+      ctx.fillStyle = "rgba(56, 189, 248, 0.95)";
+      ctx.beginPath();
+      for (let i = 0; i < front.length; i++) {
+        ctx.moveTo(front[i].x + front[i].r, front[i].y);
+        ctx.arc(front[i].x, front[i].y, front[i].r, 0, Math.PI * 2);
+      }
+      ctx.fill();
     };
 
     render();
 
     return () => {
+      observer.disconnect();
       cancelAnimationFrame(animationFrameId);
     };
   }, [size, isListening]);

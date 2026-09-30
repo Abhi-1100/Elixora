@@ -222,9 +222,20 @@ export function ParticleHandsCanvas() {
 
     container.addEventListener("mousemove", handleMouseMove);
 
+    let isVisible = true;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0 }
+    );
+    observer.observe(container);
     let time = 0;
 
     const render = () => {
+      animationFrameId = requestAnimationFrame(render);
+      if (!isVisible || document.hidden) return;
+
       time += 0.015;
       ctx.clearRect(0, 0, width, height);
 
@@ -265,20 +276,14 @@ export function ParticleHandsCanvas() {
       ctx.arc(centerX, centerY - scale * 0.05, glowRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Sort particles by depth Z for proper depth rendering
-      const projectedParticles: {
-        px: number;
-        py: number;
-        pz: number;
-        size: number;
-        alpha: number;
-        isHighlight: boolean;
-      }[] = [];
-
+      // Project particles
+      const fov = 1.8;
+      ctx.fillStyle = "rgba(225, 230, 240, 0.7)";
+      ctx.beginPath();
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
+        if (p.isHighlight) continue;
 
-        // Subtle micro-float animation
         const floatZ = Math.sin(time * 1.5 + p.phase) * 0.004;
         const floatY = Math.cos(time * 1.2 + p.phase) * 0.003;
 
@@ -286,61 +291,57 @@ export function ParticleHandsCanvas() {
         const by = p.by + floatY;
         const bz = p.bz + floatZ;
 
-        // 3D Y-axis rotation
         const x1 = bx * cosY + bz * sinY;
         const z1 = -bx * sinY + bz * cosY;
 
-        // 3D X-axis rotation
         const y2 = by * cosX - z1 * sinX;
         const z2 = by * sinX + z1 * cosX;
 
-        // Perspective camera projection
-        const fov = 1.8;
         const perspective = fov / (fov + z2);
-
         const projX = centerX + x1 * scale * perspective;
         const projY = centerY + y2 * scale * perspective;
-
-        // Halftone depth shading factor
-        const depthAlpha = Math.max(0.15, Math.min(1.0, (z2 + 0.35) / 0.7));
-        const finalAlpha = p.baseOpacity * depthAlpha;
         const finalSize = p.baseSize * perspective;
 
-        projectedParticles.push({
-          px: projX,
-          py: projY,
-          pz: z2,
-          size: finalSize,
-          alpha: finalAlpha,
-          isHighlight: p.isHighlight,
-        });
+        ctx.moveTo(projX + finalSize, projY);
+        ctx.arc(projX, projY, finalSize, 0, Math.PI * 2);
       }
+      ctx.fill();
 
-      // Sort back to front
-      projectedParticles.sort((a, b) => a.pz - b.pz);
+      // Draw Highlights in second batched path
+      ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+      ctx.beginPath();
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        if (!p.isHighlight) continue;
 
-      // Render Halftone Circular White/Light-Gray Points
-      for (let i = 0; i < projectedParticles.length; i++) {
-        const p = projectedParticles[i];
+        const floatZ = Math.sin(time * 1.5 + p.phase) * 0.004;
+        const floatY = Math.cos(time * 1.2 + p.phase) * 0.003;
 
-        // Halftone dot color palette: crisp pure white and light-gray
-        if (p.isHighlight) {
-          ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-        } else {
-          ctx.fillStyle = `rgba(225, 230, 240, ${p.alpha * 0.85})`;
-        }
+        const bx = p.bx;
+        const by = p.by + floatY;
+        const bz = p.bz + floatZ;
 
-        ctx.beginPath();
-        ctx.arc(p.px, p.py, p.size, 0, Math.PI * 2);
-        ctx.fill();
+        const x1 = bx * cosY + bz * sinY;
+        const z1 = -bx * sinY + bz * cosY;
+
+        const y2 = by * cosX - z1 * sinX;
+        const z2 = by * sinX + z1 * cosX;
+
+        const perspective = fov / (fov + z2);
+        const projX = centerX + x1 * scale * perspective;
+        const projY = centerY + y2 * scale * perspective;
+        const finalSize = p.baseSize * perspective;
+
+        ctx.moveTo(projX + finalSize, projY);
+        ctx.arc(projX, projY, finalSize, 0, Math.PI * 2);
       }
-
-      animationFrameId = requestAnimationFrame(render);
+      ctx.fill();
     };
 
     render();
 
     return () => {
+      observer.disconnect();
       window.removeEventListener("resize", handleResize);
       container.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationFrameId);

@@ -11,6 +11,14 @@ from urllib.request import Request, urlopen
 from flask import Blueprint, current_app, jsonify, request
 
 from app.services.symptom_predictor import get_symptom_predictor
+from app.services.chat_router import (
+    chat_string,
+    classify_intent,
+    disease_info,
+    extract_symptoms,
+    match_disease,
+    match_medicine,
+)
 
 try:
     from thefuzz import fuzz
@@ -174,3 +182,121 @@ def symptom_check():
     response = predictor.format_response(prediction, lang=lang)
 
     return jsonify(response)
+
+
+def _chat_disclaimer(lang: str) -> str:
+    return chat_string(lang, "disclaimer") or "AI guidance only. Not a medical diagnosis. Consult a physician for emergencies."
+
+
+def _chat_emergency(lang: str) -> str:
+    return chat_string(lang, "chat_emergency")
+
+
+def _chat_disease_response(disease: str, lang: str) -> str:
+    info = disease_info(disease, lang)
+    symptoms = ", ".join(info["symptoms"]) or "No typical symptoms were available in the dataset"
+    precautions = ", ".join(info["precautions"]) or "speak with a qualified clinician for individualized advice"
+    parts = [
+        chat_string(lang, "chat_disease_intro", name=info["name"], description=info["description"]),
+        chat_string(lang, "chat_disease_symptoms", symptoms=symptoms),
+        chat_string(lang, "chat_disease_precautions", precautions=precautions),
+        _chat_disclaimer(lang),
+    ]
+    return "\n\n".join(part for part in parts if part)
+
+
+def _chat_medicine_response(message: str, lang: str) -> str:
+    medicine = match_medicine(message)
+    if not medicine:
+        return (
+            "I could not find that medicine in the local medicine dataset. Please check the spelling or ask a pharmacist.\n\n"
+            + _chat_disclaimer(lang)
+        )
+    values = {
+        "name": medicine["name"],
+        "uses": ", ".join(medicine["uses"]) or "not listed",
+        "side_effects": ", ".join(medicine["side_effects"]) or "not listed",
+        "substitutes": ", ".join(medicine["substitutes"]) or "not listed",
+    }
+    parts = [
+        chat_string(lang, "chat_medicine_intro", name=values["name"]),
+        chat_string(lang, "chat_medicine_uses", values=values["uses"]),
+        chat_string(lang, "chat_medicine_side_effects", values=values["side_effects"]),
+        chat_string(lang, "chat_medicine_substitutes", values=values["substitutes"]),
+        _chat_disclaimer(lang),
+    ]
+    return "\n\n".join(part for part in parts if part)
+
+
+def _chat_symptom_response(message: str, lang: str, predictor) -> tuple[str, dict]:
+    candidates = extract_symptoms(message, predictor.known_symptoms)
+    # The public model vocabulary commonly contains high_fever rather than the
+    # shorter natural-language phrase “fever”; keep this demo input reliable.
+    if re.search(r"(?<!\w)fever(?!\w)", message.lower()):
+        fever = predictor.normalize_known_symptom("high_fever") or predictor.normalize_known_symptom("fever")
+        if fever and fever not in candidates:
+            candidates.append(fever)
+    lower_message = message.lower()
+    for phrase, symptom in (("high temperature", "high_fever"), ("temperature", "fever"),
+                            ("bukhar", "fever"), ("sir dard", "headache"), ("head pain", "headache")):
+        if phrase in lower_message:
+            canonical = predictor.normalize_known_symptom(symptom)
+            if not canonical and symptom == "fever":
+                canonical = predictor.normalize_known_symptom("high_fever")
+            if canonical and canonical not in candidates:
+                candidates.append(canonical)
+    prediction_data = predictor.predict_disease(candidates, top_n=3)
+    recognized = prediction_data["recognized_symptoms"]
+    if not recognized or not prediction_data["predictions"]:
+        return chat_string(lang, "chat_followup"), {"matched_symptoms": []}
+
+    urgency = _urgency_for(recognized)
+    prediction_list = prediction_data["predictions"]
+    prediction_text = ", ".join(
+        f"{item['disease']} ({round(float(item['confidence']) * 100, 1)}%)"
+        for item in prediction_list
+    )
+    text = chat_string(lang, "chat_symptom_intro", predictions=prediction_text)
+    text = f"{text}\n\nMatched symptoms: {', '.join(recognized)}.\n\n{_chat_disclaimer(lang)}"
+    return text, {
+        "matched_symptoms": recognized,
+        "predictions": prediction_list,
+        "confidence": prediction_list[0].get("confidence"),
+        "urgency": urgency,
+    }
+
+
+@chat_bp.post("/message")
+def chat_message():
+    """Unified offline-first chat route used by the main chat page."""
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        return jsonify({"error": "Please send a JSON object with a non-empty message."}), 400
+
+    message = str(body.get("message") or "").strip()
+    if not message:
+        return jsonify({"error": "Please enter a message so I can help."}), 400
+    lang = body.get("lang", "en")
+    if lang not in {"en", "hi", "gu"}:
+        return jsonify({"error": "'lang' must be one of: en, hi, gu."}), 400
+
+    intent = classify_intent(message)
+    if intent == "emergency":
+        return jsonify({"intent": intent, "text": _chat_emergency(lang), "urgency": "emergency"})
+    if intent == "greeting":
+        return jsonify({"intent": intent, "text": chat_string(lang, "chat_greeting")})
+    if intent == "disease_info":
+        disease = match_disease(message)
+        if disease:
+            return jsonify({"intent": intent, "text": _chat_disease_response(disease, lang), "disease": disease})
+    if intent == "medicine_info":
+        medicine = match_medicine(message)
+        return jsonify({"intent": intent, "text": _chat_medicine_response(message, lang), "medicine": medicine["name"] if medicine else None})
+    if intent == "symptom_check":
+        predictor = get_symptom_predictor(current_app)
+        if predictor is not None:
+            text, details = _chat_symptom_response(message, lang, predictor)
+            if details.get("matched_symptoms"):
+                return jsonify({"intent": intent, "text": text, **details})
+
+    return jsonify({"intent": "unknown", "text": chat_string(lang, "chat_followup")})

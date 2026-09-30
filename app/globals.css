@@ -33,6 +33,11 @@
   font-display: swap;
 }
 
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -40,7 +45,8 @@ body {
   line-height: 1.5;
   overflow-x: hidden;
   letter-spacing: -0.015em;
-  transition: background-color 0.25s ease, color 0.2s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
