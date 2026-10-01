@@ -7,6 +7,7 @@ import { TopBar } from "@/components/chat/top-bar";
 import { EmptyState } from "@/components/chat/empty-state";
 import { MessageThread, Message } from "@/components/chat/message-thread";
 import { InputBar } from "@/components/chat/input-bar";
+import { MedicineAnalyzerModal } from "@/components/chat/medicine-analyzer-modal";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
 import { Aurora } from "@/components/ui/aurora";
@@ -133,6 +134,7 @@ function ChatPageContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+  const [isMedicineAnalyzerOpen, setIsMedicineAnalyzerOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "hi" | "gu">("en");
 
@@ -431,6 +433,7 @@ function ChatPageContent() {
                   <InputBar
                     onSendMessage={handleSendMessage}
                     onOpenVoiceMode={() => setIsVoiceOpen(true)}
+                    onOpenMedicineAnalyzer={() => setIsMedicineAnalyzerOpen(true)}
                     isLoading={isGenerating}
                     className=""
                   />
@@ -445,6 +448,7 @@ function ChatPageContent() {
             <InputBar
               onSendMessage={handleSendMessage}
               onOpenVoiceMode={() => setIsVoiceOpen(true)}
+              onOpenMedicineAnalyzer={() => setIsMedicineAnalyzerOpen(true)}
               isLoading={isGenerating}
               className="sticky bottom-0 z-20 pb-4"
             />
@@ -468,6 +472,12 @@ function ChatPageContent() {
       </div>
 
       {/* Voice Overlay */}
+      {isMedicineAnalyzerOpen && (
+        <MedicineAnalyzerModal
+          token={token}
+          onClose={() => setIsMedicineAnalyzerOpen(false)}
+        />
+      )}
       <VoiceModeModal
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}

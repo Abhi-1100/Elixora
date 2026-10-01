@@ -102,6 +102,9 @@ def create_app():
     from app.routes.report_routes import report_bp
     app.register_blueprint(report_bp, url_prefix="/api/reports")
 
+    from app.routes.medicine_routes import medicine_bp
+    app.register_blueprint(medicine_bp, url_prefix="/api/medicine")
+
     from app.routes.chat_routes import chat_bp
     app.register_blueprint(chat_bp, url_prefix="/api/chat")
 

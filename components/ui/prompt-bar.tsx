@@ -67,6 +67,7 @@ export interface PromptBarProps {
   ) => void;
   onStop?: () => void;
   onAttach?: () => any | Promise<any>;
+  onMedicineAnalyzer?: () => void;
   onDictate?: () => string | Promise<string>;
   background?: string;
   color?: string;
@@ -229,6 +230,7 @@ export function PromptBar({
   onSend,
   onStop,
   onAttach,
+  onMedicineAnalyzer,
   onDictate,
   background = '#0A0E1A',
   color = '#F5F5F7',
@@ -498,7 +500,9 @@ export function PromptBar({
       return;
     }
     const head = token ? draft.slice(0, token.start) : draft;
-    if (row.attach) {
+    if (row.key === 'medicine-analyzer') {
+      onMedicineAnalyzer?.();
+    } else if (row.attach) {
       setDraft(head);
       if (latest.current.onAttach) {
         Promise.resolve(latest.current.onAttach()).then(files => {
