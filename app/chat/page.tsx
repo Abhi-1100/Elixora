@@ -7,7 +7,9 @@ import { TopBar } from "@/components/chat/top-bar";
 import { EmptyState } from "@/components/chat/empty-state";
 import { MessageThread, Message } from "@/components/chat/message-thread";
 import { InputBar } from "@/components/chat/input-bar";
+import { MedicineAnalyzerModal } from "@/components/chat/medicine-analyzer-modal";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
+import { SettingsModal } from "@/components/chat/settings-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
 import { Aurora } from "@/components/ui/aurora";
 import { useAuth } from "@/context/AuthContext";
@@ -23,7 +25,7 @@ const DEFAULT_NEW_CONVERSATION: Conversation = {
   category: "Today",
 };
 
-// Initial Demo Conversations (history)
+// Initial Demo Conversations (history tailored for Elixora Health)
 const INITIAL_CONVERSATIONS: Conversation[] = [
   DEFAULT_NEW_CONVERSATION,
   {
@@ -42,13 +44,49 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
   {
     id: "conv-3",
     title: "Lisinopril Prescription Refill",
-    date: "Yesterday",
-    category: "Yesterday",
+    date: "Today, 07:45 AM",
+    category: "Today",
   },
   {
     id: "conv-4",
     title: "Chest Pain & SOB Triage",
+    date: "Yesterday",
+    category: "Yesterday",
+  },
+  {
+    id: "conv-5",
+    title: "CBC Blood Count Report Breakdown",
+    date: "Yesterday",
+    category: "Yesterday",
+  },
+  {
+    id: "conv-6",
+    title: "Metformin Dosage & Diet Advice",
+    date: "Yesterday",
+    category: "Yesterday",
+  },
+  {
+    id: "conv-7",
+    title: "Vitamin D3 & Iron Consultation",
+    date: "2 days ago",
+    category: "Previous 7 Days",
+  },
+  {
+    id: "conv-8",
+    title: "Seasonal Allergies & Antihistamines",
     date: "3 days ago",
+    category: "Previous 7 Days",
+  },
+  {
+    id: "conv-9",
+    title: "Blood Pressure Monitoring Log",
+    date: "4 days ago",
+    category: "Previous 7 Days",
+  },
+  {
+    id: "conv-10",
+    title: "Post-Workout Muscle Soreness Relief",
+    date: "5 days ago",
     category: "Previous 7 Days",
   },
 ];
@@ -89,13 +127,13 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
       id: "m-5",
       sender: "user",
       text: "Summarize my prescription for Lisinopril and check refills",
-      timestamp: "Yesterday, 4:20 PM",
+      timestamp: "07:45 AM",
     },
     {
       id: "m-6",
       sender: "ai",
       text: "Prescription Summary for Lisinopril 10mg Tablets:\n\n• **Instructions:** Take 1 tablet orally every morning with water.\n• **Refills Remaining:** 3 refills available.\n• **Monitoring:** Check your blood pressure weekly as recommended by your physician.",
-      timestamp: "Yesterday, 4:21 PM",
+      timestamp: "07:46 AM",
     },
   ],
   "conv-4": [
@@ -103,13 +141,13 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
       id: "m-7",
       sender: "user",
       text: "I am experiencing sudden tight chest pressure radiating to my left arm",
-      timestamp: "3 days ago",
+      timestamp: "Yesterday",
     },
     {
       id: "m-8",
       sender: "ai",
       text: "CRITICAL HEALTH ALERT: Chest pressure radiating to your arm or jaw is a major red-flag symptom of an acute medical emergency.\n\nDo not delay — please seek emergency medical evaluation immediately (call 911 or visit the nearest emergency room).",
-      timestamp: "3 days ago",
+      timestamp: "Yesterday",
       cardType: "emergency",
       cardData: {
         message: "Chest pain radiating to arm, neck, or jaw requires immediate emergency medical evaluation.",
@@ -122,6 +160,90 @@ const MOCK_THREAD_DATA: Record<string, Message[]> = {
       },
     },
   ],
+  "conv-5": [
+    {
+      id: "m-9",
+      sender: "user",
+      text: "Can you help me understand my Complete Blood Count (CBC) results?",
+      timestamp: "Yesterday",
+    },
+    {
+      id: "m-10",
+      sender: "ai",
+      text: "Here is a breakdown of standard Complete Blood Count (CBC) indicators:\n\n• **White Blood Cells (WBC):** 4,500 – 11,000 /µL (Immune defense)\n• **Red Blood Cells (RBC):** 4.5 – 5.9 million/µL (Oxygen transport)\n• **Hemoglobin (Hb):** 13.5 – 17.5 g/dL for men, 12.0 – 15.5 g/dL for women\n• **Platelets:** 150,000 – 450,000 /µL (Clotting)\n\nYou can also upload your lab PDF directly to see automated biomarker ranges!",
+      timestamp: "Yesterday",
+    },
+  ],
+  "conv-6": [
+    {
+      id: "m-11",
+      sender: "user",
+      text: "What are the common side effects of Metformin and best times to take it?",
+      timestamp: "Yesterday",
+    },
+    {
+      id: "m-12",
+      sender: "ai",
+      text: "Metformin Clinical Guidance:\n\n• **Timing:** Best taken with evening meal to minimize gastrointestinal upset.\n• **Common Side Effects:** Mild stomach cramping, nausea, or loose stools during initial weeks.\n• **Diet Advice:** Limit high-refined sugar intake and stay well-hydrated.\n• **Note:** Avoid heavy alcohol consumption while on Metformin.",
+      timestamp: "Yesterday",
+    },
+  ],
+  "conv-7": [
+    {
+      id: "m-13",
+      sender: "user",
+      text: "My Vitamin D is 18 ng/mL. How severe is this deficiency?",
+      timestamp: "2 days ago",
+    },
+    {
+      id: "m-14",
+      sender: "ai",
+      text: "Vitamin D Assessment:\n\n• **Your Level:** 18 ng/mL indicates mild to moderate deficiency (Optimal range: 30 – 50 ng/mL).\n• **Recommendations:** A weekly high-dose supplement (e.g. 50,000 IU D3) or daily 2,000 IU regimen is commonly prescribed by physicians.\n• **Co-factors:** Ensure adequate dietary magnesium and calcium for optimal absorption.",
+      timestamp: "2 days ago",
+    },
+  ],
+  "conv-8": [
+    {
+      id: "m-15",
+      sender: "user",
+      text: "Difference between Cetirizine and Fexofenadine for pollen allergies?",
+      timestamp: "3 days ago",
+    },
+    {
+      id: "m-16",
+      sender: "ai",
+      text: "Antihistamine Comparison:\n\n• **Cetirizine (Zyrtec):** Fast-acting with strong symptom relief; may cause mild drowsiness in ~10% of users.\n• **Fexofenadine (Allegra):** True non-sedating 2nd generation antihistamine; does not cross the blood-brain barrier.\n• **Tip:** Avoid taking Fexofenadine with grapefruit juice as it reduces absorption.",
+      timestamp: "3 days ago",
+    },
+  ],
+  "conv-9": [
+    {
+      id: "m-17",
+      sender: "user",
+      text: "My blood pressure reading was 134/86 mmHg this morning. Is that Stage 1 hypertension?",
+      timestamp: "4 days ago",
+    },
+    {
+      id: "m-18",
+      sender: "ai",
+      text: "Blood Pressure Reading Analysis:\n\n• **Systolic (134 mmHg):** Stage 1 Hypertension category (130–139 mmHg).\n• **Diastolic (86 mmHg):** Stage 1 Hypertension category (80–89 mmHg).\n• **Next Steps:** Record morning and evening readings for 7 days before concluding hypertension. Avoid caffeine 30 mins prior to measurement.",
+      timestamp: "4 days ago",
+    },
+  ],
+  "conv-10": [
+    {
+      id: "m-19",
+      sender: "user",
+      text: "Best recovery protocol for severe delayed onset muscle soreness (DOMS)?",
+      timestamp: "5 days ago",
+    },
+    {
+      id: "m-20",
+      sender: "ai",
+      text: "DOMS Recovery Protocol:\n\n• **Active Recovery:** 15–20 minutes of light walking or cycling to stimulate lymphatic blood flow.\n• **Hydration & Electrolytes:** Replenish sodium, potassium, and magnesium.\n• **Cold/Heat:** Alternating contrast showers or warm Epsom salt soak.\n• **Warning Signs:** If urine appears dark brown/tea-colored or extreme swelling occurs, seek immediate evaluation to rule out rhabdomyolysis.",
+      timestamp: "5 days ago",
+    },
+  ],
 };
 
 function ChatPageContent() {
@@ -130,9 +252,12 @@ function ChatPageContent() {
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [activeId, setActiveId] = useState<string>(NEW_CHAT_ID);
   const [threadMap, setThreadMap] = useState<Record<string, Message[]>>(MOCK_THREAD_DATA);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+  const [isMedicineAnalyzerOpen, setIsMedicineAnalyzerOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState("general");
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "hi" | "gu">("en");
 
@@ -150,7 +275,6 @@ function ChatPageContent() {
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 1023px)");
     const syncSidebarLayout = () => {
-      setIsSidebarCollapsed(mediaQuery.matches);
       if (window.innerWidth >= 1024) setIsMobileSidebarOpen(false);
     };
 
@@ -246,6 +370,7 @@ function ChatPageContent() {
 
     setThreadMap((prev) => ({ ...prev, [activeId]: updatedMsgs }));
     setIsGenerating(true);
+    const requestStartTime = performance.now();
 
     // ── REAL REPORT ATTACHMENT PATH: Upload to backend & Open Side Panel in Chat ───────
     if (attachment) {
@@ -258,6 +383,7 @@ function ChatPageContent() {
           throw new Error("Authentication required. Please log in to upload and analyze lab reports.");
         }
         const data = await uploadReport(formData, currentToken);
+        const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
 
         // Set active report to display in partition side panel right inside chat!
         setActiveReport(data);
@@ -267,6 +393,7 @@ function ChatPageContent() {
           sender: "ai",
           text: `Report analyzed — Overall Status: ${data.overall_status}. Extracted ${data.results?.length ?? 0} biomarker(s).\n\nThe document preview and biomarker breakdown panel is open on the right. Ask me any questions about your lab results!`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          thinkingTime: durationSec,
         };
 
         setThreadMap((prev) => ({
@@ -275,11 +402,13 @@ function ChatPageContent() {
         }));
         setIsGenerating(false);
       } catch (err: unknown) {
+        const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
         const errMsg: Message = {
           id: "m-" + (Date.now() + 1),
           sender: "ai",
           text: `❌ Failed to analyze report: ${err instanceof Error ? err.message : "Unknown error"}. Please try uploading again.`,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          thinkingTime: durationSec,
         };
         setThreadMap((prev) => ({
           ...prev,
@@ -293,11 +422,14 @@ function ChatPageContent() {
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
     try {
       const data = await sendChatMessage(text, selectedLanguage);
+      const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
       const aiMsg: Message = {
         id: "m-" + (Date.now() + 1),
         sender: "ai",
         text: data.text,
+        structuredResponse: data,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        thinkingTime: durationSec,
       };
       setThreadMap((prev) => ({
         ...prev,
@@ -307,6 +439,7 @@ function ChatPageContent() {
       return data.text;
     } catch (error) {
       // Preserve the existing offline UI behavior if the backend is unreachable.
+      const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
       const errorText = error instanceof Error ? error.message : "Unknown API error";
       console.error("Chat request failed:", error);
       const errorMsg: Message = {
@@ -314,6 +447,7 @@ function ChatPageContent() {
         sender: "ai",
         text: `I couldn't complete that request right now. ${errorText}\n\nPlease check the connection and try again.`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        thinkingTime: durationSec,
       };
       setThreadMap((prev) => ({
         ...prev,
@@ -397,6 +531,10 @@ function ChatPageContent() {
           onDeleteConversation={handleDeleteConversation}
           onRenameConversation={handleRenameConversation}
           onOpenVoiceMode={() => setIsVoiceOpen(true)}
+          onOpenSettings={(tab) => {
+            setSettingsTab(tab || "general");
+            setIsSettingsOpen(true);
+          }}
         />
       </div>
 
@@ -417,13 +555,17 @@ function ChatPageContent() {
           <TopBar
             title={activeConversation?.title || "Elixora Health Assistant"}
             onOpenVoiceMode={() => setIsVoiceOpen(true)}
+            onOpenSettings={(tab) => {
+              setSettingsTab(tab || "general");
+              setIsSettingsOpen(true);
+            }}
             onToggleSidebarMobile={() => setIsMobileSidebarOpen((open) => !open)}
             onGoToLanding={() => router.push("/")}
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}
           />
 
-          <main className="flex-1 min-h-0 overflow-y-auto flex flex-col relative">
+          <main className={`flex-1 min-h-0 overflow-y-auto flex flex-col relative ${activeMessages.length === 0 ? "justify-center" : ""}`}>
             {activeMessages.length === 0 ? (
               <EmptyState
                 onSelectPrompt={(pText) => handleSendMessage(pText)}
@@ -431,6 +573,7 @@ function ChatPageContent() {
                   <InputBar
                     onSendMessage={handleSendMessage}
                     onOpenVoiceMode={() => setIsVoiceOpen(true)}
+                    onOpenMedicineAnalyzer={() => setIsMedicineAnalyzerOpen(true)}
                     isLoading={isGenerating}
                     className=""
                   />
@@ -445,6 +588,7 @@ function ChatPageContent() {
             <InputBar
               onSendMessage={handleSendMessage}
               onOpenVoiceMode={() => setIsVoiceOpen(true)}
+              onOpenMedicineAnalyzer={() => setIsMedicineAnalyzerOpen(true)}
               isLoading={isGenerating}
               className="sticky bottom-0 z-20 pb-4"
             />
@@ -468,10 +612,23 @@ function ChatPageContent() {
       </div>
 
       {/* Voice Overlay */}
+      {isMedicineAnalyzerOpen && (
+        <MedicineAnalyzerModal
+          token={token}
+          onClose={() => setIsMedicineAnalyzerOpen(false)}
+        />
+      )}
       <VoiceModeModal
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}
         onSendTranscript={handleSendMessage}
+      />
+
+      {/* Settings Modal matching Claude screenshot */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        initialTab={settingsTab}
       />
     </div>
   );

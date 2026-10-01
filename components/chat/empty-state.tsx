@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface EmptyStateProps {
@@ -13,30 +12,36 @@ interface EmptyStateProps {
 export function EmptyState({ onSelectPrompt, InputBarComponent, userName }: EmptyStateProps) {
   const { user } = useAuth() as { user: any };
 
-  // Use provided userName prop, or logged in user's name, or default fallback
-  const displayName = userName || user?.name || "there";
+  // Format first name in lowercase like: "Good morning, abhi"
+  const rawName = userName || user?.name || "abhi";
+  const firstName = rawName.split(" ")[0].toLowerCase();
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const greeting = getGreeting();
 
   return (
-    <div className="flex min-h-full flex-col items-center justify-center p-4 sm:p-10 text-center max-w-3xl w-full mx-auto my-auto select-none gap-5 sm:gap-8 animate-fade-in">
-      {/* Greeting Headline */}
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)] flex items-center justify-center shadow-xs">
-          <Sparkles className="w-6 h-6 text-[var(--accent)]" />
-        </div>
-        <h2 className="font-display text-3xl sm:text-4xl font-medium tracking-tight text-[var(--ink)] capitalize">
-          How can I help with your health today, {displayName}?
+    <div className="flex flex-1 flex-col items-center justify-center p-4 select-none animate-fade-in w-full my-auto pb-16">
+      {/* ── Headline: Clean greeting without logo ── */}
+      <div className="flex items-center justify-center mb-7">
+        <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-[var(--ink)]">
+          {greeting}, {firstName}
         </h2>
-        <p className="text-xs sm:text-sm text-[var(--ink-muted)] max-w-md">
-          Ask questions about symptoms, medications, or upload a lab report PDF for clinical extraction.
-        </p>
       </div>
 
-      {/* Input Bar Placeholder */}
+      {/* ── Centered Prompt Box ── */}
       {InputBarComponent && (
-        <div className="w-full max-w-2xl mt-0 sm:mt-2">
+        <div className="w-full max-w-2xl">
           {InputBarComponent}
         </div>
       )}
     </div>
   );
 }
+
+export default EmptyState;

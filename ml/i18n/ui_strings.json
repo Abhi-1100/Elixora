@@ -19,7 +19,29 @@
     "unrecognized_symptom_note": "Note: I couldn't recognize these symptoms: {symptoms}",
     "low_confidence_note": "This match has low confidence. It's best to get a doctor's opinion rather than rely on this alone.",
     "disclaimer": "AI guidance only. Not a medical diagnosis. Consult a physician for emergencies.",
-    "no_match": "I couldn't confidently match your symptoms to a condition. Please consult a doctor, especially if symptoms are severe."
+    "no_match": "I couldn't confidently match your symptoms to a condition. Please consult a doctor, especially if symptoms are severe.",
+    "title_possible": "Possible conditions",
+    "title_emergency": "Emergency",
+    "title_greeting": "Hello",
+    "title_unknown": "Tell me more",
+    "mentioned": "You mentioned",
+    "common_symptoms": "Common symptoms",
+    "what_to_do": "What you can do",
+    "when_doctor": "When to see a doctor",
+    "follow_up": "Could you share one or two more symptoms?",
+    "cautious": "These symptoms are common and could relate to many conditions; I cannot narrow this down confidently.",
+    "generic_care": "Rest, drink fluids, and monitor how you feel.",
+    "examples": [
+      "I have fever and headache",
+      "What are the symptoms of diabetes?",
+      "I have itching and a skin rash"
+    ],
+    "no_predictions": "I need at least two recognized symptoms before I can show possible conditions.",
+    "emergency_actions": [
+      "Call your local emergency number now.",
+      "Go to the nearest hospital.",
+      "Do not drive yourself."
+    ]
   },
   "hi": {
     "chat_emergency": "यह चिकित्सा आपातकाल हो सकता है। अभी अपने स्थानीय आपातकालीन नंबर पर कॉल करें या निकटतम अस्पताल जाएँ। यह केवल AI मार्गदर्शन है, चिकित्सा निदान नहीं।",
@@ -41,7 +63,29 @@
     "unrecognized_symptom_note": "सूचना: इन लक्षणों को पहचाना नहीं जा सका: {symptoms}",
     "low_confidence_note": "इस अनुमान का विश्वास स्तर कम है। कृपया केवल इस पर निर्भर न रहें, डॉक्टर की सलाह अवश्य लें।",
     "disclaimer": "यह केवल एआई मार्गदर्शन है, चिकित्सीय निदान नहीं। आपातकाल में डॉक्टर से संपर्क करें।",
-    "no_match": "मैं आपके लक्षणों को विश्वसनीय रूप से किसी स्थिति से नहीं जोड़ पाया। कृपया डॉक्टर से सलाह लें, खासकर यदि लक्षण गंभीर हों।"
+    "no_match": "मैं आपके लक्षणों को विश्वसनीय रूप से किसी स्थिति से नहीं जोड़ पाया। कृपया डॉक्टर से सलाह लें, खासकर यदि लक्षण गंभीर हों।",
+    "title_possible": "संभावित कारण",
+    "title_emergency": "आपातकाल",
+    "title_greeting": "नमस्ते",
+    "title_unknown": "कृपया और बताएं",
+    "mentioned": "आपने बताया",
+    "common_symptoms": "सामान्य लक्षण",
+    "what_to_do": "आप क्या कर सकते हैं",
+    "when_doctor": "डॉक्टर से कब मिलें",
+    "follow_up": "क्या आप एक या दो और लक्षण बता सकते हैं?",
+    "cautious": "ये लक्षण सामान्य हैं और कई कारणों से जुड़े हो सकते हैं; मैं अभी निश्चित रूप से कारण नहीं बता सकता।",
+    "generic_care": "आराम करें, तरल पदार्थ लें और अपनी स्थिति पर ध्यान दें।",
+    "examples": [
+      "मुझे बुखार और सिरदर्द है",
+      "मधुमेह के लक्षण क्या हैं?",
+      "मुझे खुजली और त्वचा पर दाने हैं"
+    ],
+    "no_predictions": "संभावित स्थितियां दिखाने से पहले कम से कम दो पहचाने गए लक्षण बताएं।",
+    "emergency_actions": [
+      "अभी स्थानीय आपातकालीन नंबर पर कॉल करें।",
+      "निकटतम अस्पताल जाएं।",
+      "खुद गाड़ी न चलाएं।"
+    ]
   },
   "gu": {
     "chat_emergency": "આ તબીબી કટોકટી હોઈ શકે છે. તરત તમારા સ્થાનિક ઇમરજન્સી નંબર પર કૉલ કરો અથવા નજીકની હોસ્પિટલમાં જાઓ. આ માત્ર AI માર્ગદર્શન છે, તબીબી નિદાન નથી.",
@@ -63,6 +107,28 @@
     "unrecognized_symptom_note": "નોંધ: આ લક્ષણો ઓળખી શકાયા નથી: {symptoms}",
     "low_confidence_note": "આ અનુમાનનું વિશ્વાસ સ્તર ઓછું છે. ફક્ત આના પર આધાર ન રાખો, ડૉક્ટરની સલાહ જરૂર લો.",
     "disclaimer": "આ ફક્ત એઆઈ માર્ગદર્શન છે, તબીબી નિદાન નથી. કટોકટીમાં ડૉક્ટરનો સંપર્ક કરો.",
-    "no_match": "હું તમારા લક્ષણોને વિશ્વસનીય રીતે કોઈ સ્થિતિ સાથે જોડી શક્યો નથી. કૃપા કરી ડૉક્ટરની સલાહ લો, ખાસ કરીને જો લક્ષણો ગંભીર હોય."
+    "no_match": "હું તમારા લક્ષણોને વિશ્વસનીય રીતે કોઈ સ્થિતિ સાથે જોડી શક્યો નથી. કૃપા કરી ડૉક્ટરની સલાહ લો, ખાસ કરીને જો લક્ષણો ગંભીર હોય.",
+    "title_possible": "શક્ય કારણો",
+    "title_emergency": "કટોકટી",
+    "title_greeting": "નમસ્તે",
+    "title_unknown": "વધુ જણાવો",
+    "mentioned": "તમે જણાવેલા લક્ષણો",
+    "common_symptoms": "સામાન્ય લક્ષણો",
+    "what_to_do": "તમે શું કરી શકો",
+    "when_doctor": "ડૉક્ટરને ક્યારે મળવું",
+    "follow_up": "શું તમે એક કે બે વધુ લક્ષણો જણાવી શકો?",
+    "cautious": "આ લક્ષણો સામાન્ય છે અને અનેક કારણો સાથે જોડાયેલા હોઈ શકે છે; હું હમણાં ચોક્કસ કારણ જણાવી શકતો નથી.",
+    "generic_care": "આરામ કરો, પ્રવાહી લો અને તમારી સ્થિતિ પર નજર રાખો.",
+    "examples": [
+      "મને તાવ અને માથું દુખે છે",
+      "ડાયાબિટીસના લક્ષણો શું છે?",
+      "મને ખંજવાળ અને ચામડી પર ચકામા છે"
+    ],
+    "no_predictions": "શક્ય સ્થિતિઓ બતાવવા માટે ઓછામાં ઓછા બે ઓળખાયેલા લક્ષણો જણાવો.",
+    "emergency_actions": [
+      "હમણાં સ્થાનિક ઇમરજન્સી નંબર પર કૉલ કરો.",
+      "નજીકની હોસ્પિટલમાં જાઓ.",
+      "પોતે વાહન ન ચલાવો."
+    ]
   }
 }

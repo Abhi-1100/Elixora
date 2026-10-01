@@ -9,6 +9,8 @@ import { PrescriptionCard, PrescriptionData } from "./cards/prescription-card";
 import { EmergencyCard } from "./cards/emergency-card";
 import { User, Copy, Check, Sparkles, ExternalLink, FileText, Paperclip, FileCode } from "lucide-react";
 import Link from "next/link";
+import LatticeLoader from "@/components/ui/LatticeLoader";
+import { StructuredResponse, type StructuredResponse as StructuredResponseType } from "./structured-response";
 
 export interface MessageAttachment {
   name: string;
@@ -28,6 +30,8 @@ export interface Message {
   cardData?: MedicineDetails | LabReportData | PrescriptionData | { message?: string; redFlagSymptoms?: string[] };
   /** When set, a 'View full report' button linking to this URL is shown in the AI bubble */
   reportLink?: string;
+  thinkingTime?: number;
+  structuredResponse?: StructuredResponseType;
 }
 
 interface MessageThreadProps {
@@ -116,7 +120,25 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
                   className="w-full"
                 >
                   <div className="group relative p-4 sm:p-5 leading-relaxed text-[var(--ink)] space-y-3">
-                    <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>
+                    {typeof msg.thinkingTime === "number" && (
+                      <div className="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-white/5 border border-white/10 text-xs text-zinc-400 mb-1">
+                        <LatticeLoader
+                          status="done"
+                          doneLabel="Thought for"
+                          elapsed={msg.thinkingTime}
+                          pattern="orbit"
+                          grid={3}
+                          shape="round"
+                          color="rgba(161, 161, 170, 0.8)"
+                          doneColor="#22c55e"
+                          cellSize={4.5}
+                          gap={2}
+                          fontSize={12}
+                          showTimer={true}
+                        />
+                      </div>
+                    )}
+                    {msg.structuredResponse ? <StructuredResponse response={msg.structuredResponse} /> : <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>}
 
                     {/* Render Specialized Cards if present */}
                     {msg.cardType === "medicine" && msg.cardData && (
@@ -182,21 +204,39 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
         );
       })}
 
-      {/* Generating Skeleton Loader Indicator */}
+      {/* Generating Thinking State Loader */}
       {isGenerating && (
         <div className="flex items-start gap-3.5 text-xs text-[var(--ink-muted)] animate-fade-in">
           <div className="shrink-0 mt-0.5">
             <BreathOrb size="sm" mode="thinking" />
           </div>
-          <div className="bg-[var(--surface)] p-4 sm:p-5 rounded-2xl border border-[var(--border)] shadow-xs w-full max-w-[75%] space-y-2.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-[var(--accent)]">
-              <Sparkles className="w-3.5 h-3.5 animate-spin" />
-              <span>Synthesizing clinical reference response...</span>
+          <div className="bg-[var(--surface)] p-4 sm:p-5 rounded-2xl border border-[var(--border)] shadow-xs w-full max-w-[75%] space-y-3">
+            <div className="flex items-center gap-2">
+              <LatticeLoader
+                status="working"
+                label="Thinking"
+                doneLabel="Done in"
+                errorLabel="Failed after"
+                pattern="orbit"
+                grid={3}
+                shape="round"
+                color="var(--accent, #3b82f6)"
+                doneColor="#22c55e"
+                errorColor="#ef4444"
+                cellSize={6}
+                gap={2}
+                fontSize={14}
+                step={90}
+                idleOpacity={0.15}
+                glow={true}
+                glowColor="rgba(59, 130, 246, 0.45)"
+                showTimer={true}
+              />
             </div>
             <div className="space-y-2 pt-1">
-              <div className="h-3.5 skeleton-shimmer rounded-md w-11/12" />
-              <div className="h-3.5 skeleton-shimmer rounded-md w-4/5" />
-              <div className="h-3.5 skeleton-shimmer rounded-md w-2/3" />
+              <div className="h-3 skeleton-shimmer rounded-md w-11/12" />
+              <div className="h-3 skeleton-shimmer rounded-md w-4/5" />
+              <div className="h-3 skeleton-shimmer rounded-md w-2/3" />
             </div>
           </div>
         </div>

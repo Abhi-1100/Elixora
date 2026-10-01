@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useRef } from "react";
-import { ShieldCheck, Sparkles, Mic } from "lucide-react";
-import { PromptBar, PromptBarModel } from "@/components/ui/prompt-bar";
+import { Pill, ShieldCheck, Mic } from "lucide-react";
+import { DEFAULT_SOURCES, PromptBar, PromptBarModel } from "@/components/ui/prompt-bar";
 
 interface InputBarProps {
   onSendMessage: (text: string, attachment?: File | null) => void;
   onOpenVoiceMode: () => void;
+  onOpenMedicineAnalyzer: () => void;
   isLoading?: boolean;
   className?: string;
 }
@@ -14,6 +15,7 @@ interface InputBarProps {
 export function InputBar({
   onSendMessage,
   onOpenVoiceMode,
+  onOpenMedicineAnalyzer,
   isLoading = false,
   className = "sticky bottom-0 z-20 pb-4",
 }: InputBarProps) {
@@ -110,10 +112,20 @@ export function InputBar({
 
       <div className="w-full pointer-events-auto flex flex-col items-center gap-2">
         <PromptBar
+          sources={[
+            ...DEFAULT_SOURCES,
+            {
+              key: "medicine-analyzer",
+              name: "Medicine Analyzer",
+              description: "Identify a medicine from an image",
+              icon: <Pill className="h-4 w-4" />,
+            },
+          ]}
           placeholder="Ask about symptoms, medications, or attach lab reports..."
           busy={isLoading}
           onSend={handleSend}
           onAttach={handleAttach}
+          onMedicineAnalyzer={onOpenMedicineAnalyzer}
           onDictate={handleDictate}
           background="var(--bg-secondary, #0A0E1A)"
           color="var(--text-primary, #F5F5F7)"

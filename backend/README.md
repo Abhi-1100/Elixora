@@ -38,6 +38,8 @@ Edit `.env`:
 - `GOOGLE_CLIENT_ID` — the same Google OAuth 2.0 Web client ID configured as
   `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in the Next.js app
 
+Medicine Analyzer forwards authenticated image uploads to the separate Medicine AI FastAPI service. By default it uses `http://127.0.0.1:8000`. To override it, set `MEDICINE_AI_API_URL` in the backend environment; `MEDICINE_AI_TIMEOUT_SECONDS` optionally controls the upstream read timeout (default `120`). Keep these server-side; do not use `NEXT_PUBLIC_*` variables for this service URL.
+
 If this database already exists, run `migrations/001_google_signin.sql` once
 against it before starting the API. New databases get these columns from the
 updated model when `db.create_all()` runs.

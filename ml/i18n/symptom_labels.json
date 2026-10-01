@@ -1,0 +1,657 @@
+{
+  "abdominal_pain": {
+    "en": "Abdominal Pain",
+    "hi": "पेट दर्द",
+    "gu": "પેટમાં દુખાવો"
+  },
+  "abnormal_menstruation": {
+    "en": "Abnormal Menstruation",
+    "hi": "Abnormal Menstruation",
+    "gu": "Abnormal Menstruation"
+  },
+  "acidity": {
+    "en": "Acidity",
+    "hi": "Acidity",
+    "gu": "Acidity"
+  },
+  "acute_liver_failure": {
+    "en": "Acute Liver Failure",
+    "hi": "Acute Liver Failure",
+    "gu": "Acute Liver Failure"
+  },
+  "altered_sensorium": {
+    "en": "Altered Sensorium",
+    "hi": "Altered Sensorium",
+    "gu": "Altered Sensorium"
+  },
+  "anxiety": {
+    "en": "Anxiety",
+    "hi": "Anxiety",
+    "gu": "Anxiety"
+  },
+  "back_pain": {
+    "en": "Back Pain",
+    "hi": "Back Pain",
+    "gu": "Back Pain"
+  },
+  "belly_pain": {
+    "en": "Belly Pain",
+    "hi": "Belly Pain",
+    "gu": "Belly Pain"
+  },
+  "blackheads": {
+    "en": "Blackheads",
+    "hi": "Blackheads",
+    "gu": "Blackheads"
+  },
+  "bladder_discomfort": {
+    "en": "Bladder Discomfort",
+    "hi": "Bladder Discomfort",
+    "gu": "Bladder Discomfort"
+  },
+  "blister": {
+    "en": "Blister",
+    "hi": "Blister",
+    "gu": "Blister"
+  },
+  "blood_in_sputum": {
+    "en": "Blood In Sputum",
+    "hi": "Blood In Sputum",
+    "gu": "Blood In Sputum"
+  },
+  "bloody_stool": {
+    "en": "Bloody Stool",
+    "hi": "Bloody Stool",
+    "gu": "Bloody Stool"
+  },
+  "blurred_and_distorted_vision": {
+    "en": "Blurred And Distorted Vision",
+    "hi": "Blurred And Distorted Vision",
+    "gu": "Blurred And Distorted Vision"
+  },
+  "breathlessness": {
+    "en": "Breathlessness",
+    "hi": "सांस लेने में तकलीफ",
+    "gu": "શ્વાસ લેવામાં તકલીફ"
+  },
+  "brittle_nails": {
+    "en": "Brittle Nails",
+    "hi": "Brittle Nails",
+    "gu": "Brittle Nails"
+  },
+  "bruising": {
+    "en": "Bruising",
+    "hi": "Bruising",
+    "gu": "Bruising"
+  },
+  "burning_micturition": {
+    "en": "Burning Micturition",
+    "hi": "Burning Micturition",
+    "gu": "Burning Micturition"
+  },
+  "chest_pain": {
+    "en": "Chest Pain",
+    "hi": "Chest Pain",
+    "gu": "Chest Pain"
+  },
+  "chills": {
+    "en": "Chills",
+    "hi": "Chills",
+    "gu": "Chills"
+  },
+  "cold_hands_and_feets": {
+    "en": "Cold Hands And Feets",
+    "hi": "Cold Hands And Feets",
+    "gu": "Cold Hands And Feets"
+  },
+  "coma": {
+    "en": "Coma",
+    "hi": "Coma",
+    "gu": "Coma"
+  },
+  "congestion": {
+    "en": "Congestion",
+    "hi": "Congestion",
+    "gu": "Congestion"
+  },
+  "constipation": {
+    "en": "Constipation",
+    "hi": "Constipation",
+    "gu": "Constipation"
+  },
+  "continuous_feel_of_urine": {
+    "en": "Continuous Feel Of Urine",
+    "hi": "Continuous Feel Of Urine",
+    "gu": "Continuous Feel Of Urine"
+  },
+  "continuous_sneezing": {
+    "en": "Continuous Sneezing",
+    "hi": "Continuous Sneezing",
+    "gu": "Continuous Sneezing"
+  },
+  "cough": {
+    "en": "Cough",
+    "hi": "खांसी",
+    "gu": "ઉધરસ"
+  },
+  "cramps": {
+    "en": "Cramps",
+    "hi": "Cramps",
+    "gu": "Cramps"
+  },
+  "dark_urine": {
+    "en": "Dark Urine",
+    "hi": "Dark Urine",
+    "gu": "Dark Urine"
+  },
+  "dehydration": {
+    "en": "Dehydration",
+    "hi": "Dehydration",
+    "gu": "Dehydration"
+  },
+  "depression": {
+    "en": "Depression",
+    "hi": "Depression",
+    "gu": "Depression"
+  },
+  "diarrhoea": {
+    "en": "Diarrhoea",
+    "hi": "दस्त",
+    "gu": "ઝાડા"
+  },
+  "dischromic _patches": {
+    "en": "Dischromic  Patches",
+    "hi": "Dischromic  Patches",
+    "gu": "Dischromic  Patches"
+  },
+  "distention_of_abdomen": {
+    "en": "Distention Of Abdomen",
+    "hi": "Distention Of Abdomen",
+    "gu": "Distention Of Abdomen"
+  },
+  "dizziness": {
+    "en": "Dizziness",
+    "hi": "चक्कर",
+    "gu": "ચક્કર"
+  },
+  "drying_and_tingling_lips": {
+    "en": "Drying And Tingling Lips",
+    "hi": "Drying And Tingling Lips",
+    "gu": "Drying And Tingling Lips"
+  },
+  "enlarged_thyroid": {
+    "en": "Enlarged Thyroid",
+    "hi": "Enlarged Thyroid",
+    "gu": "Enlarged Thyroid"
+  },
+  "excessive_hunger": {
+    "en": "Excessive Hunger",
+    "hi": "Excessive Hunger",
+    "gu": "Excessive Hunger"
+  },
+  "extra_marital_contacts": {
+    "en": "Extra Marital Contacts",
+    "hi": "Extra Marital Contacts",
+    "gu": "Extra Marital Contacts"
+  },
+  "family_history": {
+    "en": "Family History",
+    "hi": "Family History",
+    "gu": "Family History"
+  },
+  "fast_heart_rate": {
+    "en": "Fast Heart Rate",
+    "hi": "Fast Heart Rate",
+    "gu": "Fast Heart Rate"
+  },
+  "fatigue": {
+    "en": "Fatigue",
+    "hi": "थकान",
+    "gu": "થાક"
+  },
+  "fluid_overload": {
+    "en": "Fluid Overload",
+    "hi": "Fluid Overload",
+    "gu": "Fluid Overload"
+  },
+  "foul_smell_of urine": {
+    "en": "Foul Smell Of Urine",
+    "hi": "Foul Smell Of Urine",
+    "gu": "Foul Smell Of Urine"
+  },
+  "headache": {
+    "en": "Headache",
+    "hi": "सिरदर्द",
+    "gu": "માથાનો દુખાવો"
+  },
+  "high_fever": {
+    "en": "High Fever",
+    "hi": "तेज़ बुखार",
+    "gu": "ખૂબ તાવ"
+  },
+  "hip_joint_pain": {
+    "en": "Hip Joint Pain",
+    "hi": "Hip Joint Pain",
+    "gu": "Hip Joint Pain"
+  },
+  "history_of_alcohol_consumption": {
+    "en": "History Of Alcohol Consumption",
+    "hi": "History Of Alcohol Consumption",
+    "gu": "History Of Alcohol Consumption"
+  },
+  "increased_appetite": {
+    "en": "Increased Appetite",
+    "hi": "Increased Appetite",
+    "gu": "Increased Appetite"
+  },
+  "indigestion": {
+    "en": "Indigestion",
+    "hi": "Indigestion",
+    "gu": "Indigestion"
+  },
+  "inflammatory_nails": {
+    "en": "Inflammatory Nails",
+    "hi": "Inflammatory Nails",
+    "gu": "Inflammatory Nails"
+  },
+  "internal_itching": {
+    "en": "Internal Itching",
+    "hi": "Internal Itching",
+    "gu": "Internal Itching"
+  },
+  "irregular_sugar_level": {
+    "en": "Irregular Sugar Level",
+    "hi": "Irregular Sugar Level",
+    "gu": "Irregular Sugar Level"
+  },
+  "irritability": {
+    "en": "Irritability",
+    "hi": "Irritability",
+    "gu": "Irritability"
+  },
+  "irritation_in_anus": {
+    "en": "Irritation In Anus",
+    "hi": "Irritation In Anus",
+    "gu": "Irritation In Anus"
+  },
+  "itching": {
+    "en": "Itching",
+    "hi": "खुजली",
+    "gu": "ખંજવાળ"
+  },
+  "joint_pain": {
+    "en": "Joint Pain",
+    "hi": "Joint Pain",
+    "gu": "Joint Pain"
+  },
+  "knee_pain": {
+    "en": "Knee Pain",
+    "hi": "Knee Pain",
+    "gu": "Knee Pain"
+  },
+  "lack_of_concentration": {
+    "en": "Lack Of Concentration",
+    "hi": "Lack Of Concentration",
+    "gu": "Lack Of Concentration"
+  },
+  "lethargy": {
+    "en": "Lethargy",
+    "hi": "Lethargy",
+    "gu": "Lethargy"
+  },
+  "loss_of_appetite": {
+    "en": "Loss Of Appetite",
+    "hi": "Loss Of Appetite",
+    "gu": "Loss Of Appetite"
+  },
+  "loss_of_balance": {
+    "en": "Loss Of Balance",
+    "hi": "Loss Of Balance",
+    "gu": "Loss Of Balance"
+  },
+  "loss_of_smell": {
+    "en": "Loss Of Smell",
+    "hi": "Loss Of Smell",
+    "gu": "Loss Of Smell"
+  },
+  "malaise": {
+    "en": "Malaise",
+    "hi": "Malaise",
+    "gu": "Malaise"
+  },
+  "mild_fever": {
+    "en": "Mild Fever",
+    "hi": "Mild Fever",
+    "gu": "Mild Fever"
+  },
+  "mood_swings": {
+    "en": "Mood Swings",
+    "hi": "Mood Swings",
+    "gu": "Mood Swings"
+  },
+  "movement_stiffness": {
+    "en": "Movement Stiffness",
+    "hi": "Movement Stiffness",
+    "gu": "Movement Stiffness"
+  },
+  "mucoid_sputum": {
+    "en": "Mucoid Sputum",
+    "hi": "Mucoid Sputum",
+    "gu": "Mucoid Sputum"
+  },
+  "muscle_pain": {
+    "en": "Muscle Pain",
+    "hi": "Muscle Pain",
+    "gu": "Muscle Pain"
+  },
+  "muscle_wasting": {
+    "en": "Muscle Wasting",
+    "hi": "Muscle Wasting",
+    "gu": "Muscle Wasting"
+  },
+  "muscle_weakness": {
+    "en": "Muscle Weakness",
+    "hi": "Muscle Weakness",
+    "gu": "Muscle Weakness"
+  },
+  "nausea": {
+    "en": "Nausea",
+    "hi": "Nausea",
+    "gu": "Nausea"
+  },
+  "neck_pain": {
+    "en": "Neck Pain",
+    "hi": "Neck Pain",
+    "gu": "Neck Pain"
+  },
+  "nodal_skin_eruptions": {
+    "en": "Nodal Skin Eruptions",
+    "hi": "Nodal Skin Eruptions",
+    "gu": "Nodal Skin Eruptions"
+  },
+  "obesity": {
+    "en": "Obesity",
+    "hi": "Obesity",
+    "gu": "Obesity"
+  },
+  "pain_behind_the_eyes": {
+    "en": "Pain Behind The Eyes",
+    "hi": "Pain Behind The Eyes",
+    "gu": "Pain Behind The Eyes"
+  },
+  "pain_during_bowel_movements": {
+    "en": "Pain During Bowel Movements",
+    "hi": "Pain During Bowel Movements",
+    "gu": "Pain During Bowel Movements"
+  },
+  "pain_in_anal_region": {
+    "en": "Pain In Anal Region",
+    "hi": "Pain In Anal Region",
+    "gu": "Pain In Anal Region"
+  },
+  "painful_walking": {
+    "en": "Painful Walking",
+    "hi": "Painful Walking",
+    "gu": "Painful Walking"
+  },
+  "palpitations": {
+    "en": "Palpitations",
+    "hi": "Palpitations",
+    "gu": "Palpitations"
+  },
+  "passage_of_gases": {
+    "en": "Passage Of Gases",
+    "hi": "Passage Of Gases",
+    "gu": "Passage Of Gases"
+  },
+  "patches_in_throat": {
+    "en": "Patches In Throat",
+    "hi": "Patches In Throat",
+    "gu": "Patches In Throat"
+  },
+  "phlegm": {
+    "en": "Phlegm",
+    "hi": "Phlegm",
+    "gu": "Phlegm"
+  },
+  "polyuria": {
+    "en": "Polyuria",
+    "hi": "बार-बार पेशाब आना",
+    "gu": "વારંવાર પેશાબ આવવો"
+  },
+  "prominent_veins_on_calf": {
+    "en": "Prominent Veins On Calf",
+    "hi": "Prominent Veins On Calf",
+    "gu": "Prominent Veins On Calf"
+  },
+  "puffy_face_and_eyes": {
+    "en": "Puffy Face And Eyes",
+    "hi": "Puffy Face And Eyes",
+    "gu": "Puffy Face And Eyes"
+  },
+  "pus_filled_pimples": {
+    "en": "Pus Filled Pimples",
+    "hi": "Pus Filled Pimples",
+    "gu": "Pus Filled Pimples"
+  },
+  "receiving_blood_transfusion": {
+    "en": "Receiving Blood Transfusion",
+    "hi": "Receiving Blood Transfusion",
+    "gu": "Receiving Blood Transfusion"
+  },
+  "receiving_unsterile_injections": {
+    "en": "Receiving Unsterile Injections",
+    "hi": "Receiving Unsterile Injections",
+    "gu": "Receiving Unsterile Injections"
+  },
+  "red_sore_around_nose": {
+    "en": "Red Sore Around Nose",
+    "hi": "Red Sore Around Nose",
+    "gu": "Red Sore Around Nose"
+  },
+  "red_spots_over_body": {
+    "en": "Red Spots Over Body",
+    "hi": "Red Spots Over Body",
+    "gu": "Red Spots Over Body"
+  },
+  "redness_of_eyes": {
+    "en": "Redness Of Eyes",
+    "hi": "Redness Of Eyes",
+    "gu": "Redness Of Eyes"
+  },
+  "restlessness": {
+    "en": "Restlessness",
+    "hi": "Restlessness",
+    "gu": "Restlessness"
+  },
+  "runny_nose": {
+    "en": "Runny Nose",
+    "hi": "Runny Nose",
+    "gu": "Runny Nose"
+  },
+  "rusty_sputum": {
+    "en": "Rusty Sputum",
+    "hi": "Rusty Sputum",
+    "gu": "Rusty Sputum"
+  },
+  "scurring": {
+    "en": "Scurring",
+    "hi": "Scurring",
+    "gu": "Scurring"
+  },
+  "shivering": {
+    "en": "Shivering",
+    "hi": "Shivering",
+    "gu": "Shivering"
+  },
+  "silver_like_dusting": {
+    "en": "Silver Like Dusting",
+    "hi": "Silver Like Dusting",
+    "gu": "Silver Like Dusting"
+  },
+  "sinus_pressure": {
+    "en": "Sinus Pressure",
+    "hi": "Sinus Pressure",
+    "gu": "Sinus Pressure"
+  },
+  "skin_peeling": {
+    "en": "Skin Peeling",
+    "hi": "Skin Peeling",
+    "gu": "Skin Peeling"
+  },
+  "skin_rash": {
+    "en": "Skin Rash",
+    "hi": "त्वचा पर दाने/चकत्ते",
+    "gu": "ત્વચા પર ચકામા"
+  },
+  "slurred_speech": {
+    "en": "Slurred Speech",
+    "hi": "Slurred Speech",
+    "gu": "Slurred Speech"
+  },
+  "small_dents_in_nails": {
+    "en": "Small Dents In Nails",
+    "hi": "Small Dents In Nails",
+    "gu": "Small Dents In Nails"
+  },
+  "spinning_movements": {
+    "en": "Spinning Movements",
+    "hi": "Spinning Movements",
+    "gu": "Spinning Movements"
+  },
+  "spotting_ urination": {
+    "en": "Spotting  Urination",
+    "hi": "Spotting  Urination",
+    "gu": "Spotting  Urination"
+  },
+  "stiff_neck": {
+    "en": "Stiff Neck",
+    "hi": "Stiff Neck",
+    "gu": "Stiff Neck"
+  },
+  "stomach_bleeding": {
+    "en": "Stomach Bleeding",
+    "hi": "Stomach Bleeding",
+    "gu": "Stomach Bleeding"
+  },
+  "stomach_pain": {
+    "en": "Stomach Pain",
+    "hi": "पेट दर्द",
+    "gu": "પેટમાં દુખાવો"
+  },
+  "sunken_eyes": {
+    "en": "Sunken Eyes",
+    "hi": "Sunken Eyes",
+    "gu": "Sunken Eyes"
+  },
+  "sweating": {
+    "en": "Sweating",
+    "hi": "Sweating",
+    "gu": "Sweating"
+  },
+  "swelled_lymph_nodes": {
+    "en": "Swelled Lymph Nodes",
+    "hi": "Swelled Lymph Nodes",
+    "gu": "Swelled Lymph Nodes"
+  },
+  "swelling_joints": {
+    "en": "Swelling Joints",
+    "hi": "Swelling Joints",
+    "gu": "Swelling Joints"
+  },
+  "swelling_of_stomach": {
+    "en": "Swelling Of Stomach",
+    "hi": "Swelling Of Stomach",
+    "gu": "Swelling Of Stomach"
+  },
+  "swollen_blood_vessels": {
+    "en": "Swollen Blood Vessels",
+    "hi": "Swollen Blood Vessels",
+    "gu": "Swollen Blood Vessels"
+  },
+  "swollen_extremeties": {
+    "en": "Swollen Extremeties",
+    "hi": "Swollen Extremeties",
+    "gu": "Swollen Extremeties"
+  },
+  "swollen_legs": {
+    "en": "Swollen Legs",
+    "hi": "Swollen Legs",
+    "gu": "Swollen Legs"
+  },
+  "throat_irritation": {
+    "en": "Throat Irritation",
+    "hi": "Throat Irritation",
+    "gu": "Throat Irritation"
+  },
+  "toxic_look_(typhos)": {
+    "en": "Toxic Look (Typhos)",
+    "hi": "Toxic Look (Typhos)",
+    "gu": "Toxic Look (Typhos)"
+  },
+  "ulcers_on_tongue": {
+    "en": "Ulcers On Tongue",
+    "hi": "Ulcers On Tongue",
+    "gu": "Ulcers On Tongue"
+  },
+  "unsteadiness": {
+    "en": "Unsteadiness",
+    "hi": "Unsteadiness",
+    "gu": "Unsteadiness"
+  },
+  "visual_disturbances": {
+    "en": "Visual Disturbances",
+    "hi": "Visual Disturbances",
+    "gu": "Visual Disturbances"
+  },
+  "vomiting": {
+    "en": "Vomiting",
+    "hi": "उल्टी",
+    "gu": "ઉલટી"
+  },
+  "watering_from_eyes": {
+    "en": "Watering From Eyes",
+    "hi": "Watering From Eyes",
+    "gu": "Watering From Eyes"
+  },
+  "weakness_in_limbs": {
+    "en": "Weakness In Limbs",
+    "hi": "Weakness In Limbs",
+    "gu": "Weakness In Limbs"
+  },
+  "weakness_of_one_body_side": {
+    "en": "Weakness Of One Body Side",
+    "hi": "Weakness Of One Body Side",
+    "gu": "Weakness Of One Body Side"
+  },
+  "weight_gain": {
+    "en": "Weight Gain",
+    "hi": "Weight Gain",
+    "gu": "Weight Gain"
+  },
+  "weight_loss": {
+    "en": "Weight Loss",
+    "hi": "Weight Loss",
+    "gu": "Weight Loss"
+  },
+  "yellow_crust_ooze": {
+    "en": "Yellow Crust Ooze",
+    "hi": "Yellow Crust Ooze",
+    "gu": "Yellow Crust Ooze"
+  },
+  "yellow_urine": {
+    "en": "Yellow Urine",
+    "hi": "Yellow Urine",
+    "gu": "Yellow Urine"
+  },
+  "yellowing_of_eyes": {
+    "en": "Yellowing Of Eyes",
+    "hi": "Yellowing Of Eyes",
+    "gu": "Yellowing Of Eyes"
+  },
+  "yellowish_skin": {
+    "en": "Yellowish Skin",
+    "hi": "Yellowish Skin",
+    "gu": "Yellowish Skin"
+  }
+}

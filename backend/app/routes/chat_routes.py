@@ -13,6 +13,8 @@ from flask import Blueprint, current_app, jsonify, request
 from app.services.symptom_predictor import get_symptom_predictor
 from app.services.chat_router import (
     chat_string,
+    detect_language,
+    label,
     classify_intent,
     disease_info,
     extract_symptoms,
@@ -266,6 +268,57 @@ def _chat_symptom_response(message: str, lang: str, predictor) -> tuple[str, dic
     }
 
 
+def _section(heading, kind, items):
+    return {"heading": heading, "type": kind, "items": items}
+
+
+def _structured(intent, lang, title, summary, sections=None, urgency=None, follow_up=None):
+    response = {"intent": intent, "lang": lang, "title": title, "summary": summary,
+                "sections": sections or [], "disclaimer": _chat_disclaimer(lang)}
+    if urgency:
+        response["urgency"] = urgency
+    if follow_up:
+        response["follow_up"] = follow_up
+    text_parts = [title, summary]
+    for section in response["sections"]:
+        text_parts.append(f"{section['heading']}:\n" + "\n".join(f"• {item.get('name')} ({item.get('confidence')}%)" if isinstance(item, dict) and "confidence" in item else f"• {item}" for item in section["items"]))
+    if follow_up:
+        text_parts.append(follow_up)
+    text_parts.append(response["disclaimer"])
+    response["text"] = "\n\n".join(part for part in text_parts if part)
+    return response
+
+
+def _structured_symptoms(message, lang, predictor):
+    candidates = extract_symptoms(message, predictor.known_symptoms)
+    data = predictor.predict_disease(candidates, top_n=3)
+    recognized = data["recognized_symptoms"]
+    if len(recognized) < 2:
+        items = [label(item, lang) for item in recognized]
+        summary = chat_string(lang, "no_predictions")
+        sections = [_section(chat_string(lang, "mentioned"), "bullets", items)] if items else []
+        sections.append(_section(chat_string(lang, "what_to_do"), "bullets", [chat_string(lang, "generic_care")]))
+        return _structured("symptom_check", lang, chat_string(lang, "title_possible"), summary, sections, "routine", chat_string(lang, "follow_up"))
+    predictions = []
+    alarming = {"aids", "paralysis (brain hemorrhage)", "heart attack", "tuberculosis", "dengue", "malaria", "typhoid"}
+    for item in data["predictions"]:
+        confidence = round(float(item.get("confidence", 0)) * 100, 1)
+        if confidence < 15 or (str(item["disease"]).lower() in alarming and confidence < 40):
+            continue
+        info = disease_info(str(item["disease"]), lang)
+        predictions.append({"name": info["name"], "confidence": confidence})
+    top = predictions[0]["confidence"] if predictions else 0
+    cautious = top < 40
+    summary = chat_string(lang, "cautious") if cautious else chat_string(lang, "chat_symptom_intro", predictions=predictions[0]["name"])
+    heading = chat_string(lang, "title_possible") if not cautious else chat_string(lang, "title_possible")
+    sections = [_section(chat_string(lang, "mentioned"), "bullets", [label(item, lang) for item in recognized])]
+    if predictions:
+        sections.append(_section(heading, "predictions", predictions))
+    sections.append(_section(chat_string(lang, "what_to_do"), "bullets", [chat_string(lang, "generic_care")]))
+    sections.append(_section(chat_string(lang, "when_doctor"), "bullets", [chat_string(lang, "advice_note")]))
+    return _structured("symptom_check", lang, heading, summary, sections, "routine", chat_string(lang, "follow_up") if cautious else None)
+
+
 @chat_bp.post("/message")
 def chat_message():
     """Unified offline-first chat route used by the main chat page."""
@@ -276,27 +329,31 @@ def chat_message():
     message = str(body.get("message") or "").strip()
     if not message:
         return jsonify({"error": "Please enter a message so I can help."}), 400
-    lang = body.get("lang", "en")
-    if lang not in {"en", "hi", "gu"}:
+    selected_lang = body.get("lang", "en")
+    if selected_lang not in {"en", "hi", "gu"}:
         return jsonify({"error": "'lang' must be one of: en, hi, gu."}), 400
+    lang = detect_language(message, selected_lang)
 
     intent = classify_intent(message)
     if intent == "emergency":
-        return jsonify({"intent": intent, "text": _chat_emergency(lang), "urgency": "emergency"})
+        response = _structured(intent, lang, chat_string(lang, "title_emergency"), _chat_emergency(lang), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "emergency_actions"))], "emergency")
+        return jsonify(response)
     if intent == "greeting":
-        return jsonify({"intent": intent, "text": chat_string(lang, "chat_greeting")})
+        response = _structured(intent, lang, chat_string(lang, "title_greeting"), chat_string(lang, "chat_greeting"), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "examples"))])
+        return jsonify(response)
     if intent == "disease_info":
         disease = match_disease(message)
         if disease:
-            return jsonify({"intent": intent, "text": _chat_disease_response(disease, lang), "disease": disease})
+            info = disease_info(disease, lang)
+            sections = [_section(chat_string(lang, "common_symptoms"), "bullets", [label(item, lang) for item in info["symptoms"]]), _section(chat_string(lang, "what_to_do"), "bullets", info["precautions"][:4]), _section(chat_string(lang, "when_doctor"), "bullets", [chat_string(lang, "advice_note")])]
+            return jsonify(_structured(intent, lang, info["name"], info["description"], sections, "routine"))
     if intent == "medicine_info":
         medicine = match_medicine(message)
-        return jsonify({"intent": intent, "text": _chat_medicine_response(message, lang), "medicine": medicine["name"] if medicine else None})
+        summary = _chat_medicine_response(message, lang)
+        return jsonify(_structured(intent, lang, medicine["name"] if medicine else chat_string(lang, "title_unknown"), summary, [], "routine"))
     if intent == "symptom_check":
         predictor = get_symptom_predictor(current_app)
         if predictor is not None:
-            text, details = _chat_symptom_response(message, lang, predictor)
-            if details.get("matched_symptoms"):
-                return jsonify({"intent": intent, "text": text, **details})
+            return jsonify(_structured_symptoms(message, lang, predictor))
 
-    return jsonify({"intent": "unknown", "text": chat_string(lang, "chat_followup")})
+    return jsonify(_structured("unknown", lang, chat_string(lang, "title_unknown"), chat_string(lang, "chat_followup"), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "examples"))], "routine"))
