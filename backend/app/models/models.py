@@ -24,6 +24,8 @@ class User(db.Model):
     chat_sessions = db.relationship("ChatSession", backref="user", cascade="all, delete-orphan")
     reports = db.relationship("Report", backref="user", cascade="all, delete-orphan")
     medicine_scans = db.relationship("MedicineScan", backref="user", cascade="all, delete-orphan")
+    emergency_contacts = db.relationship("EmergencyContact", backref="user", cascade="all, delete-orphan")
+    alert_logs = db.relationship("AlertLog", backref="user", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -94,3 +96,55 @@ class MedicineScan(db.Model):
     side_effects = db.Column(db.Text, nullable=True)
     substitutes = db.Column(db.Text, nullable=True)
     scanned_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+
+
+class EmergencyContact(db.Model):
+    __tablename__ = "emergency_contacts"
+
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    user_id = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=False, index=True)
+    name = db.Column(db.String(120), nullable=False)
+    relation = db.Column(db.String(40), nullable=False, default="Friend")
+    phone = db.Column(db.String(30), nullable=True)
+    email = db.Column(db.String(120), nullable=True)
+    is_primary = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
+    notify_email = db.Column(db.Boolean, nullable=False, default=True, server_default=db.true())
+    notify_sms = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "relation": self.relation,
+            "phone": self.phone,
+            "email": self.email,
+            "is_primary": self.is_primary,
+            "notify_email": self.notify_email,
+            "notify_sms": self.notify_sms,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class AlertLog(db.Model):
+    __tablename__ = "alert_logs"
+
+    id = db.Column(db.String(36), primary_key=True, default=generate_uuid)
+    user_id = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=False, index=True)
+    trigger = db.Column(db.String(30), nullable=False)
+    contacts_notified = db.Column(db.Integer, nullable=False, default=0)
+    channels = db.Column(db.String(30), nullable=False, default="")
+    status = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "trigger": self.trigger,
+            "contacts_notified": self.contacts_notified,
+            "channels": self.channels,
+            "status": self.status,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

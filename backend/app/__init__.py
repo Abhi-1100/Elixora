@@ -108,6 +108,9 @@ def create_app():
     from app.routes.chat_routes import chat_bp
     app.register_blueprint(chat_bp, url_prefix="/api/chat")
 
+    from app.routes.emergency_routes import emergency_bp
+    app.register_blueprint(emergency_bp, url_prefix="/api")
+
     # --- Serve uploaded report files for the frontend preview panel ---
     from flask import send_from_directory as _send
 

@@ -2,6 +2,7 @@
 
 export type StructuredResponse = {
   intent?: string;
+  can_alert?: boolean;
   lang?: "en" | "hi" | "gu";
   title?: string;
   summary?: string;

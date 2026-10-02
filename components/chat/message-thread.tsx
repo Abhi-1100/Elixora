@@ -11,6 +11,7 @@ import { User, Copy, Check, Sparkles, ExternalLink, FileText, Paperclip, FileCod
 import Link from "next/link";
 import LatticeLoader from "@/components/ui/LatticeLoader";
 import { StructuredResponse, type StructuredResponse as StructuredResponseType } from "./structured-response";
+import { EmergencyAlertPrompt } from "./emergency-alert-prompt";
 
 export interface MessageAttachment {
   name: string;
@@ -37,9 +38,10 @@ export interface Message {
 interface MessageThreadProps {
   messages: Message[];
   isGenerating?: boolean;
+  token?: string | null;
 }
 
-export function MessageThread({ messages, isGenerating = false }: MessageThreadProps) {
+export function MessageThread({ messages, isGenerating = false, token = null }: MessageThreadProps) {
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
   const handleCopy = (id: string, text: string) => {
@@ -139,6 +141,7 @@ export function MessageThread({ messages, isGenerating = false }: MessageThreadP
                       </div>
                     )}
                     {msg.structuredResponse ? <StructuredResponse response={msg.structuredResponse} /> : <p className="whitespace-pre-line leading-relaxed">{msg.text}</p>}
+                    {msg.structuredResponse?.intent === "emergency" && msg.structuredResponse.can_alert !== false && <EmergencyAlertPrompt token={token} />}
 
                     {/* Render Specialized Cards if present */}
                     {msg.cardType === "medicine" && msg.cardData && (

@@ -7,6 +7,8 @@ import {
   Check,
   Menu,
   Settings,
+  Siren,
+  HeartHandshake,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,6 +21,7 @@ interface TopBarProps {
   selectedLanguage: "en" | "hi" | "gu";
   onLanguageChange: (language: "en" | "hi" | "gu") => void;
   onOpenSettings?: (tab?: string) => void;
+  onSos?: () => void;
 }
 
 const LANGUAGES = [
@@ -35,6 +38,7 @@ export function TopBar({
   selectedLanguage,
   onLanguageChange,
   onOpenSettings,
+  onSos,
 }: TopBarProps) {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const router = useRouter();
@@ -67,6 +71,8 @@ export function TopBar({
 
       {/* Right: "Free plan · Upgrade" pill, Language Switcher, and Mascot Icon */}
       <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+        {onSos && <button type="button" onClick={onSos} className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/40 bg-red-500/10 px-2.5 py-1.5 text-[11px] font-semibold text-red-300 transition hover:bg-red-500/20" title="Send an emergency alert"><Siren className="h-3.5 w-3.5" /> <span className="hidden sm:inline">SOS</span></button>}
+        <Link href="/emergency" className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-[11px] font-medium text-[var(--ink-muted)] transition hover:bg-white/5 hover:text-[var(--ink)]" title="Emergency contacts"><HeartHandshake className="h-3.5 w-3.5" /> <span className="hidden lg:inline">Contacts</span></Link>
         {/* Plan & Upgrade Pill matching Claude screenshot */}
         <div className="flex items-center gap-1.5 text-xs text-[var(--ink-muted)]">
           <span className="opacity-70">Free plan</span>

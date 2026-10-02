@@ -9,6 +9,7 @@ from urllib.error import URLError
 from urllib.request import Request, urlopen
 
 from flask import Blueprint, current_app, jsonify, request
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 from app.services.symptom_predictor import get_symptom_predictor
 from app.services.chat_router import (
@@ -337,6 +338,11 @@ def chat_message():
     intent = classify_intent(message)
     if intent == "emergency":
         response = _structured(intent, lang, chat_string(lang, "title_emergency"), _chat_emergency(lang), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "emergency_actions"))], "emergency")
+        try:
+            verify_jwt_in_request(optional=True)
+            response["can_alert"] = bool(get_jwt_identity())
+        except Exception:
+            response["can_alert"] = False
         return jsonify(response)
     if intent == "greeting":
         response = _structured(intent, lang, chat_string(lang, "title_greeting"), chat_string(lang, "chat_greeting"), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "examples"))])

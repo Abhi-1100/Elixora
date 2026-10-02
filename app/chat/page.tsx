@@ -13,7 +13,7 @@ import { SettingsModal } from "@/components/chat/settings-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
 import { Aurora } from "@/components/ui/aurora";
 import { useAuth } from "@/context/AuthContext";
-import { uploadReport, getReport, sendChatMessage } from "@/lib/api";
+import { uploadReport, getReport, sendChatMessage, sendAlert } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 
 const NEW_CHAT_ID = "conv-new";
@@ -267,6 +267,24 @@ function ChatPageContent() {
 
   const { user, token, loading } = useAuth() as { user: any; token: string | null; loading: boolean };
 
+  const handleSos = async () => {
+    if (!window.confirm("Send an emergency alert to your contacts?")) return;
+    const payload: { trigger: "sos_button"; latitude?: number; longitude?: number } = { trigger: "sos_button" };
+    if (navigator.geolocation) {
+      await new Promise<void>((resolve) => navigator.geolocation.getCurrentPosition(
+        (position) => { payload.latitude = position.coords.latitude; payload.longitude = position.coords.longitude; resolve(); },
+        () => resolve(),
+        { timeout: 7000, maximumAge: 30000 }
+      ));
+    }
+    try {
+      const result = await sendAlert(payload, token);
+      window.alert(result.message || "Emergency alert sent.");
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "The emergency alert could not be sent.");
+    }
+  };
+
   const tokenRef = useRef<string | null>(token);
   useEffect(() => {
     tokenRef.current = token;
@@ -421,7 +439,7 @@ function ChatPageContent() {
 
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
     try {
-      const data = await sendChatMessage(text, selectedLanguage);
+      const data = await sendChatMessage(text, selectedLanguage, tokenRef.current || undefined);
       const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
       const aiMsg: Message = {
         id: "m-" + (Date.now() + 1),
@@ -563,6 +581,7 @@ function ChatPageContent() {
             onGoToLanding={() => router.push("/")}
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}
+            onSos={handleSos}
           />
 
           <main className={`flex-1 min-h-0 overflow-y-auto flex flex-col relative ${activeMessages.length === 0 ? "justify-center" : ""}`}>
@@ -580,7 +599,7 @@ function ChatPageContent() {
                 }
               />
             ) : (
-              <MessageThread messages={activeMessages} isGenerating={isGenerating} />
+              <MessageThread messages={activeMessages} isGenerating={isGenerating} token={token} />
             )}
           </main>
 
