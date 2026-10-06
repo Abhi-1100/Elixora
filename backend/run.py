@@ -5,10 +5,9 @@ app = create_app()
 
 def run_migrations():
     with app.app_context():
-        # Creates all tables from models if they don't already exist
-        db.create_all()
-        # Apply non-destructive migrations for existing tables
+        # Creates all tables from models if they don't already exist and apply migrations
         try:
+            db.create_all()
             with db.engine.connect() as conn:
                 conn.execute(text("ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;"))
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255);"))
@@ -17,7 +16,7 @@ def run_migrations():
                 conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_google_id ON users (google_id) WHERE google_id IS NOT NULL;"))
                 conn.commit()
         except Exception as err:
-            app.logger.warning(f"Schema migration warning: {err}")
+            app.logger.warning(f"Database initialization / schema migration warning: {err}")
 
 run_migrations()
 

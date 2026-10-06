@@ -10,7 +10,7 @@ requests
 pytesseract
 pdf2image
 PyMuPDF
-opencv-python
+opencv-python-headless
 thefuzz
 python-Levenshtein
 pandas
