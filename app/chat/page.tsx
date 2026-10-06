@@ -10,6 +10,7 @@ import { InputBar } from "@/components/chat/input-bar";
 import { MedicineAnalyzerModal } from "@/components/chat/medicine-analyzer-modal";
 import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { SettingsModal } from "@/components/chat/settings-modal";
+import { SosModal } from "@/components/chat/sos-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
 import { Aurora } from "@/components/ui/aurora";
 import { useAuth } from "@/context/AuthContext";
@@ -260,30 +261,23 @@ function ChatPageContent() {
   const [settingsTab, setSettingsTab] = useState("general");
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<"en" | "hi" | "gu">("en");
+  const [sosNotice, setSosNotice] = useState<{ type: "pending" | "success" | "error"; message: string } | null>(null);
+  const [isSosModalOpen, setIsSosModalOpen] = useState(false);
+
+  // Auto-dismiss SOS status notice after 7 seconds so it doesn't linger forever
+  useEffect(() => {
+    if (!sosNotice) return;
+    const timer = setTimeout(() => {
+      setSosNotice(null);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [sosNotice]);
 
   // Active Report state for side-by-side partition view
   const [activeReport, setActiveReport] = useState<ReportData | null>(null);
   const [isReportExpanded, setIsReportExpanded] = useState(false);
 
   const { user, token, loading } = useAuth() as { user: any; token: string | null; loading: boolean };
-
-  const handleSos = async () => {
-    if (!window.confirm("Send an emergency alert to your contacts?")) return;
-    const payload: { trigger: "sos_button"; latitude?: number; longitude?: number } = { trigger: "sos_button" };
-    if (navigator.geolocation) {
-      await new Promise<void>((resolve) => navigator.geolocation.getCurrentPosition(
-        (position) => { payload.latitude = position.coords.latitude; payload.longitude = position.coords.longitude; resolve(); },
-        () => resolve(),
-        { timeout: 7000, maximumAge: 30000 }
-      ));
-    }
-    try {
-      const result = await sendAlert(payload, token);
-      window.alert(result.message || "Emergency alert sent.");
-    } catch (error) {
-      window.alert(error instanceof Error ? error.message : "The emergency alert could not be sent.");
-    }
-  };
 
   const tokenRef = useRef<string | null>(token);
   useEffect(() => {
@@ -581,7 +575,9 @@ function ChatPageContent() {
             onGoToLanding={() => router.push("/")}
             selectedLanguage={selectedLanguage}
             onLanguageChange={setSelectedLanguage}
-            onSos={handleSos}
+            onSos={() => setIsSosModalOpen(true)}
+            sosNotice={sosNotice}
+            onDismissNotice={() => setSosNotice(null)}
           />
 
           <main className={`flex-1 min-h-0 overflow-y-auto flex flex-col relative ${activeMessages.length === 0 ? "justify-center" : ""}`}>
@@ -648,6 +644,18 @@ function ChatPageContent() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         initialTab={settingsTab}
+      />
+
+      {/* SOS 5-Second Countdown Modal */}
+      <SosModal
+        isOpen={isSosModalOpen}
+        onClose={() => setIsSosModalOpen(false)}
+        token={token}
+        onOpenSettings={(tab) => {
+          setSettingsTab(tab || "contacts");
+          setIsSettingsOpen(true);
+        }}
+        onAlertStatus={(notice) => setSosNotice(notice)}
       />
     </div>
   );

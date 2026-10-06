@@ -29,7 +29,7 @@ export function EmptyState({ onSelectPrompt, InputBarComponent, userName }: Empt
     <div className="flex flex-1 flex-col items-center justify-center p-4 select-none animate-fade-in w-full my-auto pb-16">
       {/* ── Headline: Clean greeting without logo ── */}
       <div className="flex items-center justify-center mb-7">
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal tracking-tight text-[var(--ink)]">
+        <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-[var(--ink)]">
           {greeting}, {firstName}
         </h2>
       </div>

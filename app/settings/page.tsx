@@ -1,19 +1,21 @@
 "use client";
 
 import React, { Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SettingsModal } from "@/components/chat/settings-modal";
 import { Loader2 } from "lucide-react";
 
 function SettingsPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "general";
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)] flex items-center justify-center p-4">
       <SettingsModal
         isOpen={true}
         onClose={() => router.push("/chat")}
-        initialTab="general"
+        initialTab={initialTab}
       />
     </div>
   );

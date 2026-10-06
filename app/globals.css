@@ -2,55 +2,61 @@
 
 @layer base {
   :root {
-    --bg-primary: #050507;
-    --bg-secondary: #0A0E1A;
-    --accent-blue: #3B82F6;
-    --accent-blue-glow: #5B9CFF;
-    --text-primary: #F5F5F7;
-    --text-secondary: #9CA3AF;
-    --border-subtle: rgba(255, 255, 255, 0.08);
+    --bg-primary: #111114;
+    --bg-secondary: #1e1e21;
+    --accent-blue: #96beff;
+    --accent-blue-glow: #96beff;
+    --text-primary: #ffffff;
+    --text-secondary: #ababab;
+    --border-subtle: rgba(255, 255, 255, 0.12);
 
     /* Legacy mapping fallback */
     --bg: var(--bg-primary);
     --surface: var(--bg-secondary);
-    --surface-muted: rgba(255, 255, 255, 0.03);
+    --surface-muted: #252529;
     --ink: var(--text-primary);
     --ink-muted: var(--text-secondary);
     --accent: var(--accent-blue);
-    --accent-dark: #2563EB;
-    --accent-soft: rgba(59, 130, 246, 0.15);
+    --accent-dark: #0f6fd0;
+    --accent-soft: rgba(150, 190, 255, 0.14);
     --border: var(--border-subtle);
-    --glow-a: rgba(91, 156, 255, 0.4);
-    --glow-b: rgba(59, 130, 246, 0.1);
+    --glow-a: rgba(150, 190, 255, 0.35);
+    --glow-b: rgba(150, 190, 255, 0.12);
+    --ink: #ffffff;
+    --ink-muted: #ababab;
+    --warn: #f79009;
+    --warn-soft: rgba(247, 144, 9, 0.14);
+    --success: #22c55e;
+    --success-soft: rgba(34, 197, 94, 0.14);
+    --danger: #ef4444;
+    --danger-soft: rgba(239, 68, 68, 0.14);
+    --info: #1488fc;
+    --radius-token: 9px;
+    --shadow-raised: inset 0 1px #ffffff0d, 0 1px 2px #00000059;
+    --shadow-floating: 0 4px 12px #0000001a;
   }
-}
-
-@font-face {
-  font-family: "Geist Sans";
-  src: url("https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGkyMCo.woff2") format("woff2");
-  font-weight: 400 600;
-  font-style: normal;
-  font-display: swap;
 }
 
 html {
   scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
+  color-scheme: dark;
+  background: var(--bg-primary);
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: "Geist Sans", "Noto Sans Devanagari", "Noto Sans Gujarati", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-body), "Schibsted Grotesk", sans-serif;
   line-height: 1.5;
   overflow-x: hidden;
-  letter-spacing: -0.015em;
+  letter-spacing: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
+  background: rgba(150, 190, 255, 0.3);
   color: #ffffff;
 }
 
@@ -60,8 +66,8 @@ select {
 }
 
 select option {
-  background-color: var(--bg-secondary, #0A0E1A) !important;
-  color: var(--text-primary, #F5F5F7) !important;
+  background-color: var(--bg-secondary, #1e1e21) !important;
+  color: var(--text-primary, #ffffff) !important;
 }
 
 /* Background noise texture layer */
@@ -74,14 +80,14 @@ select option {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
-  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-raised);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel:hover {
   border-color: rgba(91, 156, 255, 0.4);
   transform: translateY(-4px);
-  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.15);
+  box-shadow: var(--shadow-floating);
 }
 
 /* Shared Pill Button Styles */
@@ -140,13 +146,29 @@ select option {
 }
 
 .font-headline {
-  font-family: "Geist Sans", Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -0.025em;
+  font-family: var(--font-body), "Schibsted Grotesk", sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.font-display,
+h1,
+h2,
+h3 {
+  font-family: var(--font-body), "Schibsted Grotesk", sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: "SFMono-Regular", "IBM Plex Mono", Consolas, monospace;
 }
 
 /* Focus ring accessibility */
 .focus-ring:focus-visible {
-  outline: 2px solid var(--accent-blue-glow);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -157,21 +179,21 @@ select option {
 }
 
 ::-webkit-scrollbar-track {
-  background: #050507;
+  background: var(--bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 9px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-blue);
+  background: var(--accent);
 }
 
 /* Focus ring accessibility */
 .focus-ring:focus-visible {
-  outline: 2px solid var(--accent-blue-glow);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -186,10 +208,70 @@ select option {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 9px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-blue);
+  background: var(--accent);
+}
+
+/* Bridge legacy utility colors to the dark token system. */
+@layer utilities {
+  [class~="bg-white"],
+  [class*="bg-white/["],
+  [class*="bg-gray-"],
+  [class*="bg-slate-"] {
+    background-color: var(--surface) !important;
+  }
+
+  [class~="text-black"],
+  [class*="text-gray-"],
+  [class*="text-slate-"] {
+    color: var(--ink) !important;
+  }
+
+  [class*="border-gray-"],
+  [class*="border-slate-"],
+  [class~="border-black"] {
+    border-color: var(--border) !important;
+  }
+
+  [class~="bg-white/5"],
+  [class~="bg-white/10"],
+  [class~="bg-white/15"],
+  [class*="bg-white/[0.04]"] {
+    background-color: var(--surface-muted) !important;
+  }
+
+  [class*="border-white/"] {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  [class*="focus:ring-"],
+  [class*="focus:border-"] {
+    --tw-ring-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+  }
+
+  [class*="shadow-"] {
+    box-shadow: var(--shadow-raised) !important;
+  }
+
+  [class*="from-white"],
+  [class*="via-white"],
+  [class*="to-white"] {
+    --tw-gradient-from: var(--surface) !important;
+    --tw-gradient-to: var(--surface) !important;
+  }
+
+  [class*="hover:bg-white/"]:hover {
+    background-color: var(--surface-muted) !important;
+  }
+
+  [class*="rounded-3xl"],
+  [class*="rounded-2xl"],
+  [class*="rounded-xl"] {
+    border-radius: var(--radius-token) !important;
+  }
 }

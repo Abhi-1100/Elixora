@@ -49,8 +49,8 @@ def send_email(to, subject, body):
     port = int(os.getenv("SMTP_PORT", "587"))
     sender = os.getenv("SMTP_FROM", DEFAULT_FROM)
     if not host or not user or not password:
-        logger.info("DEV MODE emergency email to %s\nSubject: %s\n\n%s", to, subject, body)
-        return True
+        logger.warning("Emergency email not sent: SMTP_HOST, SMTP_USER, and SMTP_PASSWORD are required")
+        return False
     try:
         message = EmailMessage()
         message["From"] = sender

@@ -76,9 +76,9 @@ export function VoiceModeModal({ isOpen, onClose, onSendTranscript }: VoiceModeM
         {/* Animated GradientWaves WebGL Background Effect */}
         <div className="absolute inset-0 pointer-events-none z-0 opacity-80">
           <GradientWaves
-            horizonColor="#3B82F6"
-            waveColor="#FF9FFC"
-            crestColor="#FFFFFF"
+              horizonColor="#96beff"
+              waveColor="#96beff"
+              crestColor="#ffffff"
             speed={0.3}
             amplitude={1.55}
             waveScale={0.8}

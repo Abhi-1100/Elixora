@@ -20,7 +20,6 @@ import {
   Plus,
   Folder,
   Layers,
-  Code2,
   SlidersHorizontal,
   Download,
   ChevronRight,
@@ -513,7 +512,7 @@ export function Sidebar({
               >
                 <PanelLeft className="w-4 h-4 stroke-[1.75]" />
               </button>
-              <span className="font-serif text-lg tracking-tight font-medium text-white">
+              <span className="text-lg tracking-tight font-medium text-white">
                 Elixora
               </span>
             </div>
@@ -560,20 +559,6 @@ export function Sidebar({
               <span>Artifacts</span>
             </button>
 
-            <button
-              onClick={() => {
-                if (onOpenSettings) onOpenSettings("elixora-api");
-              }}
-              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-white/5 hover:text-white transition-colors text-left group"
-            >
-              <div className="flex items-center gap-2.5">
-                <Code2 className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                <span>Code</span>
-              </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-blue-500/15 text-blue-400 border border-blue-500/25">
-                Upgrade
-              </span>
-            </button>
 
             <button
               onClick={() => {

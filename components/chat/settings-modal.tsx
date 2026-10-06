@@ -26,9 +26,46 @@ import {
   Download,
   AlertTriangle,
   Zap,
+  HeartHandshake,
+  Plus,
+  Pencil,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { addContact, deleteContact, getContacts, updateContact } from "@/lib/api";
+
+interface EmergencyContact {
+  id: string;
+  name: string;
+  relation: string;
+  phone?: string | null;
+  email?: string | null;
+  is_primary?: boolean;
+  notify_email?: boolean;
+  notify_sms?: boolean;
+}
+
+interface ContactDraft {
+  name: string;
+  relation: string;
+  phone: string;
+  email: string;
+  is_primary: boolean;
+  notify_email: boolean;
+  notify_sms: boolean;
+}
+
+const EMPTY_CONTACT: ContactDraft = {
+  name: "",
+  relation: "Family",
+  phone: "",
+  email: "",
+  is_primary: false,
+  notify_email: true,
+  notify_sms: true,
+};
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -37,7 +74,7 @@ export interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose, initialTab = "general" }: SettingsModalProps) {
-  const { user, logout } = useAuth() as { user: any; logout: () => void };
+  const { user, token, logout } = useAuth() as { user: any; token: string | null; logout: () => void };
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -59,6 +96,13 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [styleMenuOpen, setStyleMenuOpen] = useState(false);
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
+
+  const [contacts, setContacts] = useState<EmergencyContact[]>([]);
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [contactSaving, setContactSaving] = useState(false);
+  const [contactError, setContactError] = useState("");
+  const [editingContactId, setEditingContactId] = useState<string | null>(null);
+  const [contactDraft, setContactDraft] = useState<ContactDraft>(EMPTY_CONTACT);
 
   // Load saved preferences
   useEffect(() => {
@@ -90,6 +134,82 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
   useEffect(() => {
     if (initialTab) setActiveTab(initialTab);
   }, [initialTab]);
+
+  useEffect(() => {
+    if (!isOpen || activeTab !== "contacts" || !token) return;
+    let mounted = true;
+    setContactsLoading(true);
+    setContactError("");
+    getContacts(token)
+      .then((data) => {
+        if (mounted) setContacts(data.contacts || []);
+      })
+      .catch((error) => {
+        if (mounted) setContactError(error instanceof Error ? error.message : "Unable to load emergency contacts.");
+      })
+      .finally(() => {
+        if (mounted) setContactsLoading(false);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, [activeTab, isOpen, token]);
+
+  const updateContactDraft = (key: keyof ContactDraft, value: string | boolean) => {
+    setContactDraft((current) => ({ ...current, [key]: value }));
+  };
+
+  const resetContactForm = () => {
+    setEditingContactId(null);
+    setContactDraft(EMPTY_CONTACT);
+    setContactError("");
+  };
+
+  const saveContact = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!token) return;
+    setContactSaving(true);
+    setContactError("");
+    try {
+      const result = editingContactId
+        ? await updateContact(editingContactId, contactDraft, token)
+        : await addContact(contactDraft, token);
+      const saved = result.contact as EmergencyContact;
+      setContacts((current) => editingContactId
+        ? current.map((contact) => contact.id === saved.id ? saved : contact)
+        : [...current, saved]);
+      resetContactForm();
+    } catch (error) {
+      setContactError(error instanceof Error ? error.message : "Unable to save this contact.");
+    } finally {
+      setContactSaving(false);
+    }
+  };
+
+  const editContact = (contact: EmergencyContact) => {
+    setEditingContactId(contact.id);
+    setContactDraft({
+      name: contact.name,
+      relation: contact.relation || "Family",
+      phone: contact.phone || "",
+      email: contact.email || "",
+      is_primary: Boolean(contact.is_primary),
+      notify_email: contact.notify_email !== false,
+      notify_sms: contact.notify_sms !== false,
+    });
+    setContactError("");
+  };
+
+  const removeContact = async (id: string) => {
+    if (!token || !window.confirm("Remove this emergency contact?")) return;
+    try {
+      await deleteContact(id, token);
+      setContacts((current) => current.filter((contact) => contact.id !== id));
+      if (editingContactId === id) resetContactForm();
+    } catch (error) {
+      setContactError(error instanceof Error ? error.message : "Unable to remove this contact.");
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -148,6 +268,7 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
                 {[
                   { id: "general", label: "General", icon: Settings },
                   { id: "account", label: "Account", icon: User },
+                  { id: "contacts", label: "Emergency contacts", icon: HeartHandshake },
                   { id: "privacy", label: "Privacy", icon: Shield },
                   { id: "capabilities", label: "Capabilities", icon: Briefcase },
                   { id: "memory", label: "Memory", icon: History },
@@ -583,6 +704,132 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
                     Sign Out
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Emergency Contacts Tab */}
+          {activeTab === "contacts" && (
+            <div className="space-y-6 animate-fade-in max-w-2xl">
+              <div>
+                <h3 className="flex items-center gap-2 text-base font-medium tracking-tight text-[var(--ink)]">
+                  <HeartHandshake className="h-4 w-4 text-[var(--accent)]" />
+                  Emergency contacts
+                </h3>
+                <p className="mt-1 text-xs text-[var(--ink-muted)]">
+                  Add family members or trusted people who should receive your SOS alerts.
+                </p>
+              </div>
+
+              {contactError && (
+                <div className="rounded-xl border border-red-400/25 bg-red-500/10 px-3 py-2.5 text-xs text-red-200" role="alert">
+                  {contactError}
+                </div>
+              )}
+
+              <form onSubmit={saveContact} className="space-y-4 rounded-xl border border-[var(--border)] bg-white/5 p-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-semibold text-[var(--ink)]">
+                    {editingContactId ? "Edit contact" : "Add a contact"}
+                  </h4>
+                  <span className="text-[10px] text-[var(--ink-muted)]">Up to 5 contacts</span>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-medium text-[var(--ink-muted)]">Name</span>
+                    <input
+                      required
+                      value={contactDraft.name}
+                      onChange={(event) => updateContactDraft("name", event.target.value)}
+                      placeholder="Family member name"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink)] outline-none transition focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="text-[11px] font-medium text-[var(--ink-muted)]">Relation</span>
+                    <input
+                      required
+                      value={contactDraft.relation}
+                      onChange={(event) => updateContactDraft("relation", event.target.value)}
+                      placeholder="Parent, spouse, sibling..."
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink)] outline-none transition focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--ink-muted)]"><Phone className="h-3 w-3" />Mobile number</span>
+                    <input
+                      type="tel"
+                      value={contactDraft.phone}
+                      onChange={(event) => updateContactDraft("phone", event.target.value)}
+                      placeholder="10-digit mobile number"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink)] outline-none transition focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+                    />
+                  </label>
+                  <label className="space-y-1.5">
+                    <span className="flex items-center gap-1.5 text-[11px] font-medium text-[var(--ink-muted)]"><Mail className="h-3 w-3" />Email address</span>
+                    <input
+                      type="email"
+                      value={contactDraft.email}
+                      onChange={(event) => updateContactDraft("email", event.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-xs text-[var(--ink)] outline-none transition focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
+                    />
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-[11px] text-[var(--ink-muted)]">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={contactDraft.is_primary} onChange={(event) => updateContactDraft("is_primary", event.target.checked)} className="accent-[var(--accent)]" />
+                    Primary contact
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={contactDraft.notify_email} onChange={(event) => updateContactDraft("notify_email", event.target.checked)} className="accent-[var(--accent)]" />
+                    Email alerts
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={contactDraft.notify_sms} onChange={(event) => updateContactDraft("notify_sms", event.target.checked)} className="accent-[var(--accent)]" />
+                    SMS alerts
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button type="submit" disabled={contactSaving || (!editingContactId && contacts.length >= 5)} className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent)] px-3 py-2 text-xs font-semibold text-[#111114] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
+                    {editingContactId ? <Pencil className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                    {contactSaving ? "Saving..." : editingContactId ? "Update contact" : "Add contact"}
+                  </button>
+                  {editingContactId && (
+                    <button type="button" onClick={resetContactForm} className="rounded-lg border border-[var(--border)] px-3 py-2 text-xs text-[var(--ink-muted)] hover:bg-white/10">Cancel</button>
+                  )}
+                </div>
+              </form>
+
+              <div className="space-y-2">
+                {contactsLoading ? (
+                  <p className="text-xs text-[var(--ink-muted)]">Loading emergency contacts...</p>
+                ) : contacts.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-[var(--border)] px-4 py-6 text-center text-xs text-[var(--ink-muted)]">
+                    No emergency contacts saved yet. Add someone you trust so SOS can reach them.
+                  </div>
+                ) : contacts.map((contact) => (
+                  <div key={contact.id} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-white/5 p-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-xs font-semibold text-[var(--ink)]">{contact.name}</p>
+                        <span className="rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-[10px] text-[var(--accent)]">{contact.relation}</span>
+                        {contact.is_primary && <span className="text-[10px] text-emerald-300">Primary</span>}
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-[var(--ink-muted)]">
+                        {contact.phone && <span>{contact.phone}</span>}
+                        {contact.email && <span className="truncate">{contact.email}</span>}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button type="button" onClick={() => editContact(contact)} className="rounded-lg p-1.5 text-[var(--ink-muted)] hover:bg-white/10 hover:text-[var(--accent)]" title="Edit contact"><Pencil className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => void removeContact(contact.id)} className="rounded-lg p-1.5 text-[var(--ink-muted)] hover:bg-red-500/10 hover:text-red-300" title="Remove contact"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

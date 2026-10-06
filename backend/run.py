@@ -19,7 +19,8 @@ def run_migrations():
         except Exception as err:
             app.logger.warning(f"Schema migration warning: {err}")
 
+run_migrations()
+
 if __name__ == "__main__":
-    run_migrations()
     app.run(debug=True, port=5000)
 

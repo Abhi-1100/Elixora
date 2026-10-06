@@ -80,13 +80,13 @@ export function BorderGlow({
   className = '',
   edgeSensitivity = 30,
   glowColor = '217 91 60',
-  backgroundColor = '#0A0E1A',
+  backgroundColor = '#1e1e21',
   borderRadius = 16,
   glowRadius = 40,
   glowIntensity = 1.0,
   coneSpread = 25,
   animated = false,
-  colors = ['#3b82f6', '#60a5fa', '#1d4ed8'],
+  colors = ['#96beff', '#1488fc', '#0f6fd0'],
   fillOpacity = 0.5,
 }: BorderGlowProps) {
   const cardRef = useRef<HTMLDivElement>(null);

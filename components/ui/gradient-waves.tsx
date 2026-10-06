@@ -155,8 +155,8 @@ export interface GradientWavesProps {
 }
 
 export function GradientWaves({
-  horizonColor = '#5227FF',
-  waveColor = '#FF9FFC',
+  horizonColor = '#96beff',
+  waveColor = '#96beff',
   crestColor = '#FFFFFF',
   speed = 0.4,
   amplitude = 2.5,

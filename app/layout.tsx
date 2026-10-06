@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { AuthProvider } from "@/context/AuthContext";
+
+const bodyFont = localFont({
+  src: [
+    { path: "../bolt-design/fonts/SchibstedGrotesk-Regular.ttf", weight: "400", style: "normal" },
+    { path: "../bolt-design/fonts/SchibstedGrotesk-Medium.ttf", weight: "500", style: "normal" },
+    { path: "../bolt-design/fonts/SchibstedGrotesk-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "../bolt-design/fonts/SchibstedGrotesk-Bold.ttf", weight: "700", style: "normal" },
+  ],
+  variable: "--font-body",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Elixora — AI Healthcare Assistant",
@@ -16,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className="h-full antialiased"
+      className={`h-full antialiased ${bodyFont.variable}`}
       suppressHydrationWarning
     >
       <head>

@@ -3,12 +3,12 @@
   --ff-h: 148px;
   --ff-r: 14px;
   --ff-tab: 14px;
-  --ff-back: #1e293b;
-  --ff-front: #0f172a;
-  --ff-paper: #3b82f6;
-  --ff-item: rgba(15, 23, 42, 0.9);
-  --ff-item-ink: #f8fafc;
-  --ff-label: #f8fafc;
+  --ff-back: #1e1e21;
+  --ff-front: #111114;
+  --ff-paper: #96beff;
+  --ff-item: rgba(17, 17, 20, 0.9);
+  --ff-item-ink: #ffffff;
+  --ff-label: #ffffff;
   --ff-spread: 180px;
   --ff-lift: 26px;
   --ff-angle: 34deg;
@@ -110,7 +110,7 @@
 .folder-float__sub {
   font-size: 11px;
   opacity: 0.65;
-  color: #94a3b8;
+  color: #ababab;
 }
 
 .folder-float__trigger {

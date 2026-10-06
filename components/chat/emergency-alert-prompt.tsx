@@ -65,7 +65,7 @@ export function EmergencyAlertPrompt({ token }: EmergencyAlertPromptProps) {
   }, [seconds, state, contactCount]);
 
   if (state === "empty") {
-    return <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-3 text-xs text-amber-100"><p className="font-medium">No emergency contacts saved yet.</p><Link href="/emergency" className="mt-1 inline-flex items-center gap-1 text-amber-300 hover:underline">Add contacts <ExternalLink className="h-3 w-3" /></Link></div>;
+    return <div className="rounded-xl border border-amber-400/25 bg-amber-400/10 px-3 py-3 text-xs text-amber-100"><p className="font-medium">No emergency contacts saved yet.</p><Link href="/settings?tab=contacts" className="mt-1 inline-flex items-center gap-1 text-amber-300 hover:underline">Add contacts <ExternalLink className="h-3 w-3" /></Link></div>;
   }
   if (state === "sent") {
     return <div className="flex items-center gap-2 rounded-xl border border-emerald-400/25 bg-emerald-400/10 px-3 py-3 text-xs text-emerald-100"><CheckCircle2 className="h-4 w-4 text-emerald-400" />{message}</div>;

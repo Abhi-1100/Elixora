@@ -119,7 +119,7 @@ export interface AuroraProps {
 }
 
 export function Aurora({
-  colorStops = ['#3B82F6', '#5B9CFF', '#2563EB'],
+  colorStops = ['#96beff', '#1488fc', '#0f6fd0'],
   amplitude = 1.0,
   blend = 0.5,
   speed = 0.5,

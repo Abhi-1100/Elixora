@@ -86,7 +86,13 @@ def _alert(user, trigger, latitude=None, longitude=None, note=None, test=False):
     log = AlertLog(user_id=user.id, trigger=trigger, contacts_notified=sent_count, channels=",".join(sorted(channels)), status=status)
     db.session.add(log)
     db.session.commit()
-    return jsonify({"message": f"Alert sent to {sent_count} contact{'s' if sent_count != 1 else ''}", "contacts_notified": sent_count, "channels": sorted(channels), "status": status, "alert": log.to_dict()}), 200
+    if status == "sent":
+        message = f"Emergency notification sent to {sent_count} contact{'s' if sent_count != 1 else ''}."
+    elif status == "partial":
+        message = f"Emergency notification delivered to {sent_count} of {len(contacts)} contacts."
+    else:
+        message = "No emergency notification was delivered. Check your email/SMS provider settings."
+    return jsonify({"message": message, "contacts_notified": sent_count, "contacts_total": len(contacts), "channels": sorted(channels), "status": status, "alert": log.to_dict()}), 200
 
 
 @emergency_bp.get("/contacts")

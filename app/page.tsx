@@ -25,7 +25,7 @@ export default function Home() {
       {/* Dynamic Threads WebGL Background matching Elixora theme */}
       <div className="absolute top-0 left-0 right-0 h-[680px] sm:h-[800px] w-full overflow-hidden pointer-events-none z-0 opacity-60 transform-gpu">
         <Threads
-          color={[0.23, 0.51, 0.96]}
+          color={[0.588, 0.745, 1]}
           amplitude={1.1}
           distance={0}
           enableMouseInteraction={true}
@@ -75,12 +75,12 @@ export default function Home() {
           <SpecularButton
             size="md"
             radius={9999}
-            tint="#ffffff"
+            tint="#96beff"
             tintOpacity={0.05}
             blur={10}
             textColor="#ffffff"
-            lineColor="#5227FF"
-            baseColor="#525252"
+            lineColor="#96beff"
+            baseColor="#1e1e21"
             intensity={1.2}
             shineSize={12}
             shineFade={40}
@@ -170,5 +170,4 @@ export default function Home() {
     </div>
   );
 }
-
 

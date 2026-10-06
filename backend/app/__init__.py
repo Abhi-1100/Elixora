@@ -1,5 +1,6 @@
 import os
 import csv
+from datetime import timedelta
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -74,6 +75,8 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "elixora-jwt-secret-key-2026")
+    # Set JWT expiration to 30 days (default is 15 minutes, which caused unexpected 'Token has expired' errors)
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "elixora-secret-key-2026")
 
     # Upload folder config
@@ -85,6 +88,14 @@ def create_app():
     # --- Init extensions ---
     db.init_app(app)
     jwt.init_app(app)
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return {
+            "error": "Your session has expired. Please log in again to continue.",
+            "msg": "Token has expired",
+            "token_expired": True,
+        }, 401
 
     # Allow requests from your Next.js frontend (update origin for production)
     CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)

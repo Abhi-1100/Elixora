@@ -1,11 +1,11 @@
 .prompt-bar {
-  --pb-bg: #0A0E1A;
-  --pb-ink: #F5F5F7;
-  --pb-menu: #0F172A;
+  --pb-bg: #1e1e21;
+  --pb-ink: #ffffff;
+  --pb-menu: #111114;
   --pb-w: 400px;
   --pb-radius: 18px;
   --pb-press: 0.96;
-  --pb-spark: #5B9CFF;
+  --pb-spark: #96beff;
   --pb-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --pb-muted: color-mix(in srgb, var(--pb-ink) 55%, transparent);
   --pb-hover: color-mix(in srgb, var(--pb-ink) 8%, transparent);
