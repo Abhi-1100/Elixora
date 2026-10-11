@@ -46,8 +46,8 @@ export function EmergencyAlertPrompt({ token }: EmergencyAlertPromptProps) {
     try {
       const location = withLocation ? await locationPayload() : {};
       const result = await sendAlert({ trigger: "chat_emergency", ...location }, token);
-      setMessage(result.message || `Alert sent to ${result.contacts_notified || 0} contacts`);
-      setState("sent");
+      setMessage(result.message || `Alert request accepted for ${result.contacts_accepted || 0} contacts. Delivery is not confirmed.`);
+      setState(result.status === "queued" || result.status === "partial" ? "sent" : "error");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "The alert could not be sent.");
       setState("error");

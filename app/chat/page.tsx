@@ -12,6 +12,7 @@ import { VoiceModeModal } from "@/components/voice/voice-mode-modal";
 import { SettingsModal } from "@/components/chat/settings-modal";
 import { SosModal } from "@/components/chat/sos-modal";
 import { ReportSidePanel, ReportData } from "@/components/chat/report-side-panel";
+import type { VoiceLanguage } from "@/hooks/useVoiceInput";
 import { Aurora } from "@/components/ui/aurora";
 import { useAuth } from "@/context/AuthContext";
 import { uploadReport, getReport, sendChatMessage, sendAlert } from "@/lib/api";
@@ -260,7 +261,7 @@ function ChatPageContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("general");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<"en" | "hi" | "gu">("en");
+  const [selectedLanguage, setSelectedLanguage] = useState<VoiceLanguage>("en");
   const [sosNotice, setSosNotice] = useState<{ type: "pending" | "success" | "error"; message: string } | null>(null);
   const [isSosModalOpen, setIsSosModalOpen] = useState(false);
 
@@ -348,7 +349,11 @@ function ChatPageContent() {
     );
   };
 
-  const handleSendMessage = async (text: string, attachment?: File | null): Promise<string | null> => {
+  const handleSendMessage = async (
+    text: string,
+    attachment?: File | null,
+    voiceTranscribed = false,
+  ) => {
     if (!text && !attachment) return null;
 
     let attachmentData;
@@ -433,7 +438,34 @@ function ChatPageContent() {
 
     // ── TEXT-ONLY CLINICAL RESPONSE PATH ─────────────────────────────────
     try {
-      const data = await sendChatMessage(text, selectedLanguage, tokenRef.current || undefined);
+      const data = await sendChatMessage(
+        text,
+        selectedLanguage,
+        tokenRef.current || undefined,
+        voiceTranscribed,
+      );
+      if (voiceTranscribed && data.translation_status) {
+        const englishTranslation = typeof data.english_translation === "string"
+          ? data.english_translation
+          : null;
+        const translationNote = data.translation_status === "translated" && englishTranslation
+          ? `English translation (Google Cloud): ${englishTranslation}\nMachine translation may be imperfect; verify medical details.`
+          : data.translation_status === "not_configured"
+            ? "English translation unavailable: configure GOOGLE_TRANSLATE_API_KEY in backend/.env."
+            : data.translation_status === "failed"
+              ? "English translation unavailable because Google Cloud Translation failed."
+              : null;
+        if (translationNote) {
+          setThreadMap((prev) => ({
+            ...prev,
+            [activeId]: (prev[activeId] || []).map((message) =>
+              message.id === userMsg.id
+                ? { ...message, text: `${text}\n\n${translationNote}` }
+                : message,
+            ),
+          }));
+        }
+      }
       const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
       const aiMsg: Message = {
         id: "m-" + (Date.now() + 1),
@@ -448,7 +480,11 @@ function ChatPageContent() {
         [activeId]: [...(prev[activeId] || []), aiMsg],
       }));
       setIsGenerating(false);
-      return data.text;
+      return {
+        text: data.text,
+        englishTranslation: data.english_translation,
+        translationStatus: data.translation_status,
+      };
     } catch (error) {
       // Preserve the existing offline UI behavior if the backend is unreachable.
       const durationSec = Math.max(0.1, Number(((performance.now() - requestStartTime) / 1000).toFixed(1)));
@@ -472,7 +508,7 @@ function ChatPageContent() {
     setTimeout(() => {
       let replyCardType: "medicine" | "lab" | "prescription" | "emergency" | undefined;
       let replyCardData: Message["cardData"];
-      let replyText = "The symptom prediction service is unavailable. Please start the Flask backend on http://localhost:5000 and try again.";
+      let replyText = "The symptom prediction service is unavailable. Please start the Flask backend on http://127.0.0.1:5001 and try again.";
 
       const lower = text.toLowerCase();
 
@@ -589,6 +625,7 @@ function ChatPageContent() {
                     onSendMessage={handleSendMessage}
                     onOpenVoiceMode={() => setIsVoiceOpen(true)}
                     onOpenMedicineAnalyzer={() => setIsMedicineAnalyzerOpen(true)}
+                    language={selectedLanguage}
                     isLoading={isGenerating}
                     className=""
                   />
@@ -604,6 +641,7 @@ function ChatPageContent() {
               onSendMessage={handleSendMessage}
               onOpenVoiceMode={() => setIsVoiceOpen(true)}
               onOpenMedicineAnalyzer={() => setIsMedicineAnalyzerOpen(true)}
+              language={selectedLanguage}
               isLoading={isGenerating}
               className="sticky bottom-0 z-20 pb-4"
             />
@@ -636,7 +674,10 @@ function ChatPageContent() {
       <VoiceModeModal
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}
-        onSendTranscript={handleSendMessage}
+        language={selectedLanguage}
+        onLanguageChange={setSelectedLanguage}
+        onSendTranscript={(transcript, translateToEnglish) =>
+          handleSendMessage(transcript, null, translateToEnglish)}
       />
 
       {/* Settings Modal matching Claude screenshot */}
@@ -647,16 +688,18 @@ function ChatPageContent() {
       />
 
       {/* SOS 5-Second Countdown Modal */}
-      <SosModal
-        isOpen={isSosModalOpen}
-        onClose={() => setIsSosModalOpen(false)}
-        token={token}
-        onOpenSettings={(tab) => {
-          setSettingsTab(tab || "contacts");
-          setIsSettingsOpen(true);
-        }}
-        onAlertStatus={(notice) => setSosNotice(notice)}
-      />
+      {isSosModalOpen && (
+        <SosModal
+          isOpen
+          onClose={() => setIsSosModalOpen(false)}
+          token={token}
+          onOpenSettings={(tab) => {
+            setSettingsTab(tab || "contacts");
+            setIsSettingsOpen(true);
+          }}
+          onAlertStatus={(notice) => setSosNotice(notice)}
+        />
+      )}
     </div>
   );
 }

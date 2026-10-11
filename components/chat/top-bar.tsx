@@ -11,24 +11,26 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import type { VoiceLanguage } from "@/hooks/useVoiceInput";
 
 interface TopBarProps {
   title: string;
   onOpenVoiceMode: () => void;
   onToggleSidebarMobile?: () => void;
   onGoToLanding?: () => void;
-  selectedLanguage: "en" | "hi" | "gu";
-  onLanguageChange: (language: "en" | "hi" | "gu") => void;
+  selectedLanguage: VoiceLanguage;
+  onLanguageChange: (language: VoiceLanguage) => void;
   onOpenSettings?: (tab?: string) => void;
   onSos?: () => void;
   sosNotice?: { type: "pending" | "success" | "error"; message: string } | null;
   onDismissNotice?: () => void;
 }
 
-const LANGUAGES = [
-  { code: "English (US)", name: "English" },
-  { code: "Hindi (IN)", name: "हिन्दी" },
-  { code: "Gujarati (IN)", name: "ગુજરાતી" },
+const LANGUAGES: { code: VoiceLanguage; name: string }[] = [
+  { code: "auto", name: "Auto-detect reply" },
+  { code: "en", name: "English" },
+  { code: "hi", name: "हिन्दी" },
+  { code: "gu", name: "ગુજરાતી" },
 ];
 
 export function TopBar({
@@ -46,9 +48,7 @@ export function TopBar({
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const router = useRouter();
 
-  const currentLangObj = LANGUAGES[
-    selectedLanguage === "en" ? 0 : selectedLanguage === "hi" ? 1 : 2
-  ];
+  const currentLangObj = LANGUAGES.find(({ code }) => code === selectedLanguage) ?? LANGUAGES[1];
 
   return (
     <header className="sticky top-0 z-20 flex h-12 items-center justify-between px-3 sm:px-6 bg-transparent select-none">
@@ -116,6 +116,7 @@ export function TopBar({
             onClick={() => setShowLanguageMenu(!showLanguageMenu)}
             className="flex items-center gap-1 text-[11px] text-[var(--ink-muted)] hover:text-[var(--ink)] px-2 py-1 rounded-md hover:bg-white/5 transition-colors focus:outline-none"
             aria-label="Select language"
+            title="Choose a reply language or detect it from your message"
           >
             <Globe className="w-3 h-3 opacity-70" />
             <span className="hidden sm:inline font-normal">{currentLangObj.name}</span>
@@ -128,23 +129,14 @@ export function TopBar({
                 className="fixed inset-0 z-40"
                 onClick={() => setShowLanguageMenu(false)}
               />
-              <div className="absolute right-0 mt-1.5 w-36 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl p-1 z-50 text-xs animate-fade-in space-y-0.5">
+              <div className="absolute right-0 mt-1.5 w-48 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl p-1 z-50 text-xs animate-fade-in space-y-0.5">
                 {LANGUAGES.map((lang) => {
-                  const isSelected =
-                    (selectedLanguage === "en" && lang.code === "English (US)") ||
-                    (selectedLanguage === "hi" && lang.code === "Hindi (IN)") ||
-                    (selectedLanguage === "gu" && lang.code === "Gujarati (IN)");
+                  const isSelected = selectedLanguage === lang.code;
                   return (
                     <button
                       key={lang.code}
                       onClick={() => {
-                        onLanguageChange(
-                          lang.code === "English (US)"
-                            ? "en"
-                            : lang.code === "Hindi (IN)"
-                            ? "hi"
-                            : "gu"
-                        );
+                        onLanguageChange(lang.code);
                         setShowLanguageMenu(false);
                       }}
                       className={`w-full text-left px-2.5 py-1.5 rounded-lg flex items-center justify-between transition-colors text-xs ${

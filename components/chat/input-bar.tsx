@@ -3,11 +3,13 @@
 import React, { useRef } from "react";
 import { Pill, ShieldCheck, Mic } from "lucide-react";
 import { DEFAULT_SOURCES, PromptBar, PromptBarModel } from "@/components/ui/prompt-bar";
+import { useVoiceInput, type VoiceLanguage } from "@/hooks/useVoiceInput";
 
 interface InputBarProps {
-  onSendMessage: (text: string, attachment?: File | null) => void;
+  onSendMessage: (text: string, attachment?: File | null, voiceTranscribed?: boolean) => void;
   onOpenVoiceMode: () => void;
   onOpenMedicineAnalyzer: () => void;
+  language: VoiceLanguage;
   isLoading?: boolean;
   className?: string;
 }
@@ -16,11 +18,13 @@ export function InputBar({
   onSendMessage,
   onOpenVoiceMode,
   onOpenMedicineAnalyzer,
+  language,
   isLoading = false,
   className = "sticky bottom-0 z-20 pb-4",
 }: InputBarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingFileRef = useRef<File | null>(null);
+  const { startListening, isListening, interimTranscript, error } = useVoiceInput(() => {});
 
   const handleAttach = (): Promise<File | null> => {
     return new Promise((resolve) => {
@@ -44,48 +48,12 @@ export function InputBar({
     });
   };
 
-  const handleDictate = (): Promise<string> => {
-    return new Promise((resolve) => {
-      const SpeechRecognition =
-        typeof window !== "undefined"
-          ? window.SpeechRecognition || window.webkitSpeechRecognition
-          : null;
-
-      if (!SpeechRecognition) {
-        onOpenVoiceMode();
-        resolve("");
-        return;
-      }
-
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0]?.[0]?.transcript?.trim() || "";
-        resolve(transcript);
-      };
-
-      recognition.onerror = () => {
-        resolve("");
-      };
-
-      recognition.onend = () => {
-        resolve("");
-      };
-
-      try {
-        recognition.start();
-      } catch {
-        resolve("");
-      }
-    });
-  };
+  const handleDictate = (signal: AbortSignal, onInterim?: (text: string) => void) =>
+    startListening(language, signal, onInterim);
 
   const handleSend = (
     text: string,
-    options: { attachments: any[]; model: PromptBarModel; effort: string }
+    options: { attachments: any[]; model: PromptBarModel; effort: string; voiceTranscribed: boolean }
   ) => {
     // Check if an attachment was passed
     const file =
@@ -94,7 +62,7 @@ export function InputBar({
       null;
 
     pendingFileRef.current = null;
-    onSendMessage(text, file);
+    onSendMessage(text, file, options.voiceTranscribed);
   };
 
   return (
@@ -141,6 +109,11 @@ export function InputBar({
           pressScale={0.96}
           className="w-full shadow-2xl"
         />
+        {(isListening || interimTranscript || error) && (
+          <p aria-live="polite" className="w-full px-3 text-xs text-[var(--ink-muted)]">
+            {error || interimTranscript || "Listening…"}
+          </p>
+        )}
 
         {/* Quick Voice Mode & Medical Disclaimer Bar */}
         <div className="w-full flex items-center justify-between text-[11px] text-[var(--ink-muted)] px-2 font-mono">

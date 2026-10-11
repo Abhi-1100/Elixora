@@ -26,7 +26,19 @@ export function StructuredResponse({ response }: { response: StructuredResponse 
           <ul className="list-disc space-y-1 pl-5 text-[var(--ink-muted)]">
             {section.items.map((item, itemIndex) => {
               if (typeof item === "string") return <li key={itemIndex}>{item}</li>;
-              return <li key={itemIndex} className="list-none -ml-5"><div className="flex items-center gap-2"><span className="min-w-0 flex-1">{item.name}</span><span className="text-[10px] text-[var(--ink-muted)]">{item.confidence.toFixed(1)}%</span><span className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10"><span className="block h-full rounded-full bg-[var(--accent)]" style={{ width: `${Math.min(100, Math.max(0, item.confidence))}%` }} /></span></div></li>;
+              const hasConfidence = typeof item.confidence === "number" && item.confidence > 0;
+              if (!hasConfidence) return <li key={itemIndex}>{item.name}</li>;
+              return (
+                <li key={itemIndex} className="list-none -ml-5">
+                  <div className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1">{item.name}</span>
+                    <span className="text-[10px] text-[var(--ink-muted)]">{item.confidence.toFixed(1)}%</span>
+                    <span className="h-1.5 w-20 overflow-hidden rounded-full bg-white/10">
+                      <span className="block h-full rounded-full bg-[var(--accent)]" style={{ width: `${Math.min(100, Math.max(0, item.confidence))}%` }} />
+                    </span>
+                  </div>
+                </li>
+              );
             })}
           </ul>
         </section>

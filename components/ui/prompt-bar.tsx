@@ -63,12 +63,12 @@ export interface PromptBarProps {
   busy?: boolean;
   onSend?: (
     text: string,
-    options: { attachments: any[]; model: PromptBarModel; effort: string }
+    options: { attachments: any[]; model: PromptBarModel; effort: string; voiceTranscribed: boolean }
   ) => void;
   onStop?: () => void;
   onAttach?: () => any | Promise<any>;
   onMedicineAnalyzer?: () => void;
-  onDictate?: () => string | Promise<string>;
+  onDictate?: (signal: AbortSignal, onInterim?: (text: string) => void) => string | Promise<string>;
   background?: string;
   color?: string;
   menuBackground?: string;
@@ -258,6 +258,7 @@ export function PromptBar({
   const rowRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const lastOpen = useRef<string | null>(null);
   const dictation = useRef(0);
+  const dictationAbort = useRef<AbortController | null>(null);
   const latest = useRef<{
     onSend?: PromptBarProps['onSend'];
     onStop?: PromptBarProps['onStop'];
@@ -268,6 +269,7 @@ export function PromptBar({
   latest.current = { onSend, onStop, onAttach, onDictate, onEffortChange };
 
   const [draft, setDraft] = useState('');
+  const [voiceTranscribed, setVoiceTranscribed] = useState(false);
   const [attachments, setAttachments] = useState<any[]>([]);
   const [modelKey, setModelKey] = useState(defaultModel);
   const [plusOpen, setPlusOpen] = useState(false);
@@ -299,6 +301,7 @@ export function PromptBar({
   const maxed = efforts.length > 1 && effortIndex === efforts.length - 1;
 
   const focusInput = () => inputRef.current?.focus({ preventScroll: true });
+  useEffect(() => () => dictationAbort.current?.abort(), []);
   const closeMenus = useCallback(() => {
     setPlusOpen(false);
     setModelOpen(false);
@@ -534,8 +537,9 @@ export function PromptBar({
 
   const send = () => {
     if (!canSend || busy) return;
-    latest.current.onSend?.(draft.trim(), { attachments, model, effort: level });
+    latest.current.onSend?.(draft.trim(), { attachments, model, effort: level, voiceTranscribed });
     setDraft('');
+    setVoiceTranscribed(false);
     setAttachments([]);
     setDismissed(false);
     closeMenus();
@@ -545,20 +549,40 @@ export function PromptBar({
   const toggleListen = () => {
     if (listening) {
       dictation.current += 1;
+      dictationAbort.current?.abort();
+      dictationAbort.current = null;
       setListening(false);
       return;
     }
     const seq = ++dictation.current;
+    const controller = new AbortController();
+    dictationAbort.current = controller;
     setListening(true);
-    Promise.resolve(latest.current.onDictate?.()).then(
+    const initialDraft = draft;
+    Promise.resolve(
+      latest.current.onDictate?.(controller.signal, (interim) => {
+        if (seq !== dictation.current) return;
+        if (interim) {
+          setDraft(initialDraft.trim() ? `${initialDraft.trimEnd()} ${interim}` : interim);
+          setVoiceTranscribed(true);
+        }
+      })
+    ).then(
       text => {
         if (seq !== dictation.current) return;
+        dictationAbort.current = null;
         setListening(false);
-        if (text) setDraft(d => (d.trim() ? `${d.trimEnd()} ${text}` : text));
+        if (text) {
+          setDraft(initialDraft.trim() ? `${initialDraft.trimEnd()} ${text}` : text);
+          setVoiceTranscribed(true);
+        }
         focusInput();
       },
       () => {
-        if (seq === dictation.current) setListening(false);
+        if (seq === dictation.current) {
+          dictationAbort.current = null;
+          setListening(false);
+        }
       }
     );
   };
@@ -592,6 +616,20 @@ export function PromptBar({
     }
     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
       e.preventDefault();
+      if (listening) {
+        dictation.current += 1;
+        dictationAbort.current?.abort();
+        dictationAbort.current = null;
+        setListening(false);
+        const textToSend = draft.trim();
+        if (textToSend.length > 0 || attachments.length > 0) {
+          latest.current.onSend?.(textToSend, { attachments, model, effort: level, voiceTranscribed: true });
+          setDraft('');
+          setAttachments([]);
+          setVoiceTranscribed(false);
+        }
+        return;
+      }
       send();
     }
   };

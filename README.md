@@ -16,13 +16,13 @@ This README is the implementation guide for developers and coding/bug-fixing age
 | JWT session | Implemented; token is stored in browser `localStorage` | `context/AuthContext.tsx`, `lib/api.js` |
 | Unified offline chat routing | Implemented | `POST /api/chat/message`, `backend/app/services/chat_router.py` |
 | Symptom prediction | Implemented | `backend/app/services/symptom_predictor.py` and `ml/predict_multilang.py` |
-| English/Hindi/Gujarati response formatting | Implemented for `/api/chat/symptom-check` | `ml/i18n/` |
+| English/Hindi/Gujarati response formatting | Implemented for `/api/chat/symptom-check` and `/api/chat/message`; the latter also detects supported transcript languages in auto mode | `ml/i18n/`, `backend/app/services/chat_router.py` |
 | LLM conversational symptom advisor | Implemented as a separate endpoint when an LLM key is configured | `/api/chat/symptom-advisor` |
 | PDF/image lab report upload | Implemented | `backend/app/routes/report_routes.py` |
 | OCR and lab-value classification | Implemented with fallbacks | PyMuPDF, RapidOCR/pytesseract, `dataset/lab_reference_ranges.csv` |
 | Medicine dataset | Present but not connected to a backend route | `dataset/medicine/medicine_dataset.csv` |
 | Persistent chat history | Database models exist, but the current chat page keeps conversations in React state | `backend/app/models/models.py`, `app/chat/page.tsx` |
-| Voice input/output | Hooks exist; the main voice page is currently a UI simulation | `hooks/`, `app/voice/page.tsx` |
+| Chat voice input/output | Browser speech recognition and speech synthesis in the chat voice modal; English, Hindi, Gujarati, and auto-detected reply language | `hooks/`, `components/voice/voice-mode-modal.tsx` |
 
 ## Architecture
 
@@ -352,7 +352,8 @@ The backend calls `db.create_all()` on startup. It also attempts non-destructive
 - New text messages call `/api/chat/message`; the returned localized text is appended to the visible thread. The older `/api/chat/symptom-check` endpoint remains available for compatibility.
 - File attachments call `/api/reports/upload`; the returned report opens in the right-side report panel.
 - The frontend API helper translates failed fetches into a “Flask backend on port 5000” message.
-- The current voice page automatically displays a sample Amoxicillin transcript/answer after timers. It is not yet a real speech-to-backend clinical conversation.
+- The separate `/voice` page remains a UI demonstration. Chat voice mode uses the browser's Web Speech APIs; recognition availability, language models, and voice quality depend on the browser and device.
+- Auto mode detects Hindi and Gujarati from supported scripts and limited Romanized phrases in the transcript and chooses the response language. Hindi/Gujarati microphone transcripts are translated to English only when `GOOGLE_TRANSLATE_API_KEY` is configured in `backend/.env`. Browser speech recognition itself does not guarantee automatic recognition-language detection; select English, Hindi, or Gujarati to guide it.
 - The Apple sign-in button in signup UI is presentation-only unless a backend integration is added.
 - `dataset/medicine/medicine_dataset.csv` is not currently used to answer medicine questions.
 

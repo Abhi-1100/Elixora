@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { addContact, deleteContact, getContacts, updateContact } from "@/lib/api";
+import { addContact, deleteContact, getContacts, sendTestAlert, updateContact } from "@/lib/api";
 
 interface EmergencyContact {
   id: string;
@@ -103,6 +103,9 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
   const [contactError, setContactError] = useState("");
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
   const [contactDraft, setContactDraft] = useState<ContactDraft>(EMPTY_CONTACT);
+  const [testAlertSending, setTestAlertSending] = useState(false);
+  const [testAlertMessage, setTestAlertMessage] = useState("");
+  const [testAlertFailed, setTestAlertFailed] = useState(false);
 
   // Load saved preferences
   useEffect(() => {
@@ -208,6 +211,40 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
       if (editingContactId === id) resetContactForm();
     } catch (error) {
       setContactError(error instanceof Error ? error.message : "Unable to remove this contact.");
+    }
+  };
+
+  const testEmergencyContacts = async () => {
+    if (!token) return;
+    setTestAlertSending(true);
+    setTestAlertMessage("");
+    setTestAlertFailed(false);
+    try {
+      const result = await sendTestAlert({}, token);
+      const accepted = result.status === "queued" || result.status === "partial";
+      const channelSummary = (["sms", "email"] as const)
+        .map((channel) => {
+          const channelResult = result.channel_results?.[channel];
+          if (!channelResult) return null;
+          const label = channel === "sms" ? "SMS" : "Email";
+          const detail = channelResult.status === "not_configured"
+            ? "not configured"
+            : channelResult.status === "not_requested"
+              ? "not enabled"
+              : `${channelResult.accepted}/${channelResult.attempted} provider-accepted; ${channelResult.failed + channelResult.invalid} failed`;
+          return `${label}: ${detail}`;
+        })
+        .filter(Boolean)
+        .join(". ");
+      setTestAlertFailed(!accepted);
+      setTestAlertMessage([result.message || (accepted
+        ? `Test alert accepted by the provider for ${result.contacts_accepted || 0} contact(s). Delivery is not confirmed.`
+        : "The test alert could not be delivered."), channelSummary].filter(Boolean).join(" "));
+    } catch (error) {
+      setTestAlertFailed(true);
+      setTestAlertMessage(error instanceof Error ? error.message : "Unable to send a test alert.");
+    } finally {
+      setTestAlertSending(false);
     }
   };
 
@@ -803,6 +840,32 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
                   )}
                 </div>
               </form>
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => void testEmergencyContacts()}
+                  disabled={testAlertSending || contacts.length === 0}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-semibold text-[var(--ink)] transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Bell className="h-3.5 w-3.5" />
+                  {testAlertSending ? "Sending test alert..." : "Send test alert"}
+                </button>
+                {testAlertMessage && (
+                  <p
+                    role={testAlertFailed ? "alert" : "status"}
+                    className={`text-xs ${testAlertFailed ? "text-red-300" : "text-emerald-300"}`}
+                  >
+                    {testAlertMessage}
+                  </p>
+                )}
+                <p className="text-[10px] text-[var(--ink-muted)]">
+                  Sends a clearly marked test message to contacts with email or SMS alerts enabled.
+                </p>
+                <p className="text-[10px] text-[var(--ink-muted)]">
+                  Delivery requires SendGrid email and/or Twilio SMS credentials in the backend configuration.
+                </p>
+              </div>
 
               <div className="space-y-2">
                 {contactsLoading ? (

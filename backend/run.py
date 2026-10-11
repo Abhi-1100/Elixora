@@ -1,3 +1,5 @@
+import ipaddress
+import os
 from app import create_app, db
 from sqlalchemy import text
 
@@ -21,5 +23,17 @@ def run_migrations():
 run_migrations()
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
-
+    # Default to 5001 on macOS to avoid AirPlay conflict on 5000
+    port = int(os.environ.get("PORT", 5001))
+    host = os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1"
+    try:
+        is_loopback = ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        is_loopback = host.lower() == "localhost"
+    debug_requested = os.environ.get("FLASK_DEBUG", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    app.run(host=host, debug=debug_requested and is_loopback, port=port)

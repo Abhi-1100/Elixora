@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Siren, X, CheckCircle2, AlertTriangle, Loader2, Send, MapPin, ShieldAlert, ArrowRight } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  Send,
+  Siren,
+  X,
+} from "lucide-react";
 import { sendAlert } from "@/lib/api";
 import { useRouter } from "next/navigation";
 
@@ -11,6 +19,51 @@ interface SosModalProps {
   token: string | null;
   onOpenSettings?: (tab?: string) => void;
   onAlertStatus?: (notice: { type: "pending" | "success" | "error"; message: string } | null) => void;
+}
+
+interface ChannelResult {
+  requested: number;
+  attempted: number;
+  accepted: number;
+  failed: number;
+  invalid: number;
+  configured: boolean;
+  status: "provider_accepted" | "partial" | "failed" | "not_configured" | "not_requested";
+  errors?: string[];
+}
+
+type AlertChannelResults = Partial<Record<"sms" | "email", ChannelResult>>;
+
+function getChannelResults(error: unknown): AlertChannelResults | null {
+  if (typeof error !== "object" || error === null || !("response" in error)) return null;
+  const response = error.response;
+  if (typeof response !== "object" || response === null || !("channel_results" in response)) return null;
+  const results = response.channel_results;
+  if (typeof results !== "object" || results === null) return null;
+  return results as AlertChannelResults;
+}
+
+function formatChannelError(error: string) {
+  const [category, detail] = error.split(":", 2);
+  if (category === "missing_configuration") return `Missing ${detail}`;
+  if (category === "invalid_configuration") return `Invalid ${detail}`;
+  if (category === "invalid_recipient") {
+    return detail === "sms" ? "Saved phone number is invalid" : "Saved email address is invalid";
+  }
+  if (category === "provider_error") {
+    if (detail === "sendgrid_http_401") return "SendGrid authentication failed; check SENDGRID_API_KEY";
+    if (detail === "sendgrid_http_403") return "SendGrid rejected the request; check Mail Send permission and sender authentication";
+    if (detail === "twilio_20003") return "Twilio rejected the Account SID/Auth Token; verify both are current in backend/.env and restart Flask";
+    if (detail === "sendgrid_timeout") return "SendGrid request timed out; verify network access and try again";
+    if (detail === "sendgrid_connection_error") return "Could not connect to SendGrid; verify backend internet access";
+    if (detail === "twilio_21211") return "Twilio rejected the destination phone number";
+    if (detail === "twilio_21606") return "Twilio rejected the sender; use an SMS-capable authorized number";
+    if (detail === "twilio_21608") return "Twilio trial accounts can only message verified destination numbers";
+    return `Provider error (${detail})`;
+  }
+  if (category === "provider_rejected") return `Provider rejected the request (${detail})`;
+  if (category === "delivery_failure") return `Provider reports delivery failure (${detail})`;
+  return error;
 }
 
 export function SosModal({
@@ -26,44 +79,24 @@ export function SosModal({
   const [isTokenExpired, setIsTokenExpired] = useState<boolean>(false);
   const [isNoContacts, setIsNoContacts] = useState<boolean>(false);
   const [resultMessage, setResultMessage] = useState<string>("");
+  const [channelResults, setChannelResults] = useState<AlertChannelResults>({});
 
   const router = useRouter();
   const coordsRef = useRef<{ latitude?: number; longitude?: number }>({});
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const dispatchingRef = useRef(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   // Reset and initialize when modal opens
   useEffect(() => {
-    if (!isOpen) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
+    if (!isOpen) return;
 
-    // Reset states
-    setSecondsLeft(5);
-    setStatus("countdown");
-    setErrorMessage("");
-    setIsTokenExpired(false);
-    setIsNoContacts(false);
-    setResultMessage("");
-    coordsRef.current = {};
+    idempotencyKeyRef.current =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : null;
 
-    // Silently pre-fetch user's geolocation in background during the countdown
-    if (typeof navigator !== "undefined" && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          coordsRef.current = {
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          };
-        },
-        () => {
-          // If location is denied or timed out, we still proceed without coordinates
-        },
-        { timeout: 5000, maximumAge: 30000 }
-      );
-    }
-
-    // Start 5-second countdown
+    // The countdown is a confirmation window; it never sends on its own.
     timerRef.current = setInterval(() => {
       setSecondsLeft((prev) => {
         if (prev <= 1) {
@@ -79,46 +112,68 @@ export function SosModal({
     };
   }, [isOpen]);
 
-  // When countdown hits 0, automatically dispatch alert
-  useEffect(() => {
-    if (isOpen && status === "countdown" && secondsLeft === 0) {
-      void dispatchEmergencyAlert();
-    }
-  }, [secondsLeft, isOpen, status]);
-
-  const dispatchEmergencyAlert = async () => {
+  async function dispatchEmergencyAlert() {
+    if (dispatchingRef.current) return;
+    dispatchingRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
     setStatus("sending");
 
     try {
+      if (
+        coordsRef.current.latitude === undefined &&
+        coordsRef.current.longitude === undefined &&
+        navigator.geolocation
+      ) {
+        await new Promise<void>((resolve) => {
+          try {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                coordsRef.current = {
+                  latitude: pos.coords.latitude,
+                  longitude: pos.coords.longitude,
+                };
+                resolve();
+              },
+              () => resolve(),
+              { timeout: 5000, maximumAge: 30000 }
+            );
+          } catch {
+            resolve();
+          }
+        });
+      }
       const payload = {
         trigger: "sos_button" as const,
         latitude: coordsRef.current.latitude,
         longitude: coordsRef.current.longitude,
       };
 
-      const result = await sendAlert(payload, token);
-      const isOk = result.status === "sent" || result.status === "partial";
+      const result = await sendAlert(payload, token, idempotencyKeyRef.current || undefined);
+      setChannelResults((result.channel_results || {}) as AlertChannelResults);
+      const isOk = result.status === "queued" || result.status === "partial";
       const message =
         result.message ||
-        `Emergency alert sent to family members via SMS & Email.`;
+        `Alert request accepted for ${result.contacts_accepted || 0} contact(s). Delivery is not confirmed.`;
 
       setStatus(isOk ? "sent" : "error");
       if (isOk) {
         setResultMessage(message);
         onAlertStatus?.({ type: "success", message });
-        // Auto-close after 3.5 seconds
-        setTimeout(() => {
-          onClose();
-        }, 3500);
       } else {
         setErrorMessage(result.message || "Failed to deliver emergency alert.");
         onAlertStatus?.({ type: "error", message: result.message || "SOS alert failed" });
       }
-    } catch (err: any) {
-      const msg = err?.message || "Failed to send emergency notification.";
+    } catch (err: unknown) {
+      const channelErrors = getChannelResults(err);
+      if (channelErrors) setChannelResults(channelErrors);
+      const msg = err instanceof Error ? err.message : "Failed to send emergency notification.";
+      const expiredFlag =
+        typeof err === "object" &&
+        err !== null &&
+        "isTokenExpired" in err &&
+        err.isTokenExpired === true;
       const expired =
-        err?.isTokenExpired ||
+        expiredFlag ||
         msg.toLowerCase().includes("token has expired") ||
         msg.toLowerCase().includes("session has expired");
       const noContacts = msg.toLowerCase().includes("contact");
@@ -135,8 +190,10 @@ export function SosModal({
         type: "error",
         message: expired ? "Session expired. Please log in again." : msg,
       });
+    } finally {
+      dispatchingRef.current = false;
     }
-  };
+  }
 
   const handleCancel = () => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -162,7 +219,7 @@ export function SosModal({
       aria-modal="true"
       aria-labelledby="sos-title"
     >
-      <div className="relative w-full max-w-md rounded-2xl border border-red-500/30 bg-[#0d131f] p-6 sm:p-7 shadow-2xl shadow-red-500/10 text-center overflow-hidden">
+      <div className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl border border-red-500/30 bg-[#0d131f] p-6 sm:p-7 shadow-2xl shadow-red-500/10 text-center">
         {/* Ambient Top Glow */}
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -182,7 +239,7 @@ export function SosModal({
             </h2>
 
             <p className="mt-2 text-sm text-red-200/80 max-w-xs leading-relaxed">
-              Sending emergency SMS & Email alert with your location to your family members in:
+              Review the alert, then choose Send Now to notify your saved contacts.
             </p>
 
             {/* Countdown Display */}
@@ -201,7 +258,7 @@ export function SosModal({
               </div>
 
               <p className="mt-3 text-xs text-amber-200/90 font-medium bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-                Triggered by mistake? Click Cancel below immediately.
+                No message is sent until you confirm with Send Now.
               </p>
             </div>
 
@@ -234,7 +291,7 @@ export function SosModal({
             <Loader2 className="h-14 w-14 text-red-400 animate-spin mb-4" />
             <h2 className="text-xl font-bold text-white">Sending Emergency Alert...</h2>
             <p className="mt-2 text-sm text-[var(--ink-muted)] max-w-xs">
-              Contacting your family members via SMS & Email with your GPS coordinates...
+              Contacting your saved recipients through their enabled email and SMS options...
             </p>
           </div>
         )}
@@ -245,10 +302,24 @@ export function SosModal({
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 border-2 border-emerald-500/40 text-emerald-400 mb-4 shadow-lg shadow-emerald-500/20">
               <CheckCircle2 className="h-9 w-9" />
             </div>
-            <h2 className="text-xl font-bold text-white">Emergency Alert Sent!</h2>
+            <h2 className="text-xl font-bold text-white">Emergency Alert Submitted</h2>
             <p className="mt-2 text-sm text-emerald-200/90 max-w-xs leading-relaxed">
-              {resultMessage || "SMS and Email notifications have been delivered to your family members."}
+              {resultMessage || "Notification providers accepted the request. Delivery is not confirmed."}
             </p>
+            <div className="mt-3 w-full space-y-1 text-left text-xs text-emerald-100/80">
+              {(["sms", "email"] as const).map((channel) => {
+                const result = channelResults[channel];
+                if (!result) return null;
+                const title = channel === "sms" ? "SMS" : "Email";
+                const detail = result.status === "not_configured"
+                  ? "Not configured"
+                  : result.status === "not_requested"
+                    ? "Not enabled for contacts"
+                    : `${result.accepted}/${result.attempted} provider-accepted, ${result.failed + result.invalid} failed`;
+                const errors = result.errors?.map(formatChannelError).join("; ");
+                return <p key={channel}>{title}: {detail}{errors ? ` — ${errors}` : ""}</p>;
+              })}
+            </div>
 
             <button
               type="button"
@@ -270,6 +341,20 @@ export function SosModal({
             <p className="mt-2 text-sm text-red-200/90 max-w-xs leading-relaxed">
               {errorMessage}
             </p>
+            <div className="mt-3 w-full space-y-1 text-left text-xs text-red-100/80">
+              {(["sms", "email"] as const).map((channel) => {
+                const result = channelResults[channel];
+                if (!result) return null;
+                const title = channel === "sms" ? "SMS" : "Email";
+                const detail = result.status === "not_configured"
+                  ? "Not configured"
+                  : result.status === "not_requested"
+                    ? "Not enabled for contacts"
+                    : `${result.accepted}/${result.attempted} provider-accepted, ${result.failed + result.invalid} failed`;
+                const errors = result.errors?.map(formatChannelError).join("; ");
+                return <p key={channel}>{title}: {detail}{errors ? ` — ${errors}` : ""}</p>;
+              })}
+            </div>
 
             <div className="mt-6 flex w-full flex-col gap-2">
               {isTokenExpired && (
@@ -303,16 +388,25 @@ export function SosModal({
                 >
                   Dismiss
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStatus("countdown");
-                    setSecondsLeft(5);
-                  }}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm transition"
-                >
-                  Try Again
-                </button>
+                {Object.values(channelResults).some((channel) => channel?.configured) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsTokenExpired(false);
+                      setIsNoContacts(false);
+                      setErrorMessage("");
+                      setChannelResults({});
+                      idempotencyKeyRef.current =
+                        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+                          ? crypto.randomUUID()
+                          : null;
+                      void dispatchEmergencyAlert();
+                    }}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm transition"
+                  >
+                    Try Again
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -12,6 +12,11 @@ from flask import Blueprint, current_app, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 from app.services.symptom_predictor import get_symptom_predictor
+from app.services.translation_service import (
+    TranslationNotConfiguredError,
+    TranslationProviderError,
+    translate_to_english,
+)
 from app.services.chat_router import (
     chat_string,
     detect_language,
@@ -21,6 +26,7 @@ from app.services.chat_router import (
     extract_symptoms,
     match_disease,
     match_medicine,
+    SYMPTOM_SYNONYMS,
 )
 
 try:
@@ -143,17 +149,14 @@ def symptom_advisor():
     supplied = body.get("symptoms")
     if supplied is not None and not isinstance(supplied, list):
         return jsonify({"error": "'symptoms' must be a list when supplied."}), 400
-    candidates = supplied if supplied is not None else extract_symptoms(message, predictor.known_symptoms)
-    prediction_data = predictor.predict_disease(candidates, top_n=3)
-    urgency = _urgency_for(prediction_data["recognized_symptoms"])
-    response, source = _llm_response(message, prediction_data, urgency)
+    if supplied is not None and not all(isinstance(item, str) and item.strip() for item in supplied):
+        return jsonify({"error": "'symptoms' must contain only non-empty strings."}), 400
+    if supplied is not None:
+        message = " ".join(str(item) for item in supplied if isinstance(item, str))
+    result = _structured_symptoms(message, detect_language(message), predictor)
     return jsonify({
-        "matched_symptoms": prediction_data["recognized_symptoms"],
-        "unrecognized_symptoms": prediction_data["unrecognized_symptoms"],
-        "predictions": prediction_data["predictions"],
-        "urgency_level": urgency,
-        "response": response,
-        "response_source": source,
+        "matched_symptoms": _remove_negated_symptoms(message, extract_symptoms(message, predictor.known_symptoms)),
+        "response": result["text"],
     })
 
 
@@ -178,13 +181,11 @@ def symptom_check():
     if lang not in {"en", "hi", "gu"}:
         return jsonify({"error": "'lang' must be one of: en, hi, gu."}), 400
 
-    predictor = _multilang_predictor()
+    predictor = get_symptom_predictor(current_app)
     if predictor is None:
-        return jsonify({"error": "The multilingual symptom prediction model is unavailable."}), 503
-    prediction = predictor.predict_disease(symptoms)
-    response = predictor.format_response(prediction, lang=lang)
-
-    return jsonify(response)
+        return jsonify({"error": "The symptom vocabulary is unavailable."}), 503
+    message = symptoms if isinstance(symptoms, str) else ", ".join(symptoms)
+    return jsonify(_structured_symptoms(message, lang, predictor))
 
 
 def _chat_disclaimer(lang: str) -> str:
@@ -195,14 +196,192 @@ def _chat_emergency(lang: str) -> str:
     return chat_string(lang, "chat_emergency")
 
 
+def _symptom_self_care(symptoms, lang):
+    normalized = {_normalized(symptom) for symptom in symptoms}
+    has_fever = any("fever" in item for item in normalized)
+    has_headache = any("headache" in item for item in normalized)
+    has_gi = any(term in item for item in normalized for term in ("vomit", "diarr", "stomach"))
+    tips = []
+    if lang == "hi":
+        if has_fever:
+            tips.append("यदि संभव हो तो थर्मामीटर से तापमान मापें, आराम करें और पानी जैसे तरल लेते रहें।")
+        if has_headache:
+            tips.append("शांत जगह पर आराम करें और पानी पिएं।")
+        if has_gi:
+            tips.append("यदि उल्टी या दस्त हैं, तो पानी या ओआरएस के छोटे-छोटे घूंट लें।")
+        if not tips:
+            tips.append("आराम करें और लक्षणों में बदलाव पर ध्यान दें।")
+        tips.append("बिना डॉक्टर या फार्मासिस्ट की सलाह के नई दवा, एंटीबायोटिक या किसी और की दवा न लें।")
+    elif lang == "gu":
+        if has_fever:
+            tips.append("શક્ય હોય તો થર્મોમીટરથી તાપમાન માપો, આરામ કરો અને પાણી જેવા પ્રવાહી પીતા રહો.")
+        if has_headache:
+            tips.append("શાંત જગ્યાએ આરામ કરો અને પાણી પીવો.")
+        if has_gi:
+            tips.append("ઉલટી કે ઝાડા હોય તો પાણી અથવા ઓઆરએસના નાના ઘૂંટડા લો.")
+        if not tips:
+            tips.append("આરામ કરો અને લક્ષણોમાં ફેરફાર પર ધ્યાન રાખો.")
+        tips.append("ડૉક્ટર કે ફાર્માસિસ્ટની સલાહ વિના નવી દવા, એન્ટિબાયોટિક કે બીજાની દવા ન લો.")
+    else:
+        if has_fever:
+            tips.append("If possible, check your temperature with a thermometer. Rest and drink fluids such as water.")
+        if has_headache:
+            tips.append("Rest somewhere quiet and drink water.")
+        if has_gi:
+            tips.append("If you have vomiting or diarrhea, take small, frequent sips of water or oral rehydration solution (ORS).")
+        if not tips:
+            tips.append("Rest as needed and keep track of any changes in your symptoms.")
+        tips.append("Do not start a new medicine, take antibiotics, or use someone else's medicine without advice from a doctor or pharmacist.")
+    return tips
+
+
+def _symptom_red_flags(symptoms, lang):
+    normalized = {_normalized(symptom) for symptom in symptoms}
+    has_fever = any("fever" in item for item in normalized)
+    has_gi = any(term in item for item in normalized for term in ("vomit", "diarr", "stomach"))
+    if lang == "hi":
+        flags = ["सांस लेने में कठिनाई, सीने में दर्द, बेहोशी, भ्रम, दौरा, या अचानक कमजोरी/बोलने में दिक्कत हो तो अभी आपातकालीन मदद लें।"]
+        if has_fever:
+            flags.append("बुखार बिगड़ रहा हो, घर पर देखभाल से ठीक न हो रहा हो, या आपको बहुत अस्वस्थ महसूस हो तो डॉक्टर से संपर्क करें।")
+        if has_gi:
+            flags.append("पानी न रुकने, पेशाब बहुत कम होने, तेज पेट दर्द, या उल्टी/मल में खून होने पर तुरंत चिकित्सा सहायता लें।")
+        flags.append("लक्षण गंभीर हों, बिगड़ें, या बने रहें तो डॉक्टर से संपर्क करें।")
+        return flags
+    if lang == "gu":
+        flags = ["શ્વાસ લેવામાં તકલીફ, છાતીમાં દુખાવો, બેભાન થવું, ગૂંચવણ, આંચકી, અથવા અચાનક નબળાઈ/બોલવામાં તકલીફ થાય તો તાત્કાલિક ઇમરજન્સી મદદ લો."]
+        if has_fever:
+            flags.append("તાવ વધે, ઘરેલુ સંભાળથી સુધરે નહીં, અથવા તમને ખૂબ અસ્વસ્થ લાગે તો ડૉક્ટરનો સંપર્ક કરો.")
+        if has_gi:
+            flags.append("પ્રવાહી ન ટકે, પેશાબ ખૂબ ઓછો થાય, પેટમાં તીવ્ર દુખાવો હોય, અથવા ઉલટી/મળમાં લોહી હોય તો તરત તબીબી મદદ લો.")
+        flags.append("લક્ષણો ગંભીર હોય, વધે, અથવા ચાલુ રહે તો ડૉક્ટરનો સંપર્ક કરો.")
+        return flags
+    flags = ["Get emergency help now for trouble breathing, chest pain, fainting, confusion, a seizure, or sudden weakness or trouble speaking."]
+    if has_fever:
+        flags.append("Contact a clinician if the fever is getting worse, is not improving with home care, or you feel very unwell.")
+    if has_gi:
+        flags.append("Seek prompt medical care if you cannot keep fluids down, urinate very little, have severe abdominal pain, or see blood in vomit or stool.")
+    flags.append("For any symptom, contact a clinician if it is severe, worsening, or not improving.")
+    return flags
+
+
+def _remove_negated_symptoms(message, symptoms):
+    """Do not present a symptom as present when the user explicitly denies it."""
+    text = _normalized(message)
+    negation = r"(?:no|not|never|without|denies|denied|don't have|do not have|doesn't have|does not have|नहीं|नही|નથી)"
+    affirmed = []
+    for symptom in symptoms:
+        phrase = _normalized(symptom)
+        surfaces = {phrase}
+        if phrase in {"fever", "high fever"}:
+            surfaces.update({"fever", "high fever"})
+        for alias, target in SYMPTOM_SYNONYMS.items():
+            normalized_target = _normalized(target)
+            if normalized_target == phrase or phrase in {"fever", "high fever"} and normalized_target in {"fever", "high fever"}:
+                surfaces.add(_normalized(alias))
+        occurrences = [match for surface in surfaces for match in re.finditer(
+            rf"(?<!\w){re.escape(surface)}(?!\w)", text
+        )]
+        if not occurrences:
+            affirmed.append(symptom)
+            continue
+        has_affirmed_mention = False
+        for occurrence in occurrences:
+            before = text[max(0, occurrence.start() - 45):occurrence.start()]
+            before = re.split(r"\b(?:but|and|however|और|અને)\b|[,;.!?]", before)[-1]
+            after = text[occurrence.end():occurrence.end() + 24]
+            denied_before = re.search(rf"{negation}(?:\s+\w+){{0,3}}\s*$", before)
+            denied_after = re.match(r"\s*(?:is|are)?\s*(?:not present|absent|gone|नहीं(?:\s+(?:है|हैं))?|નથી)", after)
+            if not denied_before and not denied_after:
+                has_affirmed_mention = True
+                break
+        if has_affirmed_mention:
+            affirmed.append(symptom)
+    return affirmed
+
+
+def _symptom_possible_causes(symptoms, lang):
+    norm = " ".join(_normalized(s) for s in symptoms)
+    causes = []
+    if lang == "hi":
+        if ("fever" in norm or "bukhar" in norm) and ("headache" in norm or "sir dard" in norm):
+            causes.extend(["सामान्य वायरल संक्रमण (मौसमी वायरल बुखार या फ्लू)", "तनाव या साइनस सिरदर्द के साथ हल्का बुखार", "ऊपरी श्वसन तंत्र का संक्रमण"])
+        elif ("fever" in norm or "bukhar" in norm) and any(term in norm for term in ("cough", "khansi")):
+            causes.extend(["ऊपरी श्वसन तंत्र का वायरल संक्रमण (सर्दी-जुकाम या फ्लू)", "मौसमी एलर्जी जनित खांसी और बुखार", "तीव्र ब्रोंकाइटिस"])
+        elif any(term in norm for term in ("vomit", "ulti", "diarrhoea", "dast", "stomach", "pet")):
+            causes.extend(["गैस्ट्रोएंटेराइटिस (पेट का सामान्य संक्रमण)", "खान-पान में गड़बड़ी या अपच", "हल्का फूड पॉइजनिंग"])
+        elif "headache" in norm or "sir dard" in norm:
+            causes.extend(["तनाव सिरदर्द (स्क्रीन समय, थकान या नींद की कमी)", "निर्जलीकरण (पानी की कमी) सिरदर्द", "साइनस सिरदर्द"])
+        elif "fever" in norm or "bukhar" in norm:
+            causes.extend(["वायरल संक्रमण (मौसमी बुखार)", "शरीर की सामान्य प्रतिरक्षा प्रतिक्रिया"])
+        else:
+            causes.extend(["मौसमी स्वास्थ्य समस्या या सामान्य वायरल सिंड्रोम", "शारीरिक थकान या निर्जलीकरण"])
+    elif lang == "gu":
+        if ("fever" in norm or "tav" in norm) and ("headache" in norm or "mathu" in norm):
+            causes.extend(["સામાન્ય વાયરલ ચેપ (મોસમી તાવ અથવા ફ્લૂ)", "તણાવ કે સાઇનસ માથાના દુખાવા સાથે તાવ", "શ્વાસનળીનો ચેપ"])
+        elif ("fever" in norm or "tav" in norm) and any(term in norm for term in ("cough", "udhras")):
+            causes.extend(["ઉપલા શ્વસનતંત્રનો વાયરલ ચેપ (શરદી અથવા ફ્લૂ)", "મોસમી એલર્જીક ઉધરસ", "તીવ્ર બ્રોન્કાઇટિસ"])
+        elif any(term in norm for term in ("vomit", "ulti", "diarrhoea", "jhada", "pet")):
+            causes.extend(["ગેસ્ટ્રોએન્ટેરાઇટિસ (પેટનો ચેપ)", "ખોરાકની અસહિષ્ણુતા કે અપચો", "હળવું ફૂડ પોઈઝનિંગ"])
+        elif "headache" in norm or "mathu" in norm:
+            causes.extend(["તણાવ માથાનો દુખાવો (સ્ક્રીન ટાઇમ, થાક કે ઊંઘનો અભાવ)", "ડિહાઇડ્રેશન માથાનો દુખાવો", "સાઇનસ માથાનો દુખાવો"])
+        elif "fever" in norm or "tav" in norm:
+            causes.extend(["વાયરલ ચેપ (મોસમી તાવ)", "શરીરની રોગપ્રતિકારક પ્રતિક્રિયા"])
+        else:
+            causes.extend(["મોસમી સામાન્ય ચેપ", "શારીરિક થાક કે ડિહાઇડ્રેશન"])
+    else:
+        if "fever" in norm and "headache" in norm:
+            causes.extend([
+                "Common viral infection (such as seasonal flu or viral syndrome)",
+                "Tension or sinus headache associated with mild fever",
+                "Early upper respiratory infection",
+            ])
+        elif "fever" in norm and any(term in norm for term in ("cough", "throat", "sneeze")):
+            causes.extend([
+                "Viral upper respiratory tract infection (common cold or influenza)",
+                "Seasonal allergic respiratory reaction with low-grade fever",
+                "Acute bronchitis or pharyngitis",
+            ])
+        elif any(term in norm for term in ("vomit", "diarrhoea", "diarrhea", "stomach")):
+            causes.extend([
+                "Acute gastroenteritis (stomach infection or foodborne bug)",
+                "Dietary indiscretion or food intolerance",
+                "Indigestion or gastritis",
+            ])
+        elif "headache" in norm:
+            causes.extend([
+                "Tension-type headache (related to stress, eye strain, or screen time)",
+                "Dehydration-related headache",
+                "Sinus congestion headache",
+            ])
+        elif "fever" in norm:
+            causes.extend([
+                "Viral infection (such as seasonal viral fever)",
+                "Immune response to an everyday infection",
+            ])
+        else:
+            causes.extend([
+                "Mild seasonal infection or viral syndrome",
+                "Physical fatigue, strain, or dehydration",
+            ])
+    return causes
+
+
+def _symptom_follow_ups(symptoms, lang):
+    names = ", ".join(label(item, lang) for item in symptoms)
+    if lang == "hi":
+        return f"इन लक्षणों के बारे में बेहतर मार्गदर्शन के लिए बताएं: {names or 'आपको क्या परेशानी है'} कब से हैं, कितने गंभीर हैं, और क्या वे बिगड़ रहे हैं?"
+    if lang == "gu":
+        return f"વધુ યોગ્ય માર્ગદર્શન માટે કહો: {names or 'તમને શું તકલીફ છે'} ક્યારથી છે, કેટલા ગંભીર છે અને શું તે વધી રહ્યા છે?"
+    return f"To guide you better, how long have {names or 'these symptoms'} been happening, how severe are they, and are they getting worse?"
+
+
 def _chat_disease_response(disease: str, lang: str) -> str:
     info = disease_info(disease, lang)
-    symptoms = ", ".join(info["symptoms"]) or "No typical symptoms were available in the dataset"
-    precautions = ", ".join(info["precautions"]) or "speak with a qualified clinician for individualized advice"
+    precautions = ", ".join(info["precautions"][:4]) or "speak with a qualified clinician for individualized advice"
     parts = [
         chat_string(lang, "chat_disease_intro", name=info["name"], description=info["description"]),
-        chat_string(lang, "chat_disease_symptoms", symptoms=symptoms),
-        chat_string(lang, "chat_disease_precautions", precautions=precautions),
+        f"General precautions: {precautions}.",
+        "Note: These are educational details from clinical references, not a diagnosis for your symptoms. If you feel unwell, consult a doctor.",
         _chat_disclaimer(lang),
     ]
     return "\n\n".join(part for part in parts if part)
@@ -217,55 +396,28 @@ def _chat_medicine_response(message: str, lang: str) -> str:
         )
     values = {
         "name": medicine["name"],
-        "uses": ", ".join(medicine["uses"]) or "not listed",
-        "side_effects": ", ".join(medicine["side_effects"]) or "not listed",
-        "substitutes": ", ".join(medicine["substitutes"]) or "not listed",
+        "uses": ", ".join(medicine["uses"][:3]) or "Not listed in the available medicine data.",
+        "side_effects": ", ".join(medicine["side_effects"][:3]) or "Not listed in the available medicine data.",
     }
+    safety_note = chat_string(lang, "medicine_safety_warning") or (
+        "Medicine Safety Notice: Always consult a licensed physician or pharmacist before starting, changing, or stopping any medication. Never self-prescribe antibiotics or alter dosages without clinical guidance."
+    )
     parts = [
         chat_string(lang, "chat_medicine_intro", name=values["name"]),
         chat_string(lang, "chat_medicine_uses", values=values["uses"]),
         chat_string(lang, "chat_medicine_side_effects", values=values["side_effects"]),
-        chat_string(lang, "chat_medicine_substitutes", values=values["substitutes"]),
+        safety_note,
         _chat_disclaimer(lang),
     ]
     return "\n\n".join(part for part in parts if part)
 
 
 def _chat_symptom_response(message: str, lang: str, predictor) -> tuple[str, dict]:
-    candidates = extract_symptoms(message, predictor.known_symptoms)
-    # The public model vocabulary commonly contains high_fever rather than the
-    # shorter natural-language phrase “fever”; keep this demo input reliable.
-    if re.search(r"(?<!\w)fever(?!\w)", message.lower()):
-        fever = predictor.normalize_known_symptom("high_fever") or predictor.normalize_known_symptom("fever")
-        if fever and fever not in candidates:
-            candidates.append(fever)
-    lower_message = message.lower()
-    for phrase, symptom in (("high temperature", "high_fever"), ("temperature", "fever"),
-                            ("bukhar", "fever"), ("sir dard", "headache"), ("head pain", "headache")):
-        if phrase in lower_message:
-            canonical = predictor.normalize_known_symptom(symptom)
-            if not canonical and symptom == "fever":
-                canonical = predictor.normalize_known_symptom("high_fever")
-            if canonical and canonical not in candidates:
-                candidates.append(canonical)
-    prediction_data = predictor.predict_disease(candidates, top_n=3)
-    recognized = prediction_data["recognized_symptoms"]
-    if not recognized or not prediction_data["predictions"]:
-        return chat_string(lang, "chat_followup"), {"matched_symptoms": []}
-
-    urgency = _urgency_for(recognized)
-    prediction_list = prediction_data["predictions"]
-    prediction_text = ", ".join(
-        f"{item['disease']} ({round(float(item['confidence']) * 100, 1)}%)"
-        for item in prediction_list
-    )
-    text = chat_string(lang, "chat_symptom_intro", predictions=prediction_text)
-    text = f"{text}\n\nMatched symptoms: {', '.join(recognized)}.\n\n{_chat_disclaimer(lang)}"
-    return text, {
-        "matched_symptoms": recognized,
-        "predictions": prediction_list,
-        "confidence": prediction_list[0].get("confidence"),
-        "urgency": urgency,
+    result = _structured_symptoms(message, lang, predictor)
+    return result["text"], {
+        "matched_symptoms": _remove_negated_symptoms(
+            message, extract_symptoms(message, predictor.known_symptoms)
+        ),
     }
 
 
@@ -282,7 +434,7 @@ def _structured(intent, lang, title, summary, sections=None, urgency=None, follo
         response["follow_up"] = follow_up
     text_parts = [title, summary]
     for section in response["sections"]:
-        text_parts.append(f"{section['heading']}:\n" + "\n".join(f"• {item.get('name')} ({item.get('confidence')}%)" if isinstance(item, dict) and "confidence" in item else f"• {item}" for item in section["items"]))
+        text_parts.append(f"{section['heading']}:\n" + "\n".join(f"• {item.get('name')} ({item.get('confidence')}%)" if isinstance(item, dict) and "confidence" in item else f"• {item.get('name')}" if isinstance(item, dict) else f"• {item}" for item in section["items"]))
     if follow_up:
         text_parts.append(follow_up)
     text_parts.append(response["disclaimer"])
@@ -291,33 +443,31 @@ def _structured(intent, lang, title, summary, sections=None, urgency=None, follo
 
 
 def _structured_symptoms(message, lang, predictor):
-    candidates = extract_symptoms(message, predictor.known_symptoms)
-    data = predictor.predict_disease(candidates, top_n=3)
-    recognized = data["recognized_symptoms"]
-    if len(recognized) < 2:
-        items = [label(item, lang) for item in recognized]
-        summary = chat_string(lang, "no_predictions")
-        sections = [_section(chat_string(lang, "mentioned"), "bullets", items)] if items else []
-        sections.append(_section(chat_string(lang, "what_to_do"), "bullets", [chat_string(lang, "generic_care")]))
-        return _structured("symptom_check", lang, chat_string(lang, "title_possible"), summary, sections, "routine", chat_string(lang, "follow_up"))
-    predictions = []
-    alarming = {"aids", "paralysis (brain hemorrhage)", "heart attack", "tuberculosis", "dengue", "malaria", "typhoid"}
-    for item in data["predictions"]:
-        confidence = round(float(item.get("confidence", 0)) * 100, 1)
-        if confidence < 15 or (str(item["disease"]).lower() in alarming and confidence < 40):
-            continue
-        info = disease_info(str(item["disease"]), lang)
-        predictions.append({"name": info["name"], "confidence": confidence})
-    top = predictions[0]["confidence"] if predictions else 0
-    cautious = top < 40
-    summary = chat_string(lang, "cautious") if cautious else chat_string(lang, "chat_symptom_intro", predictions=predictions[0]["name"])
-    heading = chat_string(lang, "title_possible") if not cautious else chat_string(lang, "title_possible")
-    sections = [_section(chat_string(lang, "mentioned"), "bullets", [label(item, lang) for item in recognized])]
-    if predictions:
-        sections.append(_section(heading, "predictions", predictions))
-    sections.append(_section(chat_string(lang, "what_to_do"), "bullets", [chat_string(lang, "generic_care")]))
-    sections.append(_section(chat_string(lang, "when_doctor"), "bullets", [chat_string(lang, "advice_note")]))
-    return _structured("symptom_check", lang, heading, summary, sections, "routine", chat_string(lang, "follow_up") if cautious else None)
+    recognized = _remove_negated_symptoms(
+        message, extract_symptoms(message, predictor.known_symptoms)
+    )
+    if not recognized:
+        title = chat_string(lang, "title_unknown") or "Tell me more"
+        summary = chat_string(lang, "no_predictions") or "I couldn't identify a symptom you are currently experiencing. Tell me what you are feeling in your own words."
+        return _structured("symptom_check", lang, title, summary)
+
+    items = [label(item, lang) for item in recognized]
+    title = chat_string(lang, "title_assessment") or "Symptom Assessment"
+    summary = chat_string(lang, "symptom_summary", symptoms=", ".join(items)) or (
+        f"Based only on the symptoms you reported ({', '.join(items)}), here is general health information and safe next steps. This is not a medical diagnosis."
+    )
+
+    self_care_tips = _symptom_self_care(recognized, lang)
+    red_flags = _symptom_red_flags(recognized, lang)
+    follow_up = _symptom_follow_ups(recognized, lang)
+
+    sections = [
+        _section(chat_string(lang, "mentioned") or "Symptoms you mentioned", "bullets", items),
+        *([_section(chat_string(lang, "safe_self_care_title") or "Self-care", "bullets", self_care_tips)] if self_care_tips else []),
+        _section(chat_string(lang, "when_doctor_title") or "Get medical help if", "bullets", red_flags),
+    ]
+
+    return _structured("symptom_check", lang, title, summary, sections, follow_up=follow_up)
 
 
 @chat_bp.post("/message")
@@ -331,11 +481,38 @@ def chat_message():
     if not message:
         return jsonify({"error": "Please enter a message so I can help."}), 400
     selected_lang = body.get("lang", "en")
-    if selected_lang not in {"en", "hi", "gu"}:
-        return jsonify({"error": "'lang' must be one of: en, hi, gu."}), 400
+    if selected_lang not in {"auto", "en", "hi", "gu"}:
+        return jsonify({"error": "'lang' must be one of: auto, en, hi, gu."}), 400
     lang = detect_language(message, selected_lang)
 
-    intent = classify_intent(message)
+    english_translation = None
+    translation_status = None
+    if body.get("translate_to_english") is True and lang in {"hi", "gu"}:
+        try:
+            english_translation = translate_to_english(message)
+            translation_status = "translated"
+        except TranslationNotConfiguredError:
+            current_app.logger.warning(
+                "Voice translation is not configured; missing variable: GOOGLE_TRANSLATE_API_KEY"
+            )
+            translation_status = "not_configured"
+        except TranslationProviderError as error:
+            current_app.logger.warning(
+                "Google Cloud Translation request failed: %s",
+                error,
+            )
+            translation_status = "failed"
+
+    query_for_routing = english_translation or message
+
+    def include_translation(response):
+        if translation_status is not None:
+            response["translation_status"] = translation_status
+            if english_translation:
+                response["english_translation"] = english_translation
+        return response
+
+    intent = classify_intent(query_for_routing)
     if intent == "emergency":
         response = _structured(intent, lang, chat_string(lang, "title_emergency"), _chat_emergency(lang), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "emergency_actions"))], "emergency")
         try:
@@ -343,23 +520,24 @@ def chat_message():
             response["can_alert"] = bool(get_jwt_identity())
         except Exception:
             response["can_alert"] = False
-        return jsonify(response)
+        return jsonify(include_translation(response))
     if intent == "greeting":
         response = _structured(intent, lang, chat_string(lang, "title_greeting"), chat_string(lang, "chat_greeting"), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "examples"))])
-        return jsonify(response)
+        return jsonify(include_translation(response))
     if intent == "disease_info":
-        disease = match_disease(message)
+        disease = match_disease(query_for_routing)
         if disease:
             info = disease_info(disease, lang)
             sections = [_section(chat_string(lang, "common_symptoms"), "bullets", [label(item, lang) for item in info["symptoms"]]), _section(chat_string(lang, "what_to_do"), "bullets", info["precautions"][:4]), _section(chat_string(lang, "when_doctor"), "bullets", [chat_string(lang, "advice_note")])]
-            return jsonify(_structured(intent, lang, info["name"], info["description"], sections, "routine"))
+            return jsonify(include_translation(_structured(intent, lang, info["name"], info["description"], sections)))
     if intent == "medicine_info":
-        medicine = match_medicine(message)
-        summary = _chat_medicine_response(message, lang)
-        return jsonify(_structured(intent, lang, medicine["name"] if medicine else chat_string(lang, "title_unknown"), summary, [], "routine"))
+        medicine = match_medicine(query_for_routing)
+        summary = _chat_medicine_response(query_for_routing, lang)
+        return jsonify(include_translation(_structured(intent, lang, medicine["name"] if medicine else chat_string(lang, "title_unknown"), summary)))
     if intent == "symptom_check":
         predictor = get_symptom_predictor(current_app)
         if predictor is not None:
-            return jsonify(_structured_symptoms(message, lang, predictor))
+            return jsonify(include_translation(_structured_symptoms(query_for_routing, lang, predictor)))
 
-    return jsonify(_structured("unknown", lang, chat_string(lang, "title_unknown"), chat_string(lang, "chat_followup"), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "examples"))], "routine"))
+    response = _structured("unknown", lang, chat_string(lang, "title_unknown"), chat_string(lang, "chat_followup"), [_section(chat_string(lang, "what_to_do"), "bullets", chat_string(lang, "examples"))])
+    return jsonify(include_translation(response))

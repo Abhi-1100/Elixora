@@ -1,7 +1,7 @@
 {
   "en": {
     "chat_emergency": "This may be a medical emergency. Call your local emergency number or go to the nearest hospital now. AI guidance only. Not a medical diagnosis.",
-    "chat_greeting": "Hello! I can help with possible symptom patterns, disease information, medicines, and lab reports. What would you like to ask?",
+    "chat_greeting": "Hello! I can share general health information and safe next steps based on the symptoms you describe. What would you like help with?",
     "chat_followup": "Could you tell me which symptoms or health topic you mean? For example: \"symptoms of diabetes\", \"I have fever and headache\", or \"what is paracetamol used for\".",
     "chat_disease_intro": "{name} is a possible condition described by the health dataset. {description}",
     "chat_disease_symptoms": "Typical symptoms in the dataset: {symptoms}.",
@@ -31,21 +31,34 @@
     "follow_up": "Could you share one or two more symptoms?",
     "cautious": "These symptoms are common and could relate to many conditions; I cannot narrow this down confidently.",
     "generic_care": "Rest, drink fluids, and monitor how you feel.",
+    "single_symptom_guidance": "One symptom alone is not enough to identify its cause. I can still help with general next steps.",
+    "fever_guidance": "Fever can have many causes, often an infection. A fever alone cannot identify which one.",
+    "fever_care": ["If you can, check your temperature with a thermometer; 38°C (100.4°F) or higher is generally considered a fever.", "Rest and drink fluids. Use fever medicine only if it is normally safe for you, following the label or a clinician's advice."],
+    "fever_red_flags": "Get urgent medical help for trouble breathing, confusion, difficulty waking, a seizure, severe dehydration, or a rapidly worsening condition. Contact a clinician if the fever is not improving or you are worried.",
+    "fever_follow_up": "What is your measured temperature, how long have you had the fever, and how old are you? Any other symptoms or major health conditions?",
     "examples": [
       "I have fever and headache",
       "What are the symptoms of diabetes?",
       "I have itching and a skin rash"
     ],
-    "no_predictions": "I need at least two recognized symptoms before I can show possible conditions.",
     "emergency_actions": [
       "Call your local emergency number now.",
       "Go to the nearest hospital.",
       "Do not drive yourself."
-    ]
+    ],
+    "no_predictions": "I couldn't recognize a symptom in that message. Could you describe what you are feeling?",
+    "title_assessment": "Symptom Assessment",
+    "possible_causes_title": "Possible causes to discuss with a doctor",
+    "possible_causes_note": "These are common possibilities to discuss with a clinician, not confirmed diagnoses. Symptoms can overlap across multiple conditions.",
+    "safe_self_care_title": "Reliable self-care tips",
+    "when_doctor_title": "When to see a doctor (Warning Signs)",
+    "medicine_safety_warning": "Medicine Safety Notice: Always consult a licensed doctor or pharmacist before taking or altering any medication. Never self-prescribe antibiotics or exceed recommended doses.",
+    "symptom_summary": "Based only on the symptoms you reported ({symptoms}), here is helpful guidance and safe next steps. This is health information, not a medical diagnosis.",
+    "general_follow_up": "To give you more relevant health information:\n• How many days have you had these symptoms?\n• Have you checked your temperature with a thermometer?\n• Are there other symptoms such as a cough, rash, stiff neck, or vomiting?"
   },
   "hi": {
     "chat_emergency": "यह चिकित्सा आपातकाल हो सकता है। अभी अपने स्थानीय आपातकालीन नंबर पर कॉल करें या निकटतम अस्पताल जाएँ। यह केवल AI मार्गदर्शन है, चिकित्सा निदान नहीं।",
-    "chat_greeting": "नमस्ते! मैं संभावित लक्षणों, बीमारियों, दवाओं और लैब रिपोर्ट के बारे में सामान्य जानकारी दे सकता हूँ। आप क्या पूछना चाहते हैं?",
+    "chat_greeting": "नमस्ते! आप जो लक्षण बताएँगे, उनके आधार पर मैं सामान्य स्वास्थ्य जानकारी और सुरक्षित अगले कदम बता सकता हूँ। आपको किस बारे में मदद चाहिए?",
     "chat_followup": "कृपया बताएं कि आप किस लक्षण या स्वास्थ्य विषय के बारे में पूछ रहे हैं। उदाहरण: \"मधुमेह के लक्षण\", \"मुझे बुखार और सिरदर्द है\", या \"पैरासिटामोल किसलिए है\"।",
     "chat_disease_intro": "{name} स्वास्थ्य डेटासेट में वर्णित एक संभावित स्थिति है। {description}",
     "chat_disease_symptoms": "डेटासेट में सामान्य लक्षण: {symptoms}।",
@@ -75,21 +88,34 @@
     "follow_up": "क्या आप एक या दो और लक्षण बता सकते हैं?",
     "cautious": "ये लक्षण सामान्य हैं और कई कारणों से जुड़े हो सकते हैं; मैं अभी निश्चित रूप से कारण नहीं बता सकता।",
     "generic_care": "आराम करें, तरल पदार्थ लें और अपनी स्थिति पर ध्यान दें।",
+    "single_symptom_guidance": "केवल एक लक्षण से उसका कारण पता नहीं चलता। फिर भी मैं सामान्य अगले कदम बता सकता हूँ।",
+    "fever_guidance": "बुखार के कई कारण हो सकते हैं, अक्सर संक्रमण। केवल बुखार से कारण का पता नहीं लगाया जा सकता।",
+    "fever_care": ["यदि संभव हो तो थर्मामीटर से तापमान जांचें; आम तौर पर 38°C या उससे अधिक को बुखार माना जाता है।", "आराम करें और तरल पदार्थ लें। बुखार की दवा केवल तभी लें जब वह आपके लिए सुरक्षित हो; लेबल या डॉक्टर की सलाह मानें।"],
+    "fever_red_flags": "सांस लेने में परेशानी, भ्रम, जगाने में कठिनाई, दौरा, गंभीर निर्जलीकरण या तेजी से बिगड़ती हालत में तुरंत चिकित्सा सहायता लें। बुखार ठीक न हो या चिंता हो तो डॉक्टर से संपर्क करें।",
+    "fever_follow_up": "आपका तापमान कितना है, बुखार कब से है और आपकी उम्र क्या है? क्या कोई अन्य लक्षण या गंभीर स्वास्थ्य समस्या है?",
     "examples": [
       "मुझे बुखार और सिरदर्द है",
       "मधुमेह के लक्षण क्या हैं?",
       "मुझे खुजली और त्वचा पर दाने हैं"
     ],
-    "no_predictions": "संभावित स्थितियां दिखाने से पहले कम से कम दो पहचाने गए लक्षण बताएं।",
+    "no_predictions": "मैं इस संदेश में कोई लक्षण पहचान नहीं पाया। आप क्या महसूस कर रहे हैं, बता सकते हैं?",
     "emergency_actions": [
       "अभी स्थानीय आपातकालीन नंबर पर कॉल करें।",
       "निकटतम अस्पताल जाएं।",
       "खुद गाड़ी न चलाएं।"
-    ]
+    ],
+    "title_assessment": "लक्षण मूल्यांकन",
+    "possible_causes_title": "डॉक्टर से चर्चा करने योग्य संभावित कारण",
+    "possible_causes_note": "ये डॉक्टर से चर्चा करने योग्य सामान्य संभावनाएं हैं, पक्का निदान नहीं। कई लक्षणों के कई अलग-अलग कारण हो सकते हैं।",
+    "safe_self_care_title": "विश्वसनीय स्व-देखभाल के उपाय",
+    "when_doctor_title": "डॉक्टर से कब मिलें (चेतावनी संकेत)",
+    "medicine_safety_warning": "दवा सुरक्षा सूचना: कोई भी दवा शुरू करने, बदलने या बंद करने से पहले हमेशा प्रमाणित डॉक्टर या फार्मासिस्ट से परामर्श लें। बिना डॉक्टर की सलाह के एंटीबायोटिक्स न लें।",
+    "symptom_summary": "आपके बताए गए लक्षणों ({symptoms}) के आधार पर यहाँ सुरक्षित और उपयोगी मार्गदर्शन है। यह सामान्य स्वास्थ्य जानकारी है, चिकित्सीय निदान नहीं।",
+    "general_follow_up": "आपकी स्थिति को बेहतर समझने के लिए कुछ प्रश्न:\n• ये लक्षण कितने दिनों से हैं?\n• क्या आपने थर्मामीटर से बुखार नापा है?\n• क्या कोई अन्य लक्षण हैं, जैसे सांस लेने में तकलीफ, दाने या उल्टी?"
   },
   "gu": {
     "chat_emergency": "આ તબીબી કટોકટી હોઈ શકે છે. તરત તમારા સ્થાનિક ઇમરજન્સી નંબર પર કૉલ કરો અથવા નજીકની હોસ્પિટલમાં જાઓ. આ માત્ર AI માર્ગદર્શન છે, તબીબી નિદાન નથી.",
-    "chat_greeting": "નમસ્તે! હું સંભવિત લક્ષણો, રોગો, દવાઓ અને લેબ રિપોર્ટ વિશે સામાન્ય માહિતી આપી શકું છું. તમે શું પૂછવા માંગો છો?",
+    "chat_greeting": "નમસ્તે! તમે જણાવેલા લક્ષણોના આધારે હું સામાન્ય આરોગ્ય માહિતી અને સુરક્ષિત આગળના પગલાં આપી શકું છું. તમને શેમાં મદદ જોઈએ?",
     "chat_followup": "તમે કયા લક્ષણ અથવા આરોગ્ય વિષય વિશે પૂછો છો તે જણાવશો? ઉદાહરણ: \"ડાયાબિટીસના લક્ષણો\", \"મને તાવ અને માથાનો દુખાવો છે\", અથવા \"પેરાસિટામોલ શા માટે વપરાય છે\".",
     "chat_disease_intro": "{name} આરોગ્ય ડેટાસેટમાં વર્ણવાયેલી સંભવિત સ્થિતિ છે. {description}",
     "chat_disease_symptoms": "ડેટાસેટમાં સામાન્ય લક્ષણો: {symptoms}.",
@@ -119,16 +145,29 @@
     "follow_up": "શું તમે એક કે બે વધુ લક્ષણો જણાવી શકો?",
     "cautious": "આ લક્ષણો સામાન્ય છે અને અનેક કારણો સાથે જોડાયેલા હોઈ શકે છે; હું હમણાં ચોક્કસ કારણ જણાવી શકતો નથી.",
     "generic_care": "આરામ કરો, પ્રવાહી લો અને તમારી સ્થિતિ પર નજર રાખો.",
+    "single_symptom_guidance": "એક લક્ષણથી તેનું કારણ જાણી શકાતું નથી. છતાં હું સામાન્ય આગળના પગલાં જણાવી શકું છું.",
+    "fever_guidance": "તાવના ઘણા કારણો હોઈ શકે છે, ઘણી વાર ચેપ. ફક્ત તાવથી તેનું કારણ જાણી શકાતું નથી.",
+    "fever_care": ["શક્ય હોય તો થર્મોમીટરથી તાપમાન માપો; સામાન્ય રીતે 38°C કે તેથી વધુ તાવ ગણાય છે.", "આરામ કરો અને પ્રવાહી પીવો. તાવની દવા ફક્ત તમારા માટે સલામત હોય ત્યારે જ લો; લેબલ અથવા ડૉક્ટરની સલાહ અનુસરો."],
+    "fever_red_flags": "શ્વાસ લેવામાં તકલીફ, ગૂંચવણ, જગાડવામાં મુશ્કેલી, આંચકી, ગંભીર ડિહાઇડ્રેશન અથવા ઝડપથી બગડતી સ્થિતિમાં તાત્કાલિક તબીબી મદદ લો. તાવ સુધરે નહીં અથવા ચિંતા થાય તો ડૉક્ટરનો સંપર્ક કરો.",
+    "fever_follow_up": "તમારું માપેલું તાપમાન કેટલું છે, તાવ કેટલા સમયથી છે અને તમારી ઉંમર કેટલી છે? અન્ય લક્ષણો કે ગંભીર આરોગ્ય સમસ્યા છે?",
     "examples": [
       "મને તાવ અને માથું દુખે છે",
       "ડાયાબિટીસના લક્ષણો શું છે?",
       "મને ખંજવાળ અને ચામડી પર ચકામા છે"
     ],
-    "no_predictions": "શક્ય સ્થિતિઓ બતાવવા માટે ઓછામાં ઓછા બે ઓળખાયેલા લક્ષણો જણાવો.",
+    "no_predictions": "આ સંદેશમાં હું કોઈ લક્ષણ ઓળખી શક્યો નથી. તમે શું અનુભવો છો તે જણાવશો?",
     "emergency_actions": [
       "હમણાં સ્થાનિક ઇમરજન્સી નંબર પર કૉલ કરો.",
       "નજીકની હોસ્પિટલમાં જાઓ.",
       "પોતે વાહન ન ચલાવો."
-    ]
+    ],
+    "title_assessment": "લક્ષણ મૂલ્યાંકન",
+    "possible_causes_title": "ડૉક્ટર સાથે ચર્ચા કરવા યોગ્ય સંભવિત કારણો",
+    "possible_causes_note": "આ ડૉક્ટર સાથે ચર્ચા કરવા માટેની સામાન્ય શક્યતાઓ છે, નિદાન નથી. લક્ષણોના ઘણા વિવિધ કારણો હોઈ શકે છે.",
+    "safe_self_care_title": "વિશ્વસનીય સ્વ-સંભાળની રીતો",
+    "when_doctor_title": "ડૉક્ટરને ક્યારે મળવું (ચેતવણીના સંકેતો)",
+    "medicine_safety_warning": "દવા સલામતી સૂચના: કોઈપણ દવા શરૂ કરવા, બદલવા કે બંધ કરવા પહેલાં હંમેશા લાયસન્સ ધરાવતા ડૉક્ટર કે ફાર્માસિસ્ટની સલાહ લો. તબીબી સલાહ વિના જાતે એન્ટિબાયોટિક્સ ન લેશો.",
+    "symptom_summary": "તમે જણાવેલા લક્ષણો ({symptoms}) ના આધારે અહીં સલામત અને ઉપયોગી માર્ગદર્શન છે. આ સામાન્ય આરોગ્ય માહિતી છે, તબીબી નિદાન નથી.",
+    "general_follow_up": "તમારી સ્થિતિને વધુ સારી રીતે સમજવા માટે:\n• આ લક્ષણો કેટલા દિવસથી છે?\n• શું તમે થર્મોમીટરથી તાવ માપ્યો છે?\n• શું અન્ય કોઈ લક્ષણો છે, જેમ કે શ્વાસ લેવામાં તકલીફ, ચકામા કે ઉલટી?"
   }
 }

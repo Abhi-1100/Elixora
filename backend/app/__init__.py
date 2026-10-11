@@ -1,13 +1,22 @@
 import os
 import csv
+from pathlib import Path
 from datetime import timedelta
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from dotenv import load_dotenv
 
-load_dotenv()
+BACKEND_ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+
+
+def load_backend_environment():
+    """Load backend/.env by its absolute project path, independent of cwd."""
+    return load_dotenv(dotenv_path=BACKEND_ENV_FILE, override=False)
+
+
+load_backend_environment()
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -72,12 +81,24 @@ def create_app():
     if not db_url:
         db_path = os.path.join(os.path.dirname(__file__), "..", "elixora.db")
         db_url = f"sqlite:///{os.path.abspath(db_path)}"
+    jwt_secret_key = os.getenv("JWT_SECRET_KEY", "").strip()
+    secret_key = os.getenv("SECRET_KEY", "").strip()
+    if (
+        len(jwt_secret_key) < 32
+        or len(secret_key) < 32
+        or jwt_secret_key.startswith("replace-with-")
+        or secret_key.startswith("replace-with-")
+        or jwt_secret_key == secret_key
+    ):
+        raise RuntimeError(
+            "Set different, unique JWT_SECRET_KEY and SECRET_KEY values of at least 32 characters."
+        )
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "elixora-jwt-secret-key-2026")
+    app.config["JWT_SECRET_KEY"] = jwt_secret_key
     # Set JWT expiration to 30 days (default is 15 minutes, which caused unexpected 'Token has expired' errors)
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=30)
-    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "elixora-secret-key-2026")
+    app.config["SECRET_KEY"] = secret_key
 
     # Upload folder config
     app.config["UPLOAD_FOLDER"] = os.path.join(
@@ -131,9 +152,26 @@ def create_app():
         res.headers["Access-Control-Allow-Origin"] = "*"
         return res
 
-    # --- Simple health check route ---
+    # --- Root and health check routes ---
+    @app.route("/")
+    def index():
+        return jsonify({
+            "status": "online",
+            "service": "Elixora Health AI Backend API",
+            "version": "1.0",
+            "frontend_url": "http://localhost:3000",
+            "endpoints": {
+                "health": "/api/health",
+                "auth": "/api/auth",
+                "chat": "/api/chat",
+                "reports": "/api/reports",
+                "medicine": "/api/medicine",
+                "emergency": "/api/emergency",
+            },
+        }), 200
+
     @app.route("/api/health")
     def health_check():
-        return {"status": "ok", "message": "Backend is running"}, 200
+        return jsonify({"status": "ok", "message": "Backend is running"}), 200
 
     return app

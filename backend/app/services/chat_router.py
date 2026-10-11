@@ -87,7 +87,7 @@ EMERGENCY_PHRASES = (
     "chest pain", "chest pressure", "can't breathe", "cannot breathe",
     "cannot breath", "shortness of breath", "breathlessness", "unconscious",
     "loss of consciousness", "severe bleeding", "heavy bleeding", "suicidal",
-    "suicide", "stroke", "facial droop", "one-sided weakness", "heart attack",
+    "suicide", "facial droop", "one-sided weakness",
     "seene me dard", "sans nahi aa rahi", "behosh", "bahut khoon", "khudkushi", "lakwa",
     "बेहोश", "सांस नहीं", "सीने में दर्द", "છાતીમાં દુખાવો",
 )
@@ -266,7 +266,24 @@ def _has_disease_cue(message: str) -> bool:
 
 def classify_intent(message: str) -> str:
     text = _clean(message)
-    if any(phrase in text for phrase in EMERGENCY_PHRASES):
+    informational_question = bool(re.match(
+        r"^(?:what|which|how|why|can|could|is|are|does|do|when|explain|define|tell me|symptoms of|signs of|क्या|શુ)\b", text
+    ))
+    current_report = bool(re.search(
+        r"\b(?:i have|i am having|i'm having|i feel|my|someone is|they are|he is|she is)\b", text
+    ))
+    emergency_reported = False
+    for phrase in EMERGENCY_PHRASES:
+        if phrase not in text:
+            continue
+        if informational_question and not current_report:
+            continue
+        escaped = re.escape(phrase)
+        if re.search(rf"\b(?:no|not|without|don't have|do not have|doesn't have|does not have)\s+(?:\w+\s+){{0,2}}{escaped}\b", text):
+            continue
+        emergency_reported = True
+        break
+    if emergency_reported:
         return "emergency"
     if not text:
         return "unknown"

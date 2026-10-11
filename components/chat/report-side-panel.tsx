@@ -47,7 +47,7 @@ interface ReportSidePanelProps {
 
 const FLASK_BASE = process.env.NEXT_PUBLIC_API_URL
   ? process.env.NEXT_PUBLIC_API_URL.replace("/api", "")
-  : "http://localhost:5000";
+  : "http://127.0.0.1:5001";
 
 function getStatusPill(status: string) {
   switch (status) {
@@ -98,6 +98,8 @@ export function ReportSidePanel({
   const [showUnmatched, setShowUnmatched] = useState(false);
   const [copied, setCopied] = useState(false);
   const [imageScale, setImageScale] = useState(1);
+  // `null` uses the PDF viewer's page-fit mode; numbers are zoom percentages.
+  const [pdfZoom, setPdfZoom] = useState<number | null>(null);
 
   const filePreviewUrl = report.file_url
     ? report.file_url.startsWith("http")
@@ -245,10 +247,10 @@ export function ReportSidePanel({
       </div>
 
       {/* ── Main Canvas View Stage ───────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto min-h-0 relative bg-[var(--bg)]">
+      <div className={`flex-1 min-h-0 relative bg-[var(--bg)] ${viewMode === "document" && isPdf ? "overflow-hidden" : "overflow-y-auto"}`}>
         {viewMode === "document" ? (
           /* ── DOCUMENT / IMAGE PREVIEW CANVAS ─────────────────────────── */
-          <div className="w-full h-full flex flex-col relative bg-slate-900/5 dark:bg-black/30">
+          <div className="w-full h-full min-h-0 flex flex-col relative bg-slate-900/5 dark:bg-black/30">
             {/* Image zoom controls bar if previewing an image */}
             {filePreviewUrl && !isPdf && (
               <div className="absolute top-3 right-3 z-20 flex items-center gap-1 p-1 rounded-xl bg-[var(--surface)]/90 backdrop-blur-md border border-[var(--border)] shadow-md text-xs">
@@ -280,11 +282,46 @@ export function ReportSidePanel({
 
             {filePreviewUrl ? (
               isPdf ? (
-                <iframe
-                  src={filePreviewUrl}
-                  title="Lab Report Document PDF"
-                  className="w-full h-full min-h-[500px] border-0"
-                />
+                <>
+                  <div className="z-20 flex shrink-0 items-center justify-end gap-1.5 px-3 py-2 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-sm">
+                    <button
+                      type="button"
+                      onClick={() => setPdfZoom((zoom) => Math.max(50, (zoom ?? 100) - 25))}
+                      disabled={pdfZoom !== null && pdfZoom <= 50}
+                      className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--ink-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Zoom out"
+                      aria-label="Zoom out"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+                    <span className="min-w-11 text-center font-mono text-[11px] text-[var(--ink-muted)]">
+                      {pdfZoom === null ? "Fit" : `${pdfZoom}%`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPdfZoom((zoom) => Math.min(250, (zoom ?? 100) + 25))}
+                      disabled={pdfZoom !== null && pdfZoom >= 250}
+                      className="p-1.5 rounded-lg border border-[var(--border)] text-[var(--ink-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Zoom in"
+                      aria-label="Zoom in"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPdfZoom(null)}
+                      className="ml-1 px-2.5 py-1.5 rounded-lg border border-[var(--border)] text-[11px] font-medium text-[var(--ink-muted)] hover:text-[var(--accent)] hover:border-[var(--accent)]"
+                      title="Fit the complete PDF page in the viewer"
+                    >
+                      Fit to Page
+                    </button>
+                  </div>
+                  <iframe
+                    src={`${filePreviewUrl}#toolbar=0&zoom=${pdfZoom === null ? "page-fit" : pdfZoom}`}
+                    title="Lab Report Document PDF"
+                    className="w-full flex-1 min-h-0 border-0"
+                  />
+                </>
               ) : (
                 <div className="w-full h-full overflow-auto p-6 flex items-center justify-center">
                   <div

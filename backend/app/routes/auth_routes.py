@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from dotenv import load_dotenv
 import bcrypt
 import os
 import re
@@ -11,8 +10,6 @@ from app import db
 from app.models.models import User
 
 auth_bp = Blueprint("auth_bp", __name__)
-
-load_dotenv()
 
 EMAIL_REGEX = r"^[\w\.-]+@[\w\.-]+\.\w+$"
 
