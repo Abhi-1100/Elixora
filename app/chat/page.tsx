@@ -261,7 +261,7 @@ function ChatPageContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("general");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<VoiceLanguage>("en");
+  const [selectedLanguage, setSelectedLanguage] = useState<VoiceLanguage>("auto");
   const [sosNotice, setSosNotice] = useState<{ type: "pending" | "success" | "error"; message: string } | null>(null);
   const [isSosModalOpen, setIsSosModalOpen] = useState(false);
 
@@ -482,6 +482,12 @@ function ChatPageContent() {
       setIsGenerating(false);
       return {
         text: data.text,
+        summary: data.summary,
+        intent: data.intent,
+        lang: data.lang,
+        sections: data.sections,
+        follow_up: data.follow_up,
+        disclaimer: data.disclaimer,
         englishTranslation: data.english_translation,
         translationStatus: data.translation_status,
       };

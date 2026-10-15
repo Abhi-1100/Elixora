@@ -44,14 +44,18 @@ The backend refuses to start if either secret key is missing. Replace the
 placeholders with unique values and never commit `backend/.env` or put provider
 secrets in `NEXT_PUBLIC_*` variables.
 
-Medicine Analyzer forwards authenticated image uploads to the separate Medicine AI FastAPI service. By default it uses `http://127.0.0.1:8000`. To override it, set `MEDICINE_AI_API_URL` in the backend environment; `MEDICINE_AI_TIMEOUT_SECONDS` optionally controls the upstream read timeout (default `120`). Keep these server-side; do not use `NEXT_PUBLIC_*` variables for this service URL.
+Medicine Analyzer accepts JPG/JPEG, PNG, WEBP, BMP, TIFF, GIF, HEIC/HEIF, and AVIF images up to 10 MB. The backend validates and normalizes uploads to JPEG before sending them to the analyzer, including phone photos in HEIC/HEIF format. Pillow and `pillow-heif` are required for this conversion. Analysis also uses the separate Medicine AI FastAPI service by default at `http://127.0.0.1:8000`. To override it, set `MEDICINE_AI_API_URL` in the backend environment; `MEDICINE_AI_TIMEOUT_SECONDS` optionally controls the upstream read timeout (default `120`). Keep these server-side; do not use `NEXT_PUBLIC_*` variables for this service URL.
 
-### SOS email and SMS delivery
+### Optional email and SMS test-alert delivery
 
-Install the official provider SDKs with `pip install -r requirements.txt`.
-Configure either or both providers in `backend/.env`, then restart Flask. The
-backend loads this file from its own directory regardless of the shell's
-current working directory:
+After the user confirms **Send Now**, SOS submits alerts through the saved
+contacts' enabled email and SMS channels, then offers a prepared WhatsApp draft.
+The user must press **Send** in WhatsApp; opening a draft is not delivery.
+**Send test alert** in Settings also uses the configured email/SMS providers.
+These channels require provider credentials and account authorization; provider
+acceptance does not confirm final delivery. Configure either or both providers
+in `backend/.env`, then restart Flask. The backend loads this file from its own
+directory regardless of the shell's current working directory:
 
 ```dotenv
 TWILIO_ACCOUNT_SID=your-account-sid
@@ -62,20 +66,52 @@ SENDGRID_API_KEY=your-sendgrid-api-key
 SENDGRID_FROM_EMAIL=alerts@example.com
 ```
 
-For SMS, create a Twilio account, configure an SMS-capable sender number, and
+### Critical lab report notifications
+
+When analysis marks one or more results **Critical**, Elixora creates a concise
+summary using only those analyzed findings and automatically emails contacts
+whose **Email alerts** setting is enabled. The email includes the test, measured
+value, severity relative to the listed range when determinable, and a general
+urgent-care recommendation. It does not include an invented diagnosis. Critical
+report email never uses Twilio SMS.
+
+Configure a TLS SMTP account in `backend/.env` (SMTP is preferred over SendGrid):
+
+```dotenv
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-account@gmail.com
+SMTP_PASSWORD=your-provider-app-password
+SMTP_FROM=your-account@gmail.com
+```
+
+For Gmail, use an App Password where supported; do not put the account password
+or SMTP credentials in frontend variables. Port 587 uses STARTTLS; port 465 uses
+implicit TLS. If SMTP is not configured, the existing SendGrid email settings
+above can be used as a fallback. An email is reported as accepted only when the
+SMTP server or email provider accepts the request; this does not confirm inbox
+delivery.
+
+The report UI can also prepare a WhatsApp message for saved contacts with
+**Phone alerts** enabled and a valid phone number. WhatsApp opens with a draft;
+the user must review it and press **Send**. The application does not claim to
+send WhatsApp messages automatically.
+
+For SMS on existing SOS and test-alert flows, create a Twilio account, configure an SMS-capable sender number, and
 copy the Account SID and Auth Token from the Twilio Console. Sender and
 destination numbers must use E.164 format (for example, `+14155550123`). A
 10-digit contact number is interpreted as an Indian number (`+91`). Trial
 accounts may only message destination numbers verified in Twilio, and country
 registration/sender rules may apply.
 
-The email integration uses the Twilio SendGrid Email API (`POST
+The SendGrid fallback email integration uses the Twilio SendGrid Email API (`POST
 /v3/mail/send`), authenticated with a SendGrid API key that has Mail Send
 permission. This is separate from the Twilio SMS Account SID and Auth Token:
 Twilio SMS credentials do not enable email sending. Complete SendGrid account
 activation and domain/sender authentication, then use the authenticated sender
 as `SENDGRID_FROM_EMAIL`. SendGrid will reject unverified senders. Keep the API
-key server-side.
+key server-side. When `SMTP_HOST` and `SMTP_FROM` are configured, SMTP is used
+for email instead of SendGrid, including email in SOS and test alerts.
 
 ### Voice transcript translation
 
@@ -89,22 +125,26 @@ language support and reports that English translation is unavailable. English
 transcripts do not require a Translation API request. Machine translation can be
 imperfect and should not replace clinical review.
 
-In Settings → Emergency contacts, save each recipient's email and/or phone
-number and enable the corresponding Email alerts / SMS alerts checkbox.
+In Settings → Emergency contacts, save trusted contacts with a valid email
+and/or phone number and enable the relevant alert settings. Email alerts control
+automatic critical-report email; Phone alerts controls WhatsApp draft eligibility
+and the existing SMS alerts for SOS/test flows.
 **Send test alert** sends a real, clearly marked message to every saved contact
 who opted in; it is authenticated and rate-limited. Do not use a contact unless
 they have agreed to receive alerts.
 
-The SOS request is sent only after the user confirms **Send Now**. The backend
-attempts each opted-in channel independently and reports its configuration,
-recipient-validation, and provider-request result. A provider accepting a
-request does not confirm final SMS delivery or email arrival; delivery receipts
-are not currently tracked. Provider requests have a 10-second timeout, and SOS
-submissions include an idempotency key plus a server-side two-minute throttle
-to reduce duplicate alerts. Alert content contains the user's name, timestamp,
-and optional location only; it excludes free-text notes and medical reports.
-Legacy `SMTP_*` values are not used by the emergency notifier. `TWILIO_FROM`
-is accepted only as a fallback when `TWILIO_PHONE_NUMBER` is unset; prefer
+After the user confirms **Send Now**, the browser requests location permission.
+The backend attempts enabled SMS/email channels for saved contacts. If the
+provider accepts the request, final delivery is still not guaranteed. The browser
+then lets the user pick a saved WhatsApp contact and opens a prefilled SOS draft;
+the user must press **Send** in WhatsApp. If location is denied or unavailable,
+the SOS can continue without a map link.
+The separate Call Emergency Services action confirms before opening `tel:112`
+for India. SOS and test-alert provider submissions are authenticated and
+rate-limited. Provider requests have a 10-second timeout.
+SMTP variables configure TLS email delivery; Twilio variables are for the
+existing SMS channel. `TWILIO_FROM` is accepted only as a fallback when
+`TWILIO_PHONE_NUMBER` is unset; prefer
 `TWILIO_PHONE_NUMBER` and ensure the configured sender is authorized for SMS.
 
 If this database already exists, run `migrations/001_google_signin.sql` once
@@ -174,7 +214,7 @@ Returns: { "user": {..., "profile_complete": true} }
 ## 8. Connecting from your Next.js frontend
 On login/signup, store the `access_token` (e.g., in an httpOnly cookie or secure storage), then send it on every future request:
 ```js
-fetch("http://localhost:5000/api/auth/me", {
+fetch("http://localhost:5001/api/auth/me", {
   headers: { Authorization: `Bearer ${token}` }
 })
 ```

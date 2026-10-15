@@ -754,7 +754,7 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
                   Emergency contacts
                 </h3>
                 <p className="mt-1 text-xs text-[var(--ink-muted)]">
-                  Add family members or trusted people who should receive your SOS alerts.
+                  Critical reports are emailed automatically only to contacts with Email alerts enabled. Phone alerts controls which saved phone contacts are offered for a WhatsApp draft; you review and send that message yourself.
                 </p>
               </div>
 
@@ -826,7 +826,7 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
                   </label>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" checked={contactDraft.notify_sms} onChange={(event) => updateContactDraft("notify_sms", event.target.checked)} className="accent-[var(--accent)]" />
-                    SMS alerts
+                    Phone alerts (SMS / WhatsApp draft)
                   </label>
                 </div>
 
@@ -863,7 +863,7 @@ export function SettingsModal({ isOpen, onClose, initialTab = "general" }: Setti
                   Sends a clearly marked test message to contacts with email or SMS alerts enabled.
                 </p>
                 <p className="text-[10px] text-[var(--ink-muted)]">
-                  Delivery requires SendGrid email and/or Twilio SMS credentials in the backend configuration.
+                  Critical report email uses secure SMTP when configured, or SendGrid as a fallback. Critical reports do not use Twilio SMS. SOS and test alerts retain their existing email/SMS providers. WhatsApp opens a draft that you must send yourself.
                 </p>
               </div>
 

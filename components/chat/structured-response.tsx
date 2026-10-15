@@ -14,6 +14,27 @@ export type StructuredResponse = {
 };
 
 export function StructuredResponse({ response }: { response: StructuredResponse }) {
+  if (response.intent === "symptom_check") {
+    if (response.sections?.length) {
+      return (
+        <div className="space-y-3">
+          {response.summary && <p className="leading-relaxed">{response.summary}</p>}
+          {response.sections.map((section, index) => (
+            <section key={`${section.heading}-${index}`} className="space-y-1.5">
+              <h4 className="font-semibold text-[var(--ink)]">{section.heading}</h4>
+              <ul className="list-disc space-y-1 pl-5 text-[var(--ink-muted)]">
+                {section.items.map((item, itemIndex) => (
+                  <li key={itemIndex}>{typeof item === "string" ? item : item.name}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+          {response.follow_up && <p className="rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-2 text-sm">{response.follow_up}</p>}
+        </div>
+      );
+    }
+    return <p className="whitespace-pre-line leading-relaxed">{response.summary || response.text}</p>;
+  }
   if (!response.sections?.length) return <p className="whitespace-pre-line leading-relaxed">{response.text || response.summary}</p>;
   return (
     <div className="space-y-3">

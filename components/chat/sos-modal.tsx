@@ -1,17 +1,44 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   ArrowRight,
   CheckCircle2,
   Loader2,
+  MapPin,
+  Phone,
   Send,
   Siren,
   X,
 } from "lucide-react";
-import { sendAlert } from "@/lib/api";
 import { useRouter } from "next/navigation";
+import { getContacts, sendAlert } from "@/lib/api";
+
+interface EmergencyContact {
+  id: string;
+  name: string;
+  relation: string;
+  phone?: string | null;
+  email?: string | null;
+  is_primary?: boolean;
+}
+
+interface AlertChannelResult {
+  requested: number;
+  attempted: number;
+  accepted: number;
+  failed: number;
+  invalid: number;
+  configured: boolean;
+  status: string;
+}
+
+interface AlertResult {
+  status: string;
+  message?: string;
+  channel_results?: Partial<Record<"sms" | "email", AlertChannelResult>>;
+}
 
 interface SosModalProps {
   isOpen: boolean;
@@ -21,49 +48,45 @@ interface SosModalProps {
   onAlertStatus?: (notice: { type: "pending" | "success" | "error"; message: string } | null) => void;
 }
 
-interface ChannelResult {
-  requested: number;
-  attempted: number;
-  accepted: number;
-  failed: number;
-  invalid: number;
-  configured: boolean;
-  status: "provider_accepted" | "partial" | "failed" | "not_configured" | "not_requested";
-  errors?: string[];
+type ModalStatus = "countdown" | "loading" | "contacts" | "error";
+
+function normalizeWhatsAppNumber(phone: string | null | undefined): string | null {
+  if (!phone || !/^\+?[\d\s().-]+$/.test(phone.trim())) return null;
+
+  let digits = phone.trim().replace(/\D/g, "");
+  if (phone.trim().startsWith("00")) digits = digits.slice(2);
+  if (digits.length === 10) digits = `91${digits}`;
+  else if (digits.length === 11 && digits.startsWith("0")) digits = `91${digits.slice(1)}`;
+
+  return /^[1-9]\d{6,14}$/.test(digits) ? digits : null;
 }
 
-type AlertChannelResults = Partial<Record<"sms" | "email", ChannelResult>>;
+function getPosition(): Promise<{ latitude: number; longitude: number } | null> {
+  if (typeof navigator === "undefined" || !navigator.geolocation) return Promise.resolve(null);
 
-function getChannelResults(error: unknown): AlertChannelResults | null {
-  if (typeof error !== "object" || error === null || !("response" in error)) return null;
-  const response = error.response;
-  if (typeof response !== "object" || response === null || !("channel_results" in response)) return null;
-  const results = response.channel_results;
-  if (typeof results !== "object" || results === null) return null;
-  return results as AlertChannelResults;
-}
-
-function formatChannelError(error: string) {
-  const [category, detail] = error.split(":", 2);
-  if (category === "missing_configuration") return `Missing ${detail}`;
-  if (category === "invalid_configuration") return `Invalid ${detail}`;
-  if (category === "invalid_recipient") {
-    return detail === "sms" ? "Saved phone number is invalid" : "Saved email address is invalid";
-  }
-  if (category === "provider_error") {
-    if (detail === "sendgrid_http_401") return "SendGrid authentication failed; check SENDGRID_API_KEY";
-    if (detail === "sendgrid_http_403") return "SendGrid rejected the request; check Mail Send permission and sender authentication";
-    if (detail === "twilio_20003") return "Twilio rejected the Account SID/Auth Token; verify both are current in backend/.env and restart Flask";
-    if (detail === "sendgrid_timeout") return "SendGrid request timed out; verify network access and try again";
-    if (detail === "sendgrid_connection_error") return "Could not connect to SendGrid; verify backend internet access";
-    if (detail === "twilio_21211") return "Twilio rejected the destination phone number";
-    if (detail === "twilio_21606") return "Twilio rejected the sender; use an SMS-capable authorized number";
-    if (detail === "twilio_21608") return "Twilio trial accounts can only message verified destination numbers";
-    return `Provider error (${detail})`;
-  }
-  if (category === "provider_rejected") return `Provider rejected the request (${detail})`;
-  if (category === "delivery_failure") return `Provider reports delivery failure (${detail})`;
-  return error;
+  return new Promise((resolve) => {
+    try {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          const { latitude, longitude } = coords;
+          resolve(
+            Number.isFinite(latitude) &&
+              Number.isFinite(longitude) &&
+              latitude >= -90 &&
+              latitude <= 90 &&
+              longitude >= -180 &&
+              longitude <= 180
+              ? { latitude, longitude }
+              : null
+          );
+        },
+        () => resolve(null),
+        { timeout: 8000, maximumAge: 30000 }
+      );
+    } catch {
+      resolve(null);
+    }
+  });
 }
 
 export function SosModal({
@@ -73,37 +96,30 @@ export function SosModal({
   onOpenSettings,
   onAlertStatus,
 }: SosModalProps) {
-  const [secondsLeft, setSecondsLeft] = useState<number>(5);
-  const [status, setStatus] = useState<"countdown" | "sending" | "sent" | "error">("countdown");
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [isTokenExpired, setIsTokenExpired] = useState<boolean>(false);
-  const [isNoContacts, setIsNoContacts] = useState<boolean>(false);
-  const [resultMessage, setResultMessage] = useState<string>("");
-  const [channelResults, setChannelResults] = useState<AlertChannelResults>({});
-
+  const [secondsLeft, setSecondsLeft] = useState(5);
+  const [status, setStatus] = useState<ModalStatus>("countdown");
+  const [contacts, setContacts] = useState<EmergencyContact[]>([]);
+  const [selectedContactId, setSelectedContactId] = useState("");
+  const [message, setMessage] = useState("");
+  const [hasLocation, setHasLocation] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [deliveryMessage, setDeliveryMessage] = useState("");
+  const [deliveryFailed, setDeliveryFailed] = useState(false);
+  const [callConfirmation, setCallConfirmation] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loadingRef = useRef(false);
   const router = useRouter();
-  const coordsRef = useRef<{ latitude?: number; longitude?: number }>({});
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const dispatchingRef = useRef(false);
-  const idempotencyKeyRef = useRef<string | null>(null);
 
-  // Reset and initialize when modal opens
   useEffect(() => {
     if (!isOpen) return;
 
-    idempotencyKeyRef.current =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : null;
-
-    // The countdown is a confirmation window; it never sends on its own.
     timerRef.current = setInterval(() => {
-      setSecondsLeft((prev) => {
-        if (prev <= 1) {
+      setSecondsLeft((previous) => {
+        if (previous <= 1) {
           if (timerRef.current) clearInterval(timerRef.current);
           return 0;
         }
-        return prev - 1;
+        return previous - 1;
       });
     }, 1000);
 
@@ -112,305 +128,418 @@ export function SosModal({
     };
   }, [isOpen]);
 
-  async function dispatchEmergencyAlert() {
-    if (dispatchingRef.current) return;
-    dispatchingRef.current = true;
+  async function prepareSos() {
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     if (timerRef.current) clearInterval(timerRef.current);
-    setStatus("sending");
+    setStatus("loading");
+    setErrorMessage("");
+    setDeliveryMessage("");
+    setDeliveryFailed(false);
 
     try {
-      if (
-        coordsRef.current.latitude === undefined &&
-        coordsRef.current.longitude === undefined &&
-        navigator.geolocation
-      ) {
-        await new Promise<void>((resolve) => {
-          try {
-            navigator.geolocation.getCurrentPosition(
-              (pos) => {
-                coordsRef.current = {
-                  latitude: pos.coords.latitude,
-                  longitude: pos.coords.longitude,
-                };
-                resolve();
-              },
-              () => resolve(),
-              { timeout: 5000, maximumAge: 30000 }
-            );
-          } catch {
-            resolve();
-          }
-        });
+      let deliveryRequestFailed = false;
+      const position = await getPosition();
+      setHasLocation(position !== null);
+      const locationLink = position
+        ? `https://maps.google.com/?q=${position.latitude},${position.longitude}`
+        : null;
+      const alertMessage = locationLink
+        ? `SOS! I need help. My current location is: ${locationLink}. Please contact me immediately.`
+        : "SOS! I need help. Please contact me immediately.";
+      setMessage(alertMessage);
+
+      if (!token) {
+        throw new Error("Please sign in to access your saved emergency contacts.");
       }
-      const payload = {
-        trigger: "sos_button" as const,
-        latitude: coordsRef.current.latitude,
-        longitude: coordsRef.current.longitude,
-      };
-
-      const result = await sendAlert(payload, token, idempotencyKeyRef.current || undefined);
-      setChannelResults((result.channel_results || {}) as AlertChannelResults);
-      const isOk = result.status === "queued" || result.status === "partial";
-      const message =
-        result.message ||
-        `Alert request accepted for ${result.contacts_accepted || 0} contact(s). Delivery is not confirmed.`;
-
-      setStatus(isOk ? "sent" : "error");
-      if (isOk) {
-        setResultMessage(message);
-        onAlertStatus?.({ type: "success", message });
-      } else {
-        setErrorMessage(result.message || "Failed to deliver emergency alert.");
-        onAlertStatus?.({ type: "error", message: result.message || "SOS alert failed" });
+      try {
+        const alert = (await sendAlert(
+          {
+            trigger: "sos_button",
+            latitude: position?.latitude,
+            longitude: position?.longitude,
+          },
+          token
+        )) as AlertResult;
+        const channelSummary = (["sms", "email"] as const)
+          .map((channel) => {
+            const result = alert.channel_results?.[channel];
+            if (!result || result.requested === 0) return null;
+            const label = channel === "sms" ? "SMS" : "Email";
+            if (!result.configured) return `${label} is not configured.`;
+            if (result.accepted > 0) {
+              return `${label}: ${result.accepted} request(s) accepted by the provider; delivery is not confirmed.`;
+            }
+            if (result.invalid > 0) return `${label}: saved recipient details are invalid.`;
+            if (result.failed > 0) return `${label}: provider did not accept the request.`;
+            return `${label}: no request was accepted.`;
+          })
+          .filter(Boolean)
+          .join(" ");
+        const hasAcceptedRequest = Object.values(alert.channel_results || {}).some(
+          (result) => (result?.accepted || 0) > 0
+        );
+        const noEnabledChannels = Object.values(alert.channel_results || {}).every(
+          (result) => !result || result.requested === 0
+        );
+        deliveryRequestFailed =
+          alert.status === "failed" ||
+          alert.status === "partial" ||
+          (!hasAcceptedRequest && !noEnabledChannels);
+        setDeliveryFailed(deliveryRequestFailed);
+        setDeliveryMessage(
+          [
+            alert.message,
+            channelSummary,
+            noEnabledChannels ? "No emergency contact has SMS or Email alerts enabled." : "",
+          ]
+            .filter(Boolean)
+            .join(" ")
+        );
+      } catch (alertError) {
+        deliveryRequestFailed = true;
+        setDeliveryFailed(true);
+        setDeliveryMessage(
+          alertError instanceof Error
+            ? `Email/SMS alert request failed: ${alertError.message}`
+            : "Email/SMS alert request failed. You can still prepare a WhatsApp message."
+        );
       }
-    } catch (err: unknown) {
-      const channelErrors = getChannelResults(err);
-      if (channelErrors) setChannelResults(channelErrors);
-      const msg = err instanceof Error ? err.message : "Failed to send emergency notification.";
-      const expiredFlag =
-        typeof err === "object" &&
-        err !== null &&
-        "isTokenExpired" in err &&
-        err.isTokenExpired === true;
-      const expired =
-        expiredFlag ||
-        msg.toLowerCase().includes("token has expired") ||
-        msg.toLowerCase().includes("session has expired");
-      const noContacts = msg.toLowerCase().includes("contact");
 
-      setIsTokenExpired(expired);
-      setIsNoContacts(noContacts);
+      const result = await getContacts(token);
+      const savedContacts = Array.isArray(result.contacts)
+        ? (result.contacts as EmergencyContact[])
+        : [];
+      setContacts(savedContacts);
+      setSelectedContactId(savedContacts[0]?.id || "");
+      setStatus("contacts");
+      onAlertStatus?.({
+        type: deliveryRequestFailed ? "error" : "pending",
+        message: deliveryRequestFailed
+          ? "Email/SMS notification did not complete. Review the SOS screen; WhatsApp still requires you to press Send."
+          : "SOS prepared. Email/SMS delivery is not guaranteed; WhatsApp requires you to press Send.",
+      });
+    } catch (error) {
       setErrorMessage(
-        expired
-          ? "Your login session has expired. Please sign in again to send alerts."
-          : msg
+        error instanceof Error ? error.message : "Unable to load your saved emergency contacts."
       );
       setStatus("error");
-      onAlertStatus?.({
-        type: "error",
-        message: expired ? "Session expired. Please log in again." : msg,
-      });
     } finally {
-      dispatchingRef.current = false;
+      loadingRef.current = false;
     }
   }
 
-  const handleCancel = () => {
+  function handleCancel() {
     if (timerRef.current) clearInterval(timerRef.current);
-    setStatus("countdown");
     onAlertStatus?.({ type: "pending", message: "SOS alert was cancelled." });
-    setTimeout(() => {
-      onAlertStatus?.(null);
-    }, 3000);
+    setTimeout(() => onAlertStatus?.(null), 3000);
     onClose();
-  };
+  }
 
-  const handleSendNow = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    void dispatchEmergencyAlert();
-  };
+  function openEmergencyCall() {
+    window.location.href = "tel:112";
+  }
+
+  const selectedContact = contacts.find((contact) => contact.id === selectedContactId);
+  const selectedNumber = normalizeWhatsAppNumber(selectedContact?.phone);
+  const whatsappUrl = selectedNumber
+    ? `https://wa.me/${selectedNumber}?text=${encodeURIComponent(message)}`
+    : null;
+  const tokenExpired =
+    errorMessage.toLowerCase().includes("session has expired") ||
+    errorMessage.toLowerCase().includes("token has expired");
 
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="sos-title"
     >
-      <div className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl border border-red-500/30 bg-[#0d131f] p-6 sm:p-7 shadow-2xl shadow-red-500/10 text-center">
-        {/* Ambient Top Glow */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-red-500/30 bg-[#0d131f] p-6 text-center shadow-2xl shadow-red-500/10 sm:p-7">
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-red-500/20 blur-3xl" />
 
-        {/* State 1: 5-Second Countdown */}
         {status === "countdown" && (
           <div className="relative z-10 flex flex-col items-center">
-            {/* Animated Siren Beacon */}
             <div className="relative mb-5 flex items-center justify-center">
               <span className="absolute inline-flex h-20 w-20 animate-ping rounded-full bg-red-500/30 opacity-75" />
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20 border-2 border-red-500/50 shadow-lg shadow-red-500/30">
-                <Siren className="h-8 w-8 text-red-400 animate-pulse" />
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-red-500/50 bg-red-500/20 shadow-lg shadow-red-500/30">
+                <Siren className="h-8 w-8 animate-pulse text-red-400" />
               </div>
             </div>
-
-            <h2 id="sos-title" className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h2 id="sos-title" className="text-xl font-bold tracking-tight text-white sm:text-2xl">
               Emergency SOS Triggered
             </h2>
-
-            <p className="mt-2 text-sm text-red-200/80 max-w-xs leading-relaxed">
-              Review the alert, then choose Send Now to notify your saved contacts.
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-red-200/80">
+              After you confirm, Elixora will ask for your location and let you choose a saved
+              contact.
             </p>
-
-            {/* Countdown Display */}
             <div className="my-5 flex flex-col items-center">
-              <div className="flex items-baseline gap-1 text-6xl font-black font-mono text-red-400">
+              <div className="flex items-baseline gap-1 font-mono text-6xl font-black text-red-400">
                 <span>{secondsLeft}</span>
                 <span className="text-xl font-medium text-red-300/70">s</span>
               </div>
-
-              {/* Countdown progress bar */}
-              <div className="w-56 bg-white/10 h-2 rounded-full overflow-hidden mt-3">
+              <div className="mt-3 h-2 w-56 overflow-hidden rounded-full bg-white/10">
                 <div
                   style={{ width: `${(secondsLeft / 5) * 100}%` }}
-                  className="h-full bg-gradient-to-r from-red-600 to-amber-500 transition-all duration-1000 ease-linear rounded-full"
+                  className="h-full rounded-full bg-gradient-to-r from-red-600 to-amber-500 transition-all duration-1000 ease-linear"
                 />
               </div>
-
-              <p className="mt-3 text-xs text-amber-200/90 font-medium bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-                No message is sent until you confirm with Send Now.
+              <p className="mt-3 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-200/90">
+                Send Now attempts enabled SMS/Email alerts. WhatsApp still needs you to press Send.
               </p>
             </div>
-
-            {/* Action Buttons: Cancel vs Send Now */}
             <div className="mt-4 flex w-full gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
-                className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white font-semibold border border-white/20 transition-all flex items-center justify-center gap-2 text-sm"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-white/15 active:scale-95"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
                 Cancel SOS
               </button>
-
               <button
                 type="button"
-                onClick={handleSendNow}
-                className="flex-1 py-3 px-4 rounded-xl bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2 text-sm"
+                onClick={() => void prepareSos()}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-red-600/30 transition-all hover:bg-red-500 active:scale-95"
               >
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
                 Send Now
               </button>
             </div>
           </div>
         )}
 
-        {/* State 2: Sending */}
-        {status === "sending" && (
+        {status === "loading" && (
           <div className="relative z-10 flex flex-col items-center py-6">
-            <Loader2 className="h-14 w-14 text-red-400 animate-spin mb-4" />
-            <h2 className="text-xl font-bold text-white">Sending Emergency Alert...</h2>
-            <p className="mt-2 text-sm text-[var(--ink-muted)] max-w-xs">
-              Contacting your saved recipients through their enabled email and SMS options...
+            <Loader2 className="mb-4 h-14 w-14 animate-spin text-red-400" />
+            <h2 id="sos-title" className="text-xl font-bold text-white">
+              Preparing your SOS
+            </h2>
+            <p className="mt-2 max-w-xs text-sm text-[var(--ink-muted)]">
+              Allow location access if you want to include a map link. You can continue without it.
             </p>
           </div>
         )}
 
-        {/* State 3: Successfully Sent */}
-        {status === "sent" && (
-          <div className="relative z-10 flex flex-col items-center py-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 border-2 border-emerald-500/40 text-emerald-400 mb-4 shadow-lg shadow-emerald-500/20">
-              <CheckCircle2 className="h-9 w-9" />
+        {status === "contacts" && (
+          <div className="relative z-10 flex flex-col items-center py-2">
+            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/20 text-emerald-400">
+              <CheckCircle2 className="h-8 w-8" />
             </div>
-            <h2 className="text-xl font-bold text-white">Emergency Alert Submitted</h2>
-            <p className="mt-2 text-sm text-emerald-200/90 max-w-xs leading-relaxed">
-              {resultMessage || "Notification providers accepted the request. Delivery is not confirmed."}
-            </p>
-            <div className="mt-3 w-full space-y-1 text-left text-xs text-emerald-100/80">
-              {(["sms", "email"] as const).map((channel) => {
-                const result = channelResults[channel];
-                if (!result) return null;
-                const title = channel === "sms" ? "SMS" : "Email";
-                const detail = result.status === "not_configured"
-                  ? "Not configured"
-                  : result.status === "not_requested"
-                    ? "Not enabled for contacts"
-                    : `${result.accepted}/${result.attempted} provider-accepted, ${result.failed + result.invalid} failed`;
-                const errors = result.errors?.map(formatChannelError).join("; ");
-                return <p key={channel}>{title}: {detail}{errors ? ` — ${errors}` : ""}</p>;
-              })}
+            <h2 id="sos-title" className="text-xl font-bold text-white">
+              Choose an emergency contact
+            </h2>
+            <div
+              className={`mt-3 flex items-center gap-1.5 text-xs ${hasLocation ? "text-emerald-200" : "text-amber-200"}`}
+              role="status"
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              {hasLocation
+                ? "Your current location is included."
+                : "Location unavailable; the message will be sent without a map link."}
             </div>
+            {deliveryMessage && (
+              <p
+                className={`mt-3 w-full rounded-lg border p-2.5 text-left text-xs leading-relaxed ${
+                  deliveryFailed
+                    ? "border-amber-400/30 bg-amber-500/10 text-amber-100"
+                    : "border-emerald-400/20 bg-emerald-500/10 text-emerald-100"
+                }`}
+                role={deliveryFailed ? "alert" : "status"}
+              >
+                {deliveryMessage}
+              </p>
+            )}
 
+            {contacts.length > 0 ? (
+              <div className="mt-4 w-full space-y-2 text-left">
+                {contacts.map((contact) => {
+                  const number = normalizeWhatsAppNumber(contact.phone);
+                  const disabledReason = !contact.phone
+                    ? "No phone number saved"
+                    : !number
+                      ? "Invalid phone number"
+                      : "";
+                  return (
+                    <label
+                      key={contact.id}
+                      className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${
+                        selectedContactId === contact.id
+                          ? "border-red-400/60 bg-red-500/10"
+                          : "border-white/10 bg-white/5"
+                      } ${!number ? "cursor-not-allowed opacity-60" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="sos-contact"
+                        value={contact.id}
+                        checked={selectedContactId === contact.id}
+                        disabled={!number}
+                        onChange={() => setSelectedContactId(contact.id)}
+                        className="mt-0.5 accent-red-500"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                          {contact.name}
+                          {contact.is_primary && (
+                            <span className="text-[10px] font-medium text-emerald-300">Primary</span>
+                          )}
+                        </span>
+                        <span className="mt-0.5 block text-xs text-[var(--ink-muted)]">
+                          {contact.relation}
+                          {contact.phone ? ` · ${contact.phone}` : ""}
+                        </span>
+                        {disabledReason && (
+                          <span className="mt-1 block text-xs text-amber-200">{disabledReason}</span>
+                        )}
+                      </span>
+                    </label>
+                  );
+                })}
+                <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-left">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--ink-muted)]">
+                    Message preview
+                  </p>
+                  <p className="mt-1 break-words text-xs leading-relaxed text-white/90">{message}</p>
+                </div>
+                {whatsappUrl ? (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() =>
+                      onAlertStatus?.({
+                        type: "pending",
+                        message: "WhatsApp opened with your SOS draft. Press Send in WhatsApp to share it.",
+                      })
+                    }
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-500"
+                  >
+                    <Send className="h-4 w-4" />
+                    Open WhatsApp
+                  </a>
+                ) : (
+                  <p className="rounded-lg border border-amber-400/20 bg-amber-500/10 p-2 text-xs text-amber-100" role="alert">
+                    Select a contact with a valid phone number to open WhatsApp.
+                  </p>
+                )}
+                <p className="text-center text-[11px] leading-relaxed text-amber-100/80">
+                  The message is not sent automatically. Review it in WhatsApp and press Send.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 w-full rounded-xl border border-dashed border-white/20 px-4 py-6 text-sm text-[var(--ink-muted)]">
+                No emergency contacts are saved yet.
+                {onOpenSettings && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenSettings("contacts");
+                    }}
+                    className="mt-3 block w-full rounded-lg bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-500"
+                  >
+                    Open Contacts Settings
+                  </button>
+                )}
+              </div>
+            )}
             <button
               type="button"
               onClick={onClose}
-              className="mt-6 w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition"
+              className="mt-4 w-full rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white transition hover:bg-white/15"
             >
               Close
             </button>
           </div>
         )}
 
-        {/* State 4: Error */}
         {status === "error" && (
           <div className="relative z-10 flex flex-col items-center py-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20 border-2 border-red-500/40 text-red-400 mb-4">
+            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-red-500/40 bg-red-500/20 text-red-400">
               <AlertTriangle className="h-8 w-8" />
             </div>
-            <h2 className="text-lg font-bold text-white">Alert Delivery Notice</h2>
-            <p className="mt-2 text-sm text-red-200/90 max-w-xs leading-relaxed">
+            <h2 id="sos-title" className="text-lg font-bold text-white">
+              Unable to prepare SOS
+            </h2>
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-red-200/90" role="alert">
               {errorMessage}
             </p>
-            <div className="mt-3 w-full space-y-1 text-left text-xs text-red-100/80">
-              {(["sms", "email"] as const).map((channel) => {
-                const result = channelResults[channel];
-                if (!result) return null;
-                const title = channel === "sms" ? "SMS" : "Email";
-                const detail = result.status === "not_configured"
-                  ? "Not configured"
-                  : result.status === "not_requested"
-                    ? "Not enabled for contacts"
-                    : `${result.accepted}/${result.attempted} provider-accepted, ${result.failed + result.invalid} failed`;
-                const errors = result.errors?.map(formatChannelError).join("; ");
-                return <p key={channel}>{title}: {detail}{errors ? ` — ${errors}` : ""}</p>;
-              })}
-            </div>
-
             <div className="mt-6 flex w-full flex-col gap-2">
-              {isTokenExpired && (
+              {tokenExpired && (
                 <button
                   type="button"
                   onClick={() => router.push("/login")}
-                  className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition flex items-center justify-center gap-2"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500"
                 >
-                  Log In Again <ArrowRight className="w-4 h-4" />
+                  Log In Again <ArrowRight className="h-4 w-4" />
                 </button>
               )}
-
-              {isNoContacts && onOpenSettings && (
+              {onOpenSettings && errorMessage.toLowerCase().includes("contact") && (
                 <button
                   type="button"
                   onClick={() => {
                     onClose();
                     onOpenSettings("contacts");
                   }}
-                  className="w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-sm transition"
+                  className="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-500"
                 >
                   Open Contacts Settings
                 </button>
               )}
-
-              <div className="flex w-full gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white text-sm transition"
-                >
-                  Dismiss
-                </button>
-                {Object.values(channelResults).some((channel) => channel?.configured) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsTokenExpired(false);
-                      setIsNoContacts(false);
-                      setErrorMessage("");
-                      setChannelResults({});
-                      idempotencyKeyRef.current =
-                        typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-                          ? crypto.randomUUID()
-                          : null;
-                      void dispatchEmergencyAlert();
-                    }}
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium text-sm transition"
-                  >
-                    Try Again
-                  </button>
-                )}
-              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full rounded-xl bg-white/10 px-4 py-2.5 text-sm text-white transition hover:bg-white/15"
+              >
+                Dismiss
+              </button>
             </div>
           </div>
         )}
+
+        <div className="relative z-10 mt-4 border-t border-white/10 pt-4">
+          {callConfirmation ? (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
+              <p className="text-sm font-semibold text-white">
+                Call emergency services in India at 112?
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-amber-100/80">
+                This will open your device&apos;s phone app. Call charges or network availability may
+                apply.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCallConfirmation(false)}
+                  className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-xs font-medium text-white hover:bg-white/15"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={openEmergencyCall}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-bold text-white hover:bg-red-500"
+                >
+                  <Phone className="h-3.5 w-3.5" />
+                  Call 112
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setCallConfirmation(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-100 transition hover:bg-red-500/20"
+            >
+              <Phone className="h-4 w-4" />
+              Call Emergency Services in India (112)
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

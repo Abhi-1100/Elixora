@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getReport } from "@/lib/api";
 import { Navbar } from "@/components/ui/navbar";
+import { CriticalReportNotification, EmergencyNotificationStatus } from "@/components/chat/critical-report-notification";
 import {
   ArrowLeft,
   AlertTriangle,
@@ -33,6 +34,7 @@ interface ReportDetail {
     status: string;
   }>;
   unmatched_lines?: string[];
+  emergency_notification?: EmergencyNotificationStatus | null;
   [key: string]: any;
 }
 
@@ -372,6 +374,12 @@ export default function ReportDetailPage() {
                     icon={<CheckCircle2 className="w-5 h-5" />}
                   />
                 </div>
+
+                <CriticalReportNotification
+                  results={report.results || []}
+                  notification={report.emergency_notification}
+                  reportId={reportId}
+                />
 
                 <div className="rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--surface)]">
                   <div className="px-5 py-3 border-b border-[var(--border)] bg-[var(--surface-muted)]">

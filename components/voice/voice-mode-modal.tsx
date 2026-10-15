@@ -1,261 +1,542 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Mic, MicOff, PhoneOff, X, Volume2 } from "lucide-react";
 import { ParticleOrbCanvas } from "@/components/landing/particle-orb-canvas";
 import { GradientWaves } from "@/components/ui/gradient-waves";
-import { Mic, X, Sparkles, Send } from "lucide-react";
-import { useVoiceInput, type VoiceLanguage } from "@/hooks/useVoiceInput";
-import { useVoiceOutput } from "@/hooks/useVoiceOutput";
+import type { VoiceLanguage } from "@/hooks/useVoiceInput";
+import { useAuth } from "@/context/AuthContext";
 
 type VoiceChatReply = {
   text: string;
+  summary?: string;
+  intent?: string;
+  lang?: string;
+  sections?: { heading?: string; items: (string | { name: string; confidence?: number })[] }[];
+  follow_up?: string;
+  disclaimer?: string;
   englishTranslation?: string;
   translationStatus?: string;
 };
+type VoiceState = "idle" | "listening" | "thinking" | "speaking" | "error";
+type RecognitionAlternative = { transcript: string; confidence?: number };
+type RecognitionResult = ArrayLike<RecognitionAlternative> & { isFinal: boolean };
+type RecognitionEvent = { resultIndex: number; results: ArrayLike<RecognitionResult> };
+type RecognitionError = { error: string };
+type ContinuousRecognition = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onstart: (() => void) | null;
+  onresult: ((event: RecognitionEvent) => void) | null;
+  onerror: ((event: RecognitionError) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+};
+type RecognitionConstructor = new () => ContinuousRecognition;
 
 interface VoiceModeModalProps {
   isOpen: boolean;
   onClose: () => void;
   language: VoiceLanguage;
   onLanguageChange: (language: VoiceLanguage) => void;
-  onSendTranscript?: (
-    transcript: string,
-    translateToEnglish: boolean,
-  ) => string | VoiceChatReply | null | undefined | Promise<string | VoiceChatReply | null | undefined>;
+  onSendTranscript: (transcript: string, translateToEnglish: boolean) => Promise<string | VoiceChatReply | null | undefined> | string | VoiceChatReply | null | undefined;
+}
+
+function recognitionLocale(language: VoiceLanguage) {
+  if (language === "hi") return "hi-IN";
+  if (language === "gu") return "gu-IN";
+  if (language === "en") return "en-IN";
+  const browserLanguage = typeof navigator === "undefined" ? "en-US" : navigator.language;
+  if (browserLanguage.toLowerCase().startsWith("hi")) return "hi-IN";
+  if (browserLanguage.toLowerCase().startsWith("gu")) return "gu-IN";
+  return browserLanguage || "en-US";
 }
 
 function cleanForSpeech(text: string) {
-  return text
-    .replace(/```[\s\S]*?```/g, "")
+  const cleaned = text
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[*_~`>#]/g, "")
     .replace(/^\s*[-•]\s*/gm, "")
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
-    .replace(/AI guidance only\. Not a medical diagnosis\. Consult a physician for emergencies\.?/gi, "")
     .replace(/\s+/g, " ")
     .trim();
+  const seen = new Set<string>();
+  return cleaned.split(/(?<=[.!?।])\s+/u).filter((sentence) => {
+    const key = normalizedSpeech(sentence);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).join(" ");
 }
 
-export function VoiceModeModal({
-  isOpen,
-  onClose,
-  language,
-  onLanguageChange,
-  onSendTranscript,
-}: VoiceModeModalProps) {
-  const [statusText, setStatusText] = useState("Speak with Elixora");
-  const [currentSpeech, setCurrentSpeech] = useState<string>("");
-  const [spokenTranscript, setSpokenTranscript] = useState<string>("");
-  const { isSpeaking, speak, stopSpeaking } = useVoiceOutput();
-
-  const onTranscript = useCallback(async (transcript: string) => {
-    if (transcript) {
-      setSpokenTranscript(transcript);
-      setCurrentSpeech(`You: ${transcript}`);
-      setStatusText("Press Enter ↵ to send to chatbox");
+function splitSpeechIntoChunks(text: string, maxLength = 240) {
+  const sentences = text.split(/(?<=[.!?।])\s+/u).filter(Boolean);
+  const chunks: string[] = [];
+  let current = "";
+  for (const sentence of sentences) {
+    if (sentence.length <= maxLength) {
+      const combined = current ? `${current} ${sentence}` : sentence;
+      if (combined.length <= maxLength) current = combined;
+      else {
+        if (current) chunks.push(current);
+        current = sentence;
+      }
+      continue;
     }
+    if (current) { chunks.push(current); current = ""; }
+    let fragment = "";
+    for (const word of sentence.split(/\s+/)) {
+      const combined = fragment ? `${fragment} ${word}` : word;
+      if (combined.length > maxLength && fragment) {
+        chunks.push(fragment);
+        fragment = word;
+      } else fragment = combined;
+    }
+    if (fragment) current = fragment;
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+function normalizedSpeech(text: string) {
+  return text.toLocaleLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+}
+
+function isLikelyEcho(text: string, assistantText: string) {
+  const candidate = normalizedSpeech(text);
+  const answer = normalizedSpeech(assistantText);
+  if (candidate.length < 4 || !answer) return false;
+  if (answer.includes(candidate)) return true;
+  // Web Speech often splits playback into slightly different chunks. Treat a
+  // short phrase made mostly of words in the current reply as speaker echo.
+  const candidateWords = candidate.split(" ").filter(Boolean);
+  const answerWords = new Set(answer.split(" ").filter(Boolean));
+  if (candidateWords.length > 1 && candidateWords.length <= 12) {
+    const matching = candidateWords.filter((word) => answerWords.has(word)).length;
+    return matching / candidateWords.length >= 0.8;
+  }
+  return false;
+}
+
+function speechTextForReply(result: string | VoiceChatReply | null | undefined) {
+  if (typeof result === "string") return result;
+  if (!result) return "I couldn't prepare a response. Please try again.";
+  if (result.intent === "unknown" && result.summary) return result.summary;
+  const parts: string[] = [];
+  if (result.summary) parts.push(result.summary);
+  const sections = result.sections || [];
+  for (const section of sections) {
+    for (const item of section.items) parts.push(typeof item === "string" ? item : item.name);
+  }
+  if (result.follow_up) parts.push(result.follow_up);
+  // The chat panel still shows Elixora's medical disclaimer. Spoken replies
+  // keep the conversation natural and avoid repeating generic boilerplate.
+  return parts.join(" ") || result.text || "I couldn't prepare a response. Please try again.";
+}
+
+export function VoiceModeModal({ isOpen, onClose, language, onLanguageChange, onSendTranscript }: VoiceModeModalProps) {
+  const { user } = useAuth();
+  const [state, setState] = useState<VoiceState>("idle");
+  const [muted, setMuted] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [interim, setInterim] = useState("");
+  const [reply, setReply] = useState("");
+  const [error, setError] = useState("");
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [preferredVoiceURI, setPreferredVoiceURI] = useState("");
+  const languageRef = useRef(language);
+  const recognitionRef = useRef<ContinuousRecognition | null>(null);
+  const recognitionConstructorRef = useRef<RecognitionConstructor | null>(null);
+  const startRecognitionRef = useRef<() => void>(() => undefined);
+  const echoGraceTimerRef = useRef<number | null>(null);
+  const speechSessionRef = useRef(0);
+  const restartAfterLanguageChangeRef = useRef(false);
+  const activeRef = useRef(false);
+  const mutedRef = useRef(false);
+  const callbackRef = useRef(onSendTranscript);
+  const assistantTextRef = useRef("");
+  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const speakingRef = useRef(false);
+  const interruptedRef = useRef(false);
+  const processingRef = useRef(false);
+  const queueRef = useRef<string[]>([]);
+  const lastTranscriptRef = useRef({ text: "", at: 0 });
+
+  useEffect(() => { callbackRef.current = onSendTranscript; }, [onSendTranscript]);
+  useEffect(() => { languageRef.current = language; }, [language]);
+
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const refreshVoices = () => setAvailableVoices(window.speechSynthesis.getVoices());
+    refreshVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", refreshVoices);
+    try {
+      const saved = JSON.parse(localStorage.getItem("elixora_settings") || "{}");
+      setPreferredVoiceURI(typeof saved.voiceName === "string" ? saved.voiceName : "");
+    } catch { setPreferredVoiceURI(""); }
+    return () => window.speechSynthesis.removeEventListener("voiceschanged", refreshVoices);
+  }, [isOpen]);
+
+  const stopSpeech = useCallback((preserveEchoTranscript = false) => {
+    speechSessionRef.current += 1;
+    speechRef.current = null;
+    speakingRef.current = false;
+    if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (echoGraceTimerRef.current !== null) window.clearTimeout(echoGraceTimerRef.current);
+    echoGraceTimerRef.current = preserveEchoTranscript
+      ? null
+      : window.setTimeout(() => { assistantTextRef.current = ""; }, 1500);
   }, []);
 
-  const onInterim = useCallback((transcript: string) => {
-    if (transcript) {
-      setSpokenTranscript(transcript);
-      setCurrentSpeech(`You: ${transcript}…`);
-      setStatusText("Listening… press Enter ↵ to send to chatbox");
+  const chooseGentleVoice = useCallback((voices: SpeechSynthesisVoice[], locale: string) => {
+    const matching = voices.filter((voice) => voice.lang.toLowerCase().startsWith(locale.slice(0, 2)));
+    const preferred = matching.find((voice) => voice.voiceURI === preferredVoiceURI);
+    if (preferred) return preferred;
+    const naturalHints = /natural|enhanced|premium|neural|samantha|ava|allison|karen|susan|zira|aria|jenny|female/i;
+    return matching.find((voice) => naturalHints.test(`${voice.name} ${voice.voiceURI}`))
+      ?? matching.find((voice) => voice.lang.toLowerCase() === locale.toLowerCase())
+      ?? matching.find((voice) => voice.default)
+      ?? matching[0]
+      ?? null;
+  }, [preferredVoiceURI]);
+
+  const speakReply = useCallback((text: string, lang = "en") => {
+    const spoken = cleanForSpeech(text);
+    if (!spoken || typeof window === "undefined" || !("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+      setState("listening");
+      return;
     }
-  }, []);
+    stopSpeech(true);
+    const chunks = splitSpeechIntoChunks(spoken);
+    const session = ++speechSessionRef.current;
+    const detectedLanguage = lang === "auto"
+      ? /[\u0a80-\u0aff]/.test(spoken) ? "gu" : /[\u0900-\u097f]/.test(spoken) ? "hi" : "en"
+      : lang;
+    const locale = detectedLanguage === "hi" ? "hi-IN" : detectedLanguage === "gu" ? "gu-IN" : "en-IN";
+    const voices = availableVoices.length ? availableVoices : window.speechSynthesis.getVoices();
+    const voice = chooseGentleVoice(voices, locale);
+    let rate = 0.88;
+    try {
+      const settings = JSON.parse(localStorage.getItem("elixora_settings") || "{}");
+      if (settings.voiceSpeed === "0.8x Slower") rate = 0.8;
+      else if (settings.voiceSpeed === "1.2x Faster") rate = 0.95;
+      else if (settings.voiceSpeed === "1.5x Rapid") rate = 1;
+    } catch { /* Use the steady default speaking rate. */ }
+    speakingRef.current = true;
+    setState("speaking");
+    const speakChunk = (index: number) => {
+      if (session !== speechSessionRef.current || !activeRef.current || mutedRef.current) return;
+      const utterance = new SpeechSynthesisUtterance(chunks[index]);
+      utterance.lang = locale;
+      utterance.voice = voice;
+      utterance.rate = rate;
+      utterance.pitch = 1.04;
+      utterance.volume = 0.9;
+      utterance.onstart = () => {
+        if (session === speechSessionRef.current && speechRef.current === utterance) setState("speaking");
+      };
+      utterance.onend = () => {
+        if (session !== speechSessionRef.current || speechRef.current !== utterance) return;
+        speechRef.current = null;
+        if (index + 1 < chunks.length) {
+          window.setTimeout(() => speakChunk(index + 1), 80);
+          return;
+        }
+        speakingRef.current = false;
+        if (echoGraceTimerRef.current !== null) window.clearTimeout(echoGraceTimerRef.current);
+        echoGraceTimerRef.current = window.setTimeout(() => { assistantTextRef.current = ""; }, 1500);
+        if (activeRef.current) setState("listening");
+      };
+      utterance.onerror = (event) => {
+        if (session !== speechSessionRef.current || speechRef.current !== utterance) return;
+        speechRef.current = null;
+        speakingRef.current = false;
+        if (echoGraceTimerRef.current !== null) window.clearTimeout(echoGraceTimerRef.current);
+        echoGraceTimerRef.current = window.setTimeout(() => { assistantTextRef.current = ""; }, 1500);
+        if (activeRef.current) {
+          setError(`Spoken playback stopped (${event.error}). The reply is shown on screen; continue speaking when ready.`);
+          setState("listening");
+        }
+      };
+      speechRef.current = utterance;
+      try {
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        speechRef.current = null;
+        speakingRef.current = false;
+        if (activeRef.current) {
+          setError("Spoken playback could not start in this browser. The reply is shown on screen; continue speaking when ready.");
+          setState("listening");
+        }
+      }
+    };
+    speakChunk(0);
+  }, [availableVoices, chooseGentleVoice, stopSpeech]);
 
-  const { isListening, interimTranscript, error, startListening, stopListening } =
-    useVoiceInput(onTranscript, onInterim);
+  const processQueue = useCallback(async () => {
+    if (processingRef.current || !activeRef.current) return;
+    processingRef.current = true;
+    while (queueRef.current.length > 0 && activeRef.current) {
+      const text = queueRef.current.shift();
+      if (!text) continue;
+      setTranscript(text);
+      setInterim("");
+      setReply("");
+      setError("");
+      setState("thinking");
+      try {
+        const result = await callbackRef.current(text, true);
+        if (!activeRef.current) break;
+        const firstName = user?.name?.trim().split(/\s+/)[0];
+        const responseLanguage = typeof result === "object" && result?.lang ? result.lang : languageRef.current;
+        const isGreeting = typeof result === "object" && result?.intent === "greeting";
+        const personalizedGreeting = isGreeting
+          ? responseLanguage === "hi" ? `नमस्ते${firstName ? ` ${firstName}` : ""}, मैं आपकी कैसे मदद कर सकता हूँ?`
+            : responseLanguage === "gu" ? `નમસ્તે${firstName ? ` ${firstName}` : ""}, હું તમારી કેવી રીતે મદદ કરી શકું?`
+              : `Hello${firstName ? ` ${firstName}` : ""}, how can I help you?`
+          : "";
+        const answer = personalizedGreeting || speechTextForReply(result);
+        assistantTextRef.current = cleanForSpeech(answer);
+        setReply(answer);
+        if (queueRef.current.length === 0) {
+          const detectedLanguage = typeof result === "object" && result?.lang ? result.lang : languageRef.current;
+          speakReply(answer, detectedLanguage);
+        }
+      } catch (cause) {
+        if (activeRef.current) {
+          setError(cause instanceof Error ? cause.message : "The response could not be prepared. Please try again.");
+          setState("error");
+        }
+      }
+    }
+    processingRef.current = false;
+    if (activeRef.current && queueRef.current.length === 0 && !speakingRef.current) setState("listening");
+  }, [speakReply, user?.name]);
 
-  const handleSendToChatbox = useCallback(async () => {
-    const textToSend = (spokenTranscript || currentSpeech || "")
-      .replace(/^You:\s*/i, "")
-      .replace(/[….]+$/g, "")
-      .trim();
-    if (!textToSend) return;
-    stopListening();
-    stopSpeaking();
-    onClose();
-    await onSendTranscript?.(textToSend, true);
-  }, [spokenTranscript, currentSpeech, stopListening, stopSpeaking, onClose, onSendTranscript]);
+  const submitTranscript = useCallback((rawText: string) => {
+    const text = rawText.trim();
+    const now = Date.now();
+    if (!text || !activeRef.current) return;
+    const normalized = normalizedSpeech(text);
+    if (normalized === lastTranscriptRef.current.text && now - lastTranscriptRef.current.at < 3000) return;
+    lastTranscriptRef.current = { text: normalized, at: now };
+    if (isLikelyEcho(text, assistantTextRef.current)) return;
+    interruptedRef.current = false;
+    if (speakingRef.current) {
+      stopSpeech();
+      setState("listening");
+    }
+    queueRef.current.push(text);
+    void processQueue();
+  }, [processQueue, stopSpeech]);
+
+  const startRecognition = useCallback(() => {
+    if (!activeRef.current || mutedRef.current || recognitionRef.current || !recognitionConstructorRef.current) return;
+    try {
+      const recognition = new recognitionConstructorRef.current();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 3;
+      recognition.lang = recognitionLocale(languageRef.current);
+      recognition.onstart = () => {
+        if (!activeRef.current) return;
+        if (processingRef.current) setState("thinking");
+        else if (speakingRef.current) setState("speaking");
+        else setState("listening");
+      };
+      recognition.onresult = (event) => {
+        let partial = "";
+        const committed: string[] = [];
+        for (let index = event.resultIndex; index < event.results.length; index += 1) {
+          const result = event.results[index];
+          const alternatives = Array.from({ length: result.length }, (_, alternativeIndex) => result[alternativeIndex])
+            .filter((alternative) => alternative?.transcript?.trim());
+          const bestAlternative = alternatives.reduce<RecognitionAlternative | undefined>((best, alternative) => {
+            if (!best) return alternative;
+            return (alternative.confidence ?? -1) > (best.confidence ?? -1) ? alternative : best;
+          }, undefined);
+          const text = bestAlternative?.transcript?.trim();
+          if (!text) continue;
+          if (result.isFinal) committed.push(text);
+          else partial += `${partial ? " " : ""}${text}`;
+        }
+        if (partial) {
+          setInterim(partial);
+          if (speakingRef.current && !isLikelyEcho(partial, assistantTextRef.current)) {
+            interruptedRef.current = true;
+            stopSpeech();
+            setState("listening");
+          }
+        }
+        for (const text of committed) submitTranscript(text);
+      };
+      recognition.onerror = (event) => {
+        if (!activeRef.current || event.error === "aborted" || event.error === "no-speech") return;
+        const messages: Record<string, string> = {
+          "not-allowed": "Microphone permission was denied. Allow microphone access in your browser settings, then try again.",
+          "service-not-allowed": "This browser's speech recognition service is unavailable. Try Chrome or Edge, or use typed chat.",
+          "audio-capture": "No microphone was found. Connect or enable a microphone and try again.",
+          network: "Browser speech recognition needs a working network connection. Check your connection and retry.",
+        };
+        activeRef.current = false;
+        setError(messages[event.error] || "Browser speech recognition stopped unexpectedly. Try restarting Voice Mode.");
+        setState("error");
+      };
+      recognition.onend = () => {
+        if (recognitionRef.current === recognition) recognitionRef.current = null;
+        if (!activeRef.current || mutedRef.current) return;
+        if (restartAfterLanguageChangeRef.current) {
+          restartAfterLanguageChangeRef.current = false;
+          startRecognitionRef.current();
+          return;
+        }
+        setError("Speech recognition paused. Tap Try again to resume the conversation.");
+        setState("error");
+      };
+      recognitionRef.current = recognition;
+      recognition.start();
+      setError("");
+    } catch (cause) {
+      recognitionRef.current = null;
+      const message = cause instanceof Error && /not.?allowed|denied/i.test(cause.message)
+        ? "Microphone permission was denied. Allow microphone access in your browser settings, then try again."
+        : "Voice recognition could not start. Check microphone access and try again.";
+      setError(message);
+      setState("error");
+    }
+  }, [stopSpeech, submitTranscript]);
+
+  useEffect(() => { startRecognitionRef.current = startRecognition; }, [startRecognition]);
+
+  const stopCall = useCallback(() => {
+    activeRef.current = false;
+    if (echoGraceTimerRef.current !== null) window.clearTimeout(echoGraceTimerRef.current);
+    echoGraceTimerRef.current = null;
+    restartAfterLanguageChangeRef.current = false;
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    if (recognition) {
+      recognition.onend = null;
+      recognition.onresult = null;
+      recognition.onerror = null;
+      try { recognition.abort(); } catch { /* Browser may already have ended recognition. */ }
+    }
+    stopSpeech();
+    queueRef.current = [];
+    processingRef.current = false;
+    interruptedRef.current = false;
+    assistantTextRef.current = "";
+    setInterim("");
+    setMuted(false);
+    mutedRef.current = false;
+  }, [stopSpeech]);
+
+  const startCall = useCallback(() => {
+    if (typeof window === "undefined") return;
+    stopCall();
+    const NativeRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!NativeRecognition) {
+      setError("Speech recognition is not supported in this browser. Try Chrome or Edge, or continue with typed chat.");
+      setState("error");
+      return;
+    }
+    if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+      setError("This browser cannot speak replies. Try a browser with speech synthesis, or continue with typed chat.");
+      setState("error");
+      return;
+    }
+    activeRef.current = true;
+    recognitionConstructorRef.current = NativeRecognition as unknown as RecognitionConstructor;
+    setTranscript("");
+    setReply("");
+    setError("");
+    setState("listening");
+    startRecognitionRef.current();
+  }, [stopCall]);
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSendToChatbox();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleSendToChatbox]);
+    return () => stopCall();
+  }, [isOpen, stopCall]);
 
   useEffect(() => {
-    if (isOpen) {
-      setSpokenTranscript("");
-      setCurrentSpeech("");
-      setStatusText("Speak with Elixora");
-      stopListening();
-      void startListening(language);
+    if (!activeRef.current || mutedRef.current) return;
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+    restartAfterLanguageChangeRef.current = true;
+    recognition.stop();
+  }, [language]);
+
+  const toggleMute = () => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setMuted(next);
+    if (next) {
+      recognitionRef.current?.stop();
+      if (!speakingRef.current) setState("listening");
       return;
     }
-    stopListening();
-    stopSpeaking();
-  }, [isOpen, language, startListening, stopListening, stopSpeaking]);
-
-  const handleClose = () => {
-    stopListening();
-    stopSpeaking();
-    onClose();
+    startRecognitionRef.current();
   };
 
-  const handleMicClick = () => {
-    if (isListening) {
-      stopListening();
-      setStatusText("Speak with Elixora");
-      return;
-    }
-    stopSpeaking();
-    setStatusText("Listening to your voice...");
-    void startListening(language);
-  };
-
+  const endCall = () => { stopCall(); setState("idle"); onClose(); };
   if (!isOpen) return null;
+
+  const status = state === "idle" ? "Ready when you are"
+    : state === "thinking" ? "Preparing a safe response…"
+      : state === "speaking" ? "Elixora is speaking · speak to interrupt"
+        : state === "error" ? "Voice mode needs attention"
+          : muted ? "Microphone muted" : "Listening · speak naturally";
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[#030611] text-white p-6 select-none overflow-hidden font-sans">
-        {/* Animated GradientWaves WebGL Background Effect */}
-        <div className="absolute inset-0 pointer-events-none z-0 opacity-80">
-          <GradientWaves
-              horizonColor="#96beff"
-              waveColor="#96beff"
-              crestColor="#ffffff"
-            speed={0.3}
-            amplitude={1.55}
-            waveScale={0.8}
-            waveRatio={0.55}
-            swell={35}
-            turbulence={23.5}
-            tilt={1.11}
-            zoom={0.75}
-            height={3.1}
-            fogDepth={15}
-            detail="medium"
-            brightness={0.95}
-            opacity={1.0}
-            mouseInteraction={true}
-            parallaxStrength={0.5}
-            grain={true}
-            grainIntensity={0.05}
-          />
+      <div className="fixed inset-0 z-[80] flex flex-col items-center justify-between overflow-hidden bg-[#030611] p-5 text-white sm:p-8">
+        <div className="pointer-events-none absolute inset-0 z-0 opacity-70"><GradientWaves horizonColor="#96beff" waveColor="#96beff" crestColor="#ffffff" speed={0.3} amplitude={1.55} waveScale={0.8} waveRatio={0.55} swell={35} turbulence={23.5} tilt={1.11} zoom={0.75} height={3.1} fogDepth={15} detail="medium" brightness={0.95} opacity={1} mouseInteraction={false} parallaxStrength={0} grain grainIntensity={0.05} /></div>
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-96 w-96 rounded-full bg-blue-600/25 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-20 -right-20 h-96 w-96 rounded-full bg-cyan-500/20 blur-[120px]" />
+        <div className="relative z-10 flex w-full max-w-5xl justify-between">
+          <div><p className="text-sm font-medium tracking-wide text-white/90">ELIXORA · VOICE MODE</p><p className="mt-1 text-xs text-white/55">Health information, with clinician-first safety</p></div>
+          <button onClick={endCall} aria-label="Close Voice Mode" className="rounded-full border border-white/15 bg-white/10 p-2.5 text-white/80 hover:bg-white/20"><X className="h-5 w-5" /></button>
         </div>
-        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-blue-600/30 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-cyan-500/25 rounded-full blur-[120px] pointer-events-none" />
-
-        {/* Top Close Button */}
-        <div className="relative z-20 w-full flex justify-end">
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-lg"
-            title="Close Voice Mode"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* 3. Main Center Area: Title & 3D Particle Orb */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center max-w-3xl text-center space-y-6">
-          {/* Main Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl sm:text-5xl font-medium tracking-tight text-zinc-300 max-w-2xl leading-[1.18]"
-          >
-            Talk to Elixora AI – <span className="text-white">Smarter, Faster, Better</span>
-          </motion.h1>
-
-          {/* 3D Audio Particle Orb */}
-          <div className="relative flex justify-center items-center py-2">
-            <ParticleOrbCanvas
-              size={360}
-              isListening={isListening}
-              onMicClick={handleMicClick}
-            />
+        <main className="relative z-10 flex w-full flex-1 flex-col items-center justify-center gap-5 text-center">
+          <h1 className="text-3xl font-medium tracking-tight text-zinc-200 sm:text-5xl">How can I help you today?</h1>
+          <p className="flex items-center gap-2 text-sm text-cyan-100/80"><span className={`h-2 w-2 rounded-full ${state === "error" ? "bg-rose-400" : state === "speaking" ? "bg-cyan-300" : "bg-emerald-400 animate-pulse"}`} />{status}</p>
+          <div className="relative flex h-[260px] w-full max-w-sm items-center justify-center sm:h-[320px]">
+            <ParticleOrbCanvas size={300} isListening={state === "listening" && !muted} onMicClick={state === "idle" || state === "error" ? startCall : toggleMute} />
+            <div className="pointer-events-none absolute bottom-2 flex h-10 items-center justify-center gap-1.5" aria-label={state === "speaking" ? "Speaking waveform" : "Listening waveform"}>
+              {Array.from({ length: 25 }, (_, index) => <motion.span key={index} className="w-1 rounded-full bg-cyan-200/90" animate={{ height: state === "listening" && !muted ? [5, 8 + ((index * 7) % 18), 6] : state === "speaking" ? [6, 10 + ((index * 11) % 25), 5] : 3, opacity: state === "error" ? 0.35 : 1 }} transition={{ duration: 0.45 + (index % 4) * 0.08, repeat: state === "listening" || state === "speaking" ? Infinity : 0, delay: index * 0.015 }} />)}
+            </div>
           </div>
-
-          {/* Live Transcription / Response Line */}
-          {(currentSpeech || interimTranscript || error || spokenTranscript) && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-black/60 border border-cyan-500/40 px-6 py-4 rounded-2xl max-w-lg text-xs sm:text-sm text-cyan-200 shadow-2xl backdrop-blur-md flex flex-col items-center gap-3"
-            >
-              <p className="leading-relaxed font-mono flex items-center justify-center gap-2 text-center">
-                <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
-                <span className="whitespace-pre-wrap">{error || currentSpeech || interimTranscript || spokenTranscript}</span>
-              </p>
-
-              {(spokenTranscript || interimTranscript) && !error && (
-                <button
-                  type="button"
-                  onClick={handleSendToChatbox}
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium text-xs px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  <Send className="w-3.5 h-3.5 text-white" />
-                  <span>Send to Chatbox</span>
-                  <kbd className="px-1.5 py-0.5 text-[10px] bg-black/40 border border-white/20 rounded font-mono">Enter ↵</kbd>
-                </button>
-              )}
-            </motion.div>
-          )}
-
-          {/* 4. Bottom Action Pill (Matches Reference Image 1:1) */}
-          <div className="pt-2">
-            <label className="mb-3 flex items-center justify-center gap-2 text-xs text-zinc-300">
-              <span>Speech and reply language</span>
-              <select
-                value={language}
-                onChange={(event) => {
-                  const value = event.currentTarget.value;
-                  if (value === "auto" || value === "en" || value === "hi" || value === "gu") {
-                    onLanguageChange(value);
-                  }
-                }}
-                title="Auto detects the reply language from the transcript. Choose Hindi or Gujarati for speech recognition in that language."
-                className="rounded-lg border border-white/15 bg-slate-950/80 px-2 py-1.5 text-white"
-              >
-                <option value="auto">Auto-detect reply</option>
-                <option value="en">English</option>
-                <option value="hi">हिन्दी</option>
-                <option value="gu">ગુજરાતી</option>
-              </select>
-            </label>
-            <p className="mb-3 max-w-md text-[10px] leading-relaxed text-zinc-400">
-              Hindi and Gujarati voice transcripts are sent to Google Cloud Translation for English text.
-              Machine translations can be imperfect; check important medical details.
-            </p>
-            <button
-              onClick={handleMicClick}
-              className="group bg-gradient-to-r from-blue-600/90 to-cyan-600/90 hover:from-blue-500 hover:to-cyan-500 border border-cyan-400/40 text-white font-medium text-xs sm:text-sm px-7 py-3 rounded-full flex items-center justify-center gap-2.5 shadow-[0_0_30px_rgba(37,99,235,0.55)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <div className="relative flex items-center justify-center">
-                <Mic className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
-                {isListening && (
-                  <span className="absolute -inset-1 rounded-full bg-cyan-400/40 animate-ping pointer-events-none" />
-                )}
-              </div>
-              <span className="tracking-wide">
-                {isSpeaking ? "Tap to interrupt" : isListening ? "Listening..." : statusText}
-              </span>
-            </button>
+          <div aria-live="polite" className="min-h-20 w-full max-w-2xl space-y-2 px-2">
+            {(interim || transcript) && <p className="text-sm leading-relaxed text-cyan-100/75">You: {interim || transcript}</p>}
+            {reply && <p className="line-clamp-5 text-left text-base leading-relaxed text-white/90"><span className="mr-1.5 font-semibold text-cyan-100">Elixora:</span>{reply}</p>}
+            {error && <div className="mx-auto max-w-xl rounded-xl border border-rose-300/25 bg-rose-950/50 px-4 py-3 text-sm text-rose-100">{error}</div>}
           </div>
-        </div>
-
-        {/* Footer info */}
-        <div className="relative z-10 text-[11px] text-zinc-500 pb-2">
-          Elixora voice assistant · Interim speech appears as you speak
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-white/65">
+            <label className="flex items-center gap-2">Speech language <select value={language} onChange={(event) => { const value = event.currentTarget.value; if (value === "auto" || value === "en" || value === "hi" || value === "gu") onLanguageChange(value); }} className="rounded-lg border border-white/15 bg-slate-950/80 px-2 py-1.5 text-white"><option value="auto">Use browser language</option><option value="en">English</option><option value="hi">हिन्दी</option><option value="gu">ગુજરાતી</option></select></label>
+            <label className="flex items-center gap-2">Spoken voice <select value={preferredVoiceURI} onChange={(event) => {
+              const value = event.currentTarget.value;
+              setPreferredVoiceURI(value);
+              try {
+                const saved = JSON.parse(localStorage.getItem("elixora_settings") || "{}");
+                localStorage.setItem("elixora_settings", JSON.stringify({ ...saved, voiceName: value }));
+              } catch { /* Voice selection remains active for this call. */ }
+            }} disabled={availableVoices.length === 0} className="max-w-[230px] rounded-lg border border-white/15 bg-slate-950/80 px-2 py-1.5 text-white disabled:opacity-50">
+              <option value="">Gentle automatic (match reply language)</option>
+              {availableVoices.map((voice) => <option key={voice.voiceURI} value={voice.voiceURI}>{voice.name} · {voice.lang}</option>)}
+            </select></label>
+          </div>
+          <p className="max-w-lg text-[11px] leading-relaxed text-white/45">Uses your browser’s speech recognition and installed speech voices. Gentle automatic playback prefers natural-sounding voices in the reply language when your device provides one. Voice quality depends on your browser and system. Automatic recognition follows your browser language; choose Hindi or Gujarati for better recognition when needed. Recognized text is sent through Elixora’s existing medical chat service. This is not a diagnosis or emergency service.</p>
+        </main>
+        <div className="relative z-10 flex items-center gap-5 pb-2">
+          {(state === "idle" || state === "error") ? <button type="button" onClick={startCall} aria-label={state === "error" ? "Restart voice call" : "Start voice call"} className="flex h-14 items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 text-white transition hover:bg-white/20"><Mic className="h-5 w-5" />{state === "error" ? "Try again" : "Start call"}</button> : <button type="button" onClick={toggleMute} aria-label={muted ? "Unmute microphone" : "Mute microphone"} className="flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20">{muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}</button>}
+          {state === "speaking" && <span className="flex items-center gap-2 text-xs text-cyan-100/75"><Volume2 className="h-4 w-4" />Interrupt by speaking</span>}
+          <button type="button" onClick={endCall} aria-label="End voice call" className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-600 text-white shadow-lg shadow-rose-950/50 transition hover:bg-rose-500"><PhoneOff className="h-5 w-5" /></button>
         </div>
       </div>
     </AnimatePresence>

@@ -6,6 +6,7 @@ psycopg2-binary==2.9.10
 python-dotenv==1.0.1
 bcrypt==4.2.0
 google-auth
+google-genai>=1.0.0,<2.0.0
 requests
 twilio>=9.0,<10
 sendgrid>=6.11,<7
@@ -13,6 +14,8 @@ pytesseract
 pdf2image
 PyMuPDF
 opencv-python-headless
+Pillow>=10.0,<13.0
+pillow-heif>=1.0,<2.0
 thefuzz
 python-Levenshtein
 pandas

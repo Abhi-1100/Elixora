@@ -22,7 +22,7 @@ This README is the implementation guide for developers and coding/bug-fixing age
 | OCR and lab-value classification | Implemented with fallbacks | PyMuPDF, RapidOCR/pytesseract, `dataset/lab_reference_ranges.csv` |
 | Medicine dataset | Present but not connected to a backend route | `dataset/medicine/medicine_dataset.csv` |
 | Persistent chat history | Database models exist, but the current chat page keeps conversations in React state | `backend/app/models/models.py`, `app/chat/page.tsx` |
-| Chat voice input/output | Browser speech recognition and speech synthesis in the chat voice modal; English, Hindi, Gujarati, and auto-detected reply language | `hooks/`, `components/voice/voice-mode-modal.tsx` |
+| Chat voice input/output | Browser speech recognition and speech synthesis connected to Elixora's existing medical chat route; continuous conversation, interruption, mute, and end-call controls | `hooks/`, `components/voice/voice-mode-modal.tsx`, `app/chat/page.tsx` |
 
 ## Architecture
 
@@ -31,7 +31,7 @@ Browser (Next.js 16 / React 19)
         |
         | JSON + Bearer JWT / multipart upload
         v
-Flask API on :5000
+Flask API on :5001
   ├── Auth routes      -> users table
   ├── Chat routes      -> local sklearn models and optional LLM
   ├── Report routes    -> OCR + CSV reference ranges -> reports tables
@@ -41,7 +41,7 @@ Flask API on :5000
 SQLite by default, or PostgreSQL when DATABASE_URL is set
 ```
 
-The frontend API base URL is `NEXT_PUBLIC_API_URL`, defaulting to `http://localhost:5000/api`. The Flask app is created in `backend/app/__init__.py`; `backend/run.py` creates/migrates tables and starts port 5000.
+The frontend API base URL is `NEXT_PUBLIC_API_URL`, defaulting to `http://localhost:5001/api`. The Flask app is created in `backend/app/__init__.py`; `backend/run.py` creates/migrates tables and starts port 5001 by default.
 
 ## Repository map
 
@@ -67,7 +67,7 @@ The frontend API base URL is `NEXT_PUBLIC_API_URL`, defaulting to `http://localh
 
 ### Backend
 
-- `backend/run.py` — entry point, `db.create_all()`, non-destructive user migrations, and `app.run(debug=True, port=5000)`.
+- `backend/run.py` — entry point, `db.create_all()`, non-destructive user migrations, and `app.run(debug=True, port=5001)` by default.
 - `backend/app/__init__.py` — Flask app factory, SQLAlchemy/JWT/CORS setup, model loading, route registration, health endpoint, and static report serving.
 - `backend/app/models/models.py` — SQLAlchemy models.
 - `backend/app/routes/auth_routes.py` — signup, login, Google login, profile completion, current-user endpoint.
@@ -132,7 +132,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-The API runs at `http://localhost:5000`.
+The API runs at `http://localhost:5001` by default (or the configured `PORT`).
 
 ### Backend (macOS/Linux)
 
@@ -147,7 +147,7 @@ python run.py
 Check the service:
 
 ```bash
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 ```
 
 Expected response:
@@ -161,7 +161,7 @@ Expected response:
 ### Frontend `.env.local`
 
 ```dotenv
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_API_URL=http://localhost:5001/api
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-web-client-id
 ```
 
@@ -182,6 +182,22 @@ LLM_MODEL=gpt-4o-mini
 
 `DATABASE_URL` is optional. The code falls back to SQLite. `OPENAI_API_KEY` or `LLM_API_KEY` activates the optional OpenAI-compatible symptom advisor. The multilingual `/symptom-check` route does not require an LLM key.
 
+Voice Mode does not require a provider API key. It uses the browser's SpeechRecognition/Web Speech implementation for microphone transcription and SpeechSynthesis for spoken replies, then sends recognized text through Elixora's existing `/api/chat/message` route. Browser support and its speech service behavior vary. In automatic mode the input locale follows the browser's preferred language when available, and the Flask chat route selects English, Hindi, or Gujarati responses from the recognized text. Choose English, Hindi, or Gujarati explicitly if the browser's language setting does not match the speaker. Hindi/Gujarati translation to English remains optional and uses the existing `GOOGLE_TRANSLATE_API_KEY` only when configured.
+
+To set up and run Voice Mode:
+
+```bash
+# No new voice provider key or backend dependency is required.
+cd backend
+source .venv/bin/activate
+python run.py
+
+# In another terminal, from the repository root:
+npm run dev
+```
+
+Sign in, open **Chat**, and select the Voice Mode control. Press **Start call** and allow microphone access, speak a turn, and wait for Elixora's spoken answer. Speak while the answer is playing to interrupt it; use the microphone button to mute/unmute and the red phone button to end the call. Repeat with English, Hindi, and Gujarati. Also check denied microphone permission, unsupported browser behavior, and backend disconnection. Voice chat messages are appended through the same existing chat state and API path as typed messages; this page does not persist that state across reloads.
+
 The repository ignores `.env*`. If a secret is accidentally exposed, rotate it immediately; do not solve the issue by committing the secret.
 
 ## Authentication and session flow
@@ -197,7 +213,7 @@ The current storage is browser `localStorage`, not an httpOnly cookie. Preserve 
 
 ## API reference
 
-All paths below are relative to `http://localhost:5000`.
+All paths below are relative to `http://localhost:5001`.
 
 ### Health
 
@@ -351,9 +367,10 @@ The backend calls `db.create_all()` on startup. It also attempts non-destructive
 - `app/chat/page.tsx` starts with demo conversations and demo threads in React state. It does not currently fetch or persist `ChatSession`/`ChatMessage` records.
 - New text messages call `/api/chat/message`; the returned localized text is appended to the visible thread. The older `/api/chat/symptom-check` endpoint remains available for compatibility.
 - File attachments call `/api/reports/upload`; the returned report opens in the right-side report panel.
-- The frontend API helper translates failed fetches into a “Flask backend on port 5000” message.
-- The separate `/voice` page remains a UI demonstration. Chat voice mode uses the browser's Web Speech APIs; recognition availability, language models, and voice quality depend on the browser and device.
-- Auto mode detects Hindi and Gujarati from supported scripts and limited Romanized phrases in the transcript and chooses the response language. Hindi/Gujarati microphone transcripts are translated to English only when `GOOGLE_TRANSLATE_API_KEY` is configured in `backend/.env`. Browser speech recognition itself does not guarantee automatic recognition-language detection; select English, Hindi, or Gujarati to guide it.
+- Reports with actual analyzed results marked `Critical` trigger an automatic attempt to send the analyzed breakdown through saved contacts' enabled email/SMS channels. Provider acceptance does not confirm delivery. WhatsApp cannot be sent automatically by a browser; any WhatsApp notification must open a draft and the user must press Send.
+- The frontend API helper translates failed fetches into a “Flask backend on port 5001” message.
+- The separate `/voice` page remains a UI demonstration. Chat Voice Mode uses browser speech recognition and speech synthesis with Elixora's standard `/api/chat/message` routing. Speech recognition language selection and voice quality depend on the browser and installed language services; automatic mode starts with the browser's preferred language, and users can select English, Hindi, or Gujarati directly.
+- The browser speech service supplies the transcript; `/api/chat/message` chooses the response language from the selected language and recognized text. Hindi/Gujarati transcripts are translated to English for routing only when `GOOGLE_TRANSLATE_API_KEY` is configured in `backend/.env`; without it, the existing localized fallback routing remains available.
 - The Apple sign-in button in signup UI is presentation-only unless a backend integration is added.
 - `dataset/medicine/medicine_dataset.csv` is not currently used to answer medicine questions.
 
@@ -378,7 +395,7 @@ npm run build
 ```
 
 ```bash
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 ```
 
 ```bash

@@ -50,6 +50,11 @@ class NotifierTests(unittest.TestCase):
                 "TWILIO_ACCOUNT_SID": True,
                 "TWILIO_AUTH_TOKEN": True,
                 "TWILIO_PHONE_NUMBER": False,
+                "SMTP_HOST": False,
+                "SMTP_PORT": False,
+                "SMTP_USER": False,
+                "SMTP_PASSWORD": False,
+                "SMTP_FROM": False,
                 "SENDGRID_API_KEY": True,
                 "SENDGRID_FROM_EMAIL": True,
             },
@@ -265,6 +270,50 @@ class NotifierTests(unittest.TestCase):
         self.assertTrue(result.accepted)
         self.assertEqual(result.provider_status, "accepted")
         self.assertEqual(result.message_id, "email-test-id")
+
+    @patch.dict(
+        os.environ,
+        {
+            "SMTP_HOST": "smtp.example.com",
+            "SMTP_PORT": "587",
+            "SMTP_USER": "alerts@example.com",
+            "SMTP_PASSWORD": "smtp-app-password",
+            "SMTP_FROM": "alerts@example.com",
+        },
+        clear=True,
+    )
+    @patch("app.services.notifier.smtplib.SMTP")
+    def test_smtp_starttls_acceptance_is_reported_without_delivery_claim(self, smtp_class):
+        smtp = MagicMock()
+        smtp_class.return_value.__enter__.return_value = smtp
+
+        result = notifier.send_email("relative@example.com", "Elixora alert", "summary")
+
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.provider_status, "accepted")
+        smtp.starttls.assert_called_once()
+        smtp.send_message.assert_called_once()
+
+    @patch.dict(
+        os.environ,
+        {
+            "SMTP_HOST": "smtp.example.com",
+            "SMTP_PORT": "587",
+            "SMTP_USER": "alerts@example.com",
+            "SMTP_PASSWORD": "smtp-app-password",
+            "SMTP_FROM": "alerts@example.com",
+        },
+        clear=True,
+    )
+    @patch("app.services.notifier.smtplib.SMTP")
+    def test_smtp_failure_is_reported_safely(self, smtp_class):
+        smtp_class.return_value.__enter__.side_effect = OSError("private connection details")
+
+        result = notifier.send_email("relative@example.com", "Elixora alert", "summary")
+
+        self.assertFalse(result.accepted)
+        self.assertEqual(result.provider_status, "provider_error")
+        self.assertEqual(result.error_code, "smtp_request_failed")
 
     @patch.dict(
         os.environ,

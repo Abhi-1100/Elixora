@@ -4,8 +4,11 @@ import html
 import logging
 import os
 import re
+import smtplib
+import ssl
 from dataclasses import dataclass
 from datetime import datetime
+from email.message import EmailMessage
 
 from python_http_client.exceptions import HTTPError
 from sendgrid import SendGridAPIClient
@@ -21,6 +24,11 @@ EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 PHONE_RE = re.compile(r"^\+[1-9][0-9]{6,14}$")
 PROVIDER_TIMEOUT_SECONDS = 10
 SOS_ENVIRONMENT_VARIABLES = (
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASSWORD",
+    "SMTP_FROM",
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
     "TWILIO_PHONE_NUMBER",
@@ -68,6 +76,22 @@ def environment_variable_status():
 
 
 def _provider_configuration():
+    smtp_host = _environment_value("SMTP_HOST")
+    smtp_from = _environment_value("SMTP_FROM")
+    smtp_user = _environment_value("SMTP_USER")
+    smtp_password = _environment_value("SMTP_PASSWORD")
+    try:
+        smtp_port = int(_environment_value("SMTP_PORT") or "587")
+        smtp_port_valid = 1 <= smtp_port <= 65535
+    except ValueError:
+        smtp_port = 587
+        smtp_port_valid = False
+    smtp_auth_valid = bool(smtp_user) == bool(smtp_password)
+    smtp_configured = bool(
+        smtp_host and smtp_from and EMAIL_RE.fullmatch(smtp_from)
+        and smtp_port_valid and smtp_auth_valid
+    )
+
     email_api_key = _environment_value("SENDGRID_API_KEY")
     email_sender = _environment_value("SENDGRID_FROM_EMAIL")
     email_missing = [
@@ -83,6 +107,31 @@ def _provider_configuration():
         if email_sender and not EMAIL_RE.fullmatch(email_sender)
         else []
     )
+    sendgrid_configured = not email_missing and not email_invalid
+    if smtp_configured:
+        email_configuration = {"configured": True, "provider": "smtp", "missing": [], "invalid": []}
+    elif sendgrid_configured:
+        email_configuration = {"configured": True, "provider": "sendgrid", "missing": [], "invalid": []}
+    else:
+        smtp_partial = bool(smtp_host or smtp_from or smtp_user or smtp_password)
+        if smtp_partial:
+            email_configuration = {
+                "configured": False,
+                "provider": None,
+                "missing": [key for key, present in (("SMTP_HOST", bool(smtp_host)), ("SMTP_FROM", bool(smtp_from))) if not present],
+                "invalid": (
+                    ["SMTP_PORT"] if not smtp_port_valid else
+                    ["SMTP_USER", "SMTP_PASSWORD"] if not smtp_auth_valid else
+                    ["SMTP_FROM"] if smtp_from and not EMAIL_RE.fullmatch(smtp_from) else []
+                ),
+            }
+        else:
+            email_configuration = {
+                "configured": False,
+                "provider": None,
+                "missing": email_missing,
+                "invalid": email_invalid,
+            }
 
     sender_key, sender_value = twilio_sender_setting()
     sms_values = {
@@ -101,11 +150,7 @@ def _provider_configuration():
     )
 
     return {
-        "email": {
-            "configured": not email_missing and not email_invalid,
-            "missing": email_missing,
-            "invalid": email_invalid,
-        },
+        "email": email_configuration,
         "sms": {
             "configured": not sms_missing and not sms_invalid,
             "missing": sms_missing,
@@ -206,6 +251,37 @@ def send_email(to, subject, body):
     if not EMAIL_RE.fullmatch(recipient):
         logger.warning("Emergency email not sent; recipient address is invalid")
         return DeliveryResult(False, "invalid_recipient", error_code="invalid_email")
+
+    if configuration["provider"] == "smtp":
+        sender = _environment_value("SMTP_FROM").strip()
+        host = _environment_value("SMTP_HOST")
+        username = _environment_value("SMTP_USER")
+        password = _environment_value("SMTP_PASSWORD")
+        port = int(_environment_value("SMTP_PORT") or "587")
+        message = EmailMessage()
+        message["From"] = sender
+        message["To"] = recipient
+        message["Subject"] = str(subject or "Elixora emergency alert")[:200]
+        message.set_content(str(body or ""))
+        try:
+            if port == 465:
+                with smtplib.SMTP_SSL(host, port, timeout=PROVIDER_TIMEOUT_SECONDS, context=ssl.create_default_context()) as client:
+                    if username:
+                        client.login(username, password)
+                    client.send_message(message)
+            else:
+                with smtplib.SMTP(host, port, timeout=PROVIDER_TIMEOUT_SECONDS) as client:
+                    client.ehlo()
+                    client.starttls(context=ssl.create_default_context())
+                    client.ehlo()
+                    if username:
+                        client.login(username, password)
+                    client.send_message(message)
+            logger.info("Emergency SMTP email accepted by server")
+            return DeliveryResult(True, "accepted")
+        except (smtplib.SMTPException, OSError, TimeoutError, ssl.SSLError) as error:
+            logger.warning("Emergency SMTP request failed: error_type=%s", type(error).__name__)
+            return DeliveryResult(False, "provider_error", error_code="smtp_request_failed")
 
     try:
         message = Mail(from_email=sender, to_emails=recipient, subject=subject, plain_text_content=body)

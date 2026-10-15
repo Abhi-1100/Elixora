@@ -2,6 +2,11 @@
 
 import React, { useState, useMemo } from "react";
 import {
+  CriticalReportEmailStatus,
+  CriticalReportNotification,
+  EmergencyNotificationStatus,
+} from "@/components/chat/critical-report-notification";
+import {
   X,
   FileText,
   ExternalLink,
@@ -35,6 +40,7 @@ export interface ReportData {
   uploaded_at?: string;
   file_url: string;
   results: TestResult[];
+  emergency_notification?: EmergencyNotificationStatus | null;
   unmatched_lines?: string[];
 }
 
@@ -233,7 +239,7 @@ export function ReportSidePanel({
       </div>
 
       {/* ── Status Bar Sub-header ────────────────────────────────────────── */}
-      <div className="px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)] flex items-center justify-between text-xs">
+      <div className="min-h-14 px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2">
           <span className="text-[var(--ink-muted)] font-mono text-[11px]">Overall Status:</span>
           <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${badge.badge}`}>
@@ -241,10 +247,19 @@ export function ReportSidePanel({
             <span>{report.overall_status}</span>
           </span>
         </div>
-        <span className="text-[10px] font-mono text-[var(--ink-muted)]">
-          {report.results?.length ?? 0} Biomarkers Detected
-        </span>
+        <CriticalReportNotification
+          results={report.results || []}
+          notification={report.emergency_notification}
+          reportId={report.report_id}
+          showEmailStatus={false}
+        />
       </div>
+
+      {["partial", "failed"].includes(report.emergency_notification?.email_status || "") && (
+        <div className="px-4 py-2">
+          <CriticalReportEmailStatus notification={report.emergency_notification} />
+        </div>
+      )}
 
       {/* ── Main Canvas View Stage ───────────────────────────────────────── */}
       <div className={`flex-1 min-h-0 relative bg-[var(--bg)] ${viewMode === "document" && isPdf ? "overflow-hidden" : "overflow-y-auto"}`}>

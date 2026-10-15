@@ -25,7 +25,7 @@ SYMPTOM_LABELS = PROJECT_ROOT / "ml" / "i18n" / "symptom_labels.json"
 SUPPORTED_LANGS = {"en", "hi", "gu"}
 
 ROMAN_HI_STRONG = {"mujhe", "mera", "meri", "hai", "hain", "ho raha", "nahi", "kya", "aur", "se", "batao", "bataiye", "lakshan", "ilaj", "bimari"}
-ROMAN_HI_SYMPTOMS = {"bukhar", "sir dard", "sar dard", "khansi", "khasi", "ulti", "dast", "pet dard", "thakan", "kamzori", "chakkar", "khujli", "dard", "gala", "sans", "seene", "ghabrahat", "neend", "bhookh", "pyas", "peshab"}
+ROMAN_HI_SYMPTOMS = {"bukhar", "sir dard", "sar dard", "khansi", "khasi", "ulti", "dast", "pet dard", "pair dard", "pair me dard", "pairon me dard", "paon me dard", "thakan", "kamzori", "chakkar", "khujli", "dard", "gala", "sans", "seene", "ghabrahat", "neend", "bhookh", "pyas", "peshab"}
 ROMAN_GU = {"mane", "che", "chhe", "tav", "mathu dukhe", "mathanu dard", "udhras", "ulti", "jhada", "pet dukhe", "thaak", "chakkar", "khanj", "shwas", "chhati", "shu", "batavo", "lakshano", "bimari"}
 
 def detect_language(message: str, selected_lang: str = "en") -> str:
@@ -44,12 +44,14 @@ def detect_language(message: str, selected_lang: str = "en") -> str:
         return "hi"
     return selected_lang if selected_lang in SUPPORTED_LANGS else "en"
 
-# These are deliberately small, conservative aliases. The canonical values must
-# still exist in the trained model's symptom vocabulary before they are used.
+# These are deliberately small, conservative aliases. Report-only labels may be
+# recognized for safe follow-up, but are never sent to the trained model.
 SYMPTOM_SYNONYMS = {
     "high temperature": "high_fever",
     "fever": "fever",
     "temperature": "fever",
+    "temp": "fever",
+    "body temperature": "fever",
     "loose motions": "diarrhoea",
     "loose motion": "diarrhoea",
     "throwing up": "vomiting",
@@ -66,6 +68,33 @@ SYMPTOM_SYNONYMS = {
     "बुखार": "fever",
     "તાવ": "fever",
     "માથાનો દુખાવો": "headache",
+    "leg pain": "leg_pain",
+    "pain in my legs": "leg_pain",
+    "legs hurt": "leg_pain",
+    "pair dard": "leg_pain",
+    "pair me dard": "leg_pain",
+    "pair mein dard": "leg_pain",
+    "pairon me dard": "leg_pain",
+    "pairon mein dard": "leg_pain",
+    "paon me dard": "leg_pain",
+    "paon mein dard": "leg_pain",
+    "foot pain": "foot_pain",
+    "feet pain": "foot_pain",
+    "pain in feet": "foot_pain",
+    "pain in my feet": "foot_pain",
+    "pain in my foot": "foot_pain",
+    "pain in foot": "foot_pain",
+    "pain on my feet": "foot_pain",
+    "painful feet": "foot_pain",
+    "my feet are painful": "foot_pain",
+    "my feet are hurting": "foot_pain",
+    "feet are hurting": "foot_pain",
+    "my foot hurts": "foot_pain",
+    "my feet hurt": "foot_pain",
+    "feet hurt": "foot_pain",
+    "foot hurts": "foot_pain",
+    "my foot is paining": "foot_pain",
+    "my feet are paining": "foot_pain",
 }
 
 SYMPTOM_SYNONYMS.update({
@@ -83,11 +112,88 @@ SYMPTOM_SYNONYMS.update({
     "તાવ": "high_fever", "માથું દુખે": "headache", "ઉધરસ": "cough", "ઉલટી": "vomiting", "ઝાડા": "diarrhoea",
 })
 
+SYMPTOM_SYNONYMS.update({
+    "stomach ache": "stomach_pain",
+    "tummy ache": "stomach_pain",
+    "belly ache": "belly_pain",
+    "belly pain": "belly_pain",
+    "abdominal pain": "abdominal_pain",
+    "my stomach is paining": "stomach_pain",
+    "my stomach hurts": "stomach_pain",
+    "my tummy hurts": "stomach_pain",
+    "my belly hurts": "belly_pain",
+    "stomach is paining": "stomach_pain",
+    "stomach hurts": "stomach_pain",
+    "stomach cramps": "stomach_pain",
+    "stomack pain": "stomach_pain",
+    "stomack ache": "stomach_pain",
+    "stomack": "stomach_pain",
+    "head ache": "headache",
+    "head hurts": "headache",
+    "my head hurts": "headache",
+    "my head is hurting": "headache",
+    "head is aching": "headache",
+    "headachee": "headache",
+    "nausea": "nausea",
+    "feeling nauseous": "nausea",
+    "feaver": "fever",
+    "fevre": "fever",
+    "caugh": "cough",
+    "coughing": "cough",
+    "keep coughing": "cough",
+    "vomitting": "vomiting",
+    "dizzy": "dizziness",
+    "lightheaded": "dizziness",
+    "light headed": "dizziness",
+    "dizzyness": "dizziness",
+    "itchy skin": "skin_rash",
+    "my skin is itchy": "itching",
+    "skin is itchy": "itching",
+    "rash": "skin_rash",
+    "skin problem": "skin_rash",
+    "skin irritation": "skin_rash",
+    "twisted my ankle": "injury",
+    "twisted ankle": "injury",
+    "sprained ankle": "injury",
+    "hurt my ankle": "injury",
+    "sprained my wrist": "injury",
+    "sprained my knee": "injury",
+    "cut my hand": "injury",
+    "cut my finger": "injury",
+    "burned my hand": "injury",
+    "i fell": "injury",
+    "i injured myself": "injury",
+    "injury": "injury",
+    "injured": "injury",
+    "hurt myself": "injury",
+    "head injury": "injury",
+    "hit my head": "injury",
+    "i hit my head": "injury",
+    "my feet hurt": "foot_pain",
+    "my foot hurts": "foot_pain",
+    "feet hurt": "foot_pain",
+    "foot hurts": "foot_pain",
+    "my feet are hurting": "foot_pain",
+    "my stomach is paining": "stomach_pain",
+    "पेट दर्द": "stomach_pain",
+    "पेट में दर्द": "stomach_pain",
+    "चक्कर": "dizziness",
+    "खुजली": "itching",
+    "પેટમાં દુખાવો": "stomach_pain",
+    "ચક્કર": "dizziness",
+    "ખંજવાળ": "itching",
+})
+
 EMERGENCY_PHRASES = (
     "chest pain", "chest pressure", "can't breathe", "cannot breathe",
-    "cannot breath", "shortness of breath", "breathlessness", "unconscious",
+    "cannot breath", "shortness of breath", "difficulty breathing",
+    "breathlessness", "unconscious",
     "loss of consciousness", "severe bleeding", "heavy bleeding", "suicidal",
     "suicide", "facial droop", "one-sided weakness",
+    "severe abdominal pain", "severe stomach pain", "sudden severe headache",
+    "vomiting blood", "vomited blood", "throwing up blood", "blood in vomit",
+    "severe allergic reaction", "face drooping", "weakness on one side",
+    "swelling of the tongue", "swelling of the throat", "overdose",
     "seene me dard", "sans nahi aa rahi", "behosh", "bahut khoon", "khudkushi", "lakwa",
     "बेहोश", "सांस नहीं", "सीने में दर्द", "છાતીમાં દુખાવો",
 )
@@ -106,7 +212,12 @@ DISEASE_CUES = (
 
 COMMON_SYMPTOM_CUES = (
     "fever", "temperature", "bukhar", "sir dard", "head pain", "itching",
-    "skin rash", "cough", "vomit", "tired", "fatigue", "pain",
+    "skin rash", "cough", "vomit", "tired", "fatigue", "pain", "stomach",
+    "tummy", "belly", "headache", "dizziness", "dizzy", "injury", "injured",
+    "sprain", "rash", "itchy", "wound", "unwell", "sick", "swollen", "swelling",
+    "don't feel good", "do not feel well", "feel ill",
+    "burning", "aching", "ache", "hurt", "nausea", "nauseous", "skin",
+    "body", "throbbing", "unsteady",
 )
 
 DISEASE_TYPO_ALIASES = {
@@ -118,12 +229,49 @@ DISEASE_TYPO_ALIASES = {
 
 MEDICINE_CUES = (
     "medicine", "medication", "tablet", "drug", "used for", "side effect",
-    "side effects", "substitute", "paracetamol", "दवा", "દવા",
+    "side effects", "substitute", "paracetamol", "dosage", "dose", "interaction",
+    "can i take", "what can i take", "should i take", "can i use",
+    "what medicine", "what medication", "medicine for", "prescription",
+    "missed dose", "forgot dose",
+    "how much should i take", "दवा", "દવા",
 )
 
 
 def _clean(value: Any) -> str:
     return " ".join(str(value or "").strip().lower().replace("_", " ").split())
+
+
+def _is_negated_phrase(text: str, phrase: str) -> bool:
+    """True when a keyword is explicitly negated in the sentence."""
+    normalized_text = _clean(text)
+    normalized_phrase = _clean(phrase)
+    if not normalized_text or not normalized_phrase:
+        return False
+    negation = r"(?:no|not|never|without|don't have|do not have|doesn't have|does not have|haven't|have not|am not|isn't|is not|aren't|are not|cannot|can't|nahi|nahin|nhi|nathi|नहीं|नही|नथी|નથી|નહિ)"
+    escaped_phrase = re.escape(normalized_phrase)
+    patterns = (
+        rf"{negation}\s+(?:\w+\s+){{0,3}}{escaped_phrase}\b",
+        rf"\b{escaped_phrase}\s+(?:is\s+)?(?:not|absent|gone|nahi|nahin|nhi|nathi|नहीं|नही|નથી|નહિ)\b",
+    )
+    return any(re.search(pattern, normalized_text) for pattern in patterns)
+
+
+def _has_symptom_alias(text: str) -> bool:
+    normalized = _clean(text)
+    aliases = sorted(SYMPTOM_SYNONYMS, key=len, reverse=True)
+    for alias in aliases:
+        if (
+            re.search(rf"(?<!\w){re.escape(_clean(alias))}(?!\w)", normalized)
+            and not _is_negated_phrase(normalized, alias)
+        ):
+            return True
+    words = re.findall(r"[\w'-]+", normalized, flags=re.UNICODE)
+    single_word_aliases = [alias for alias in aliases if len(alias) >= 5 and " " not in alias]
+    return any(
+        len(word) >= 5
+        and any(_similarity(word, alias) >= 86 for alias in single_word_aliases)
+        for word in words
+    )
 
 
 def _read_disease_data() -> tuple[dict[str, list[str]], dict[str, str]]:
@@ -241,8 +389,17 @@ def match_medicine(message: str) -> dict[str, Any] | None:
     best: dict[str, Any] | None = None
     best_score = 0.0
     text = _clean(message)
-    content_words = [word for word in re.findall(r"[\w'-]+", text, flags=re.UNICODE)
-                     if len(word) >= 4 and word not in {"what", "which", "used", "with", "from", "medicine", "tablet", "side", "effects"}]
+    query_stop_words = {
+        "what", "which", "used", "with", "from", "medicine", "medication",
+        "tablet", "side", "effect", "effects", "take", "takes", "taking",
+        "should", "could", "can", "for", "dose", "dosage", "drug", "safe",
+        "help", "please", "headache", "fever", "pain", "cough", "cold",
+        "stomach", "vomiting", "me", "my",
+    }
+    content_words = [
+        word for word in re.findall(r"[\w'-]+", text, flags=re.UNICODE)
+        if len(word) >= 4 and word not in query_stop_words
+    ]
     for medicine in MEDICINES:
         name = _clean(medicine["name"])
         if name in text or any(word in name for word in content_words):
@@ -278,6 +435,8 @@ def classify_intent(message: str) -> str:
             continue
         if informational_question and not current_report:
             continue
+        if _is_negated_phrase(text, phrase):
+            continue
         escaped = re.escape(phrase)
         if re.search(rf"\b(?:no|not|without|don't have|do not have|doesn't have|does not have)\s+(?:\w+\s+){{0,2}}{escaped}\b", text):
             continue
@@ -293,15 +452,38 @@ def classify_intent(message: str) -> str:
         return "medicine_info"
     if match_disease(text) and _has_disease_cue(text):
         return "disease_info"
-    if any(_clean(alias) in text for alias in SYMPTOM_SYNONYMS) or any(cue in text for cue in COMMON_SYMPTOM_CUES):
+    has_positive_symptom_cue = any(
+        cue in text and not _is_negated_phrase(text, cue)
+        for cue in COMMON_SYMPTOM_CUES + ("chest pain", "shortness of breath", "breathlessness")
+    )
+    if _has_symptom_alias(text) or has_positive_symptom_cue:
         return "symptom_check"
+    if any(_is_negated_phrase(text, cue) for cue in COMMON_SYMPTOM_CUES + ("chest pain", "shortness of breath", "breathlessness")):
+        return "unknown"
     return "symptom_check" if any(word in text for word in ("fever", "cough", "pain", "rash", "vomit", "headache")) else "unknown"
 
 
 def extract_symptoms(message: str, known_symptoms: tuple[str, ...] | list[str]) -> list[str]:
     """Exact matching, aliases, then conservative fuzzy matching."""
     text = _clean(message)
+    original_text = text
     normalized_known = {_clean(symptom): symptom for symptom in known_symptoms}
+    words = re.findall(r"[\w'-]+", text, flags=re.UNICODE)
+    single_word_aliases = [
+        alias for alias in SYMPTOM_SYNONYMS
+        if len(alias) >= 5 and " " not in alias
+    ]
+    for word in words:
+        if len(word) < 5:
+            continue
+        best_alias = max(single_word_aliases, key=lambda alias: _similarity(word, alias), default=None)
+        if best_alias and _similarity(word, best_alias) >= 86:
+            text = re.sub(
+                rf"(?<!\w){re.escape(word)}(?!\w)",
+                _clean(best_alias),
+                text,
+                count=1,
+            )
     alias_targets = {
         "fever": ("fever", "high fever"),
         "diarrhoea": ("diarrhoea", "diarrhea"),
@@ -326,6 +508,14 @@ def extract_symptoms(message: str, known_symptoms: tuple[str, ...] | list[str]) 
                 if fuzz.ratio(candidate, normalized) >= 90:
                     matches.append(canonical)
                     break
+    # Keep plain leg/foot pain as reported symptoms when the model vocabulary
+    # does not contain them. Never send these report-only labels to prediction.
+    for alias, canonical in SYMPTOM_SYNONYMS.items():
+        if canonical in {"leg_pain", "foot_pain", "injury", "nausea"} and canonical not in normalized_known:
+            if re.search(rf"(?<!\w){re.escape(_clean(alias))}(?!\w)", original_text):
+                matches.append(canonical)
+    if "injury" not in normalized_known and re.search(r"\b(?:injured|injury|sprain|sprained|twisted|wound|cut)\b", text):
+        matches.append("injury")
     return list(dict.fromkeys(matches))
 
 

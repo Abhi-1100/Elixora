@@ -1,6 +1,7 @@
 import os
 import re
 import uuid
+from datetime import datetime
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -45,7 +46,11 @@ except ImportError:
     process = None
 
 from app import db, REFERENCE_ROWS, REFERENCE_NAMES
-from app.models.models import User, Report, ReportTestResult
+from app.models.models import User, Report, ReportTestResult, EmergencyContact, AlertLog
+from app.services.notifier import (
+    EMAIL_RE,
+    send_email,
+)
 
 report_bp = Blueprint("report_bp", __name__)
 
@@ -343,6 +348,114 @@ def match_and_analyze_text(raw_text, user_gender="Both"):
     return results, unmatched_lines[:20]
 
 
+def _critical_report_message(user, report, results):
+    """Build a short email summary from only findings the analyzer marked Critical."""
+    safe_name = re.sub(r"[\x00-\x1f\x7f]", " ", str(user.name or "Elixora user"))[:120]
+    lines = [
+        f"Elixora critical lab report alert for {safe_name}.",
+        f"Report reference: {report.id}",
+        f"Analyzed: {datetime.now().astimezone().strftime('%d %b %Y, %I:%M %p %Z')}",
+        "Critical findings:",
+    ]
+    critical_results = [result for result in results if str(result.get("status", "")).lower() == "critical"]
+    for result in critical_results:
+        test_name = re.sub(r"[\x00-\x1f\x7f]", " ", str(result.get("test_name") or "Unknown test"))[:120]
+        value = result.get("value")
+        unit = re.sub(r"[\x00-\x1f\x7f]", " ", str(result.get("unit") or ""))[:30]
+        normal_range = re.sub(r"[\x00-\x1f\x7f]", " ", str(result.get("normal_range") or "Not available"))[:60]
+        value_number = float(value) if isinstance(value, (int, float)) else None
+        match = re.match(r"^\s*(-?[\d,.]+)\s*[-–]\s*(-?[\d,.]+)\s*$", normal_range)
+        severity = "Critical"
+        if match and value_number is not None:
+            lower = float(match.group(1).replace(",", ""))
+            upper = float(match.group(2).replace(",", ""))
+            if value_number < lower:
+                severity += " (below reference range)"
+            elif value_number > upper:
+                severity += " (above reference range)"
+        lines.append(f"- {test_name}: {value} {unit} — {severity}; reference range {normal_range} {unit}".strip())
+    lines.extend([
+        "",
+        "Recommended action: Contact a qualified clinician urgently to review these results. If the person has severe symptoms, contact local emergency services.",
+        "This automated report analysis is not a diagnosis.",
+    ])
+    return "\n".join(lines)
+
+
+def _notify_critical_report(user, report, results):
+    """Email critical findings once to saved contacts with email alerts enabled."""
+    # The report UUID doubles as the notification log ID, making retries idempotent.
+    existing = AlertLog.query.filter_by(id=report.id).first()
+    if existing:
+        status = existing.status
+        if status == "queued":
+            status = "accepted"
+        return {
+            "email_status": status,
+            "contacts_notified": existing.contacts_notified,
+            "channels": [name for name in (existing.channels or "").split(",") if name],
+            "whatsapp_status": "awaiting_manual_send",
+        }
+
+    contacts = EmergencyContact.query.filter_by(user_id=user.id).order_by(
+        EmergencyContact.is_primary.desc(), EmergencyContact.created_at.asc()
+    ).all()
+    log = AlertLog(
+        id=report.id,
+        user_id=user.id,
+        trigger="critical_lab_report",
+        contacts_notified=0,
+        channels="",
+        status="sending",
+    )
+    db.session.add(log)
+    db.session.commit()
+
+    message = _critical_report_message(user, report, results)
+    accepted_contacts = set()
+    accepted = 0
+    failed = 0
+    enabled = 0
+
+    for contact in contacts:
+        if not contact.notify_email:
+            continue
+        enabled += 1
+        destination = (contact.email or "").strip()
+        if not destination or not EMAIL_RE.fullmatch(destination):
+            failed += 1
+            continue
+        result = send_email(
+            destination,
+            "Elixora alert: critical lab report findings",
+            message,
+        )
+        if result.accepted:
+            accepted += 1
+            accepted_contacts.add(contact.id)
+        else:
+            failed += 1
+
+    status = (
+        "not_enabled" if enabled == 0 else
+        "failed" if accepted == 0 else
+        "partial" if failed else
+        "accepted"
+    )
+    log.contacts_notified = len(accepted_contacts)
+    log.channels = "email" if accepted else ""
+    log.status = status
+    db.session.commit()
+    return {
+        "email_status": status,
+        "contacts_notified": len(accepted_contacts),
+        "channels": ["email"] if accepted else [],
+        "email_requests_accepted": accepted,
+        "email_requests_failed": failed,
+        "whatsapp_status": "awaiting_manual_send",
+    }
+
+
 @report_bp.route("/upload", methods=["POST"])
 @jwt_required()
 def upload_report():
@@ -408,11 +521,33 @@ def upload_report():
 
         db.session.commit()
 
+        emergency_notification = None
+        if overall_status == "Critical":
+            try:
+                emergency_notification = _notify_critical_report(user, report, results_data)
+            except Exception as notification_error:
+                db.session.rollback()
+                failed_log = AlertLog.query.filter_by(id=report.id, trigger="critical_lab_report").first()
+                if failed_log:
+                    failed_log.status = "failed"
+                    db.session.commit()
+                current_app.logger.exception(
+                    "Automatic critical lab report notification failed: %s",
+                    type(notification_error).__name__,
+                )
+                emergency_notification = {
+                    "email_status": "failed",
+                    "contacts_notified": 0,
+                    "channels": [],
+                    "whatsapp_status": "awaiting_manual_send",
+                }
+
         return jsonify({
             "report_id": report.id,
             "overall_status": overall_status,
             "file_url": report.file_url,
             "results": results_data,
+            "emergency_notification": emergency_notification,
             "unmatched_lines": unmatched
         }), 201
 
@@ -462,8 +597,21 @@ def get_report(report_id):
         "uploaded_at": report.uploaded_at.isoformat(),
         "file_url": report.file_url,
         "results": results,
+        "emergency_notification": _notification_status(report.id),
         "unmatched_lines": []
     }), 200
+
+
+def _notification_status(report_id):
+    log = AlertLog.query.filter_by(id=report_id, trigger="critical_lab_report").first()
+    if not log:
+        return None
+    return {
+        "email_status": "accepted" if log.status == "queued" else log.status,
+        "contacts_notified": log.contacts_notified,
+        "channels": [name for name in (log.channels or "").split(",") if name],
+        "whatsapp_status": "awaiting_manual_send",
+    }
 
 
 @report_bp.route("", methods=["GET"])

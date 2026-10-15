@@ -289,6 +289,16 @@
     "hi": "Knee Pain",
     "gu": "Knee Pain"
   },
+  "leg_pain": {
+    "en": "Leg Pain",
+    "hi": "पैरों में दर्द",
+    "gu": "પગમાં દુખાવો"
+  },
+  "foot_pain": {
+    "en": "Foot Pain",
+    "hi": "पैरों में दर्द",
+    "gu": "પગમાં દુખાવો"
+  },
   "lack_of_concentration": {
     "en": "Lack Of Concentration",
     "hi": "Lack Of Concentration",
